@@ -47,19 +47,19 @@ ENUM_BOOLEAN check_row_and_col(int row, int col)
 
 PRIVATE STRU_PRINT_UNIT * get_table_unit_ptr(int row, int col)
 {
-    assert(check_row_and_col(row, col) == BOOLEAN_TURE);
-    assert(pTable != NULL);
+    R_ASSERT(check_row_and_col(row, col) == BOOLEAN_TURE, NULL);
+    R_ASSERT(pTable != NULL, NULL);
 
     return &(pTable[row * table_col + col]);
 }
 
 PRIVATE ENUM_RETURN set_print_table_value(int row, int col, ENUM_PRINT_TYPE value_type, int val_num, const char* val_info)
 {
-    assert(check_row_and_col(row, col) == BOOLEAN_TURE);
-    assert(value_type >= PRINT_TYPE_NO && value_type <= PRINT_TYPE_COL_LABEL);
+    R_ASSERT(check_row_and_col(row, col) == BOOLEAN_TURE, RETURN_FAILURE);
+    R_ASSERT(value_type >= PRINT_TYPE_NO && value_type <= PRINT_TYPE_COL_LABEL, RETURN_FAILURE);
     
     STRU_PRINT_UNIT *p = get_table_unit_ptr(row, col);
-    assert(p != NULL);
+    R_ASSERT(p != NULL, RETURN_FAILURE);
 
     char str_buf[PRINT_STRING_SIZE];
     
@@ -81,7 +81,7 @@ PRIVATE ENUM_RETURN set_print_table_value(int row, int col, ENUM_PRINT_TYPE valu
             sprintf(str_buf, "-----");
             break;
         case PRINT_TYPE_COL_LABEL:
-            assert(val_info != NULL);
+            R_ASSERT(val_info != NULL, RETURN_FAILURE);
             sprintf(str_buf, "%5s", val_info);
             break;
     }
@@ -107,10 +107,10 @@ PRIVATE int get_max_value_of_array(STRU_CHART_DATA array[], int array_size)
 
 PRIVATE ENUM_RETURN alloc_histogram_table(int row, int col)
 {
-    assert(row > 0 && col > 0);
+    R_ASSERT(row > 0 && col > 0, RETURN_FAILURE);
 
     pTable = (STRU_PRINT_UNIT*)malloc(row * col * sizeof(STRU_PRINT_UNIT));
-    assert(pTable != NULL);
+    R_ASSERT(pTable != NULL, RETURN_FAILURE);
     
     save_row_and_col(row, col);
     
@@ -119,7 +119,7 @@ PRIVATE ENUM_RETURN alloc_histogram_table(int row, int col)
 
 PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size)
 {   
-    ENUM_RETURN ret_value;
+    ENUM_RETURN ret_val;
 
     int max_value_of_array = get_max_value_of_array(array, array_size);
 
@@ -133,18 +133,18 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     {
         for(int j = 0; j < table_col; j++)
         {
-            ret_value = set_print_table_value(i, j, PRINT_TYPE_NO, INVALID_INT, NULL);
-            assert(ret_value == RETURN_SUCCESS);
+            ret_val = set_print_table_value(i, j, PRINT_TYPE_NO, INVALID_INT, NULL);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
     }
     
     //初始化列表头
     for(int i = 0; i < table_row - 2; i++)
     {
-        ret_value = set_print_table_value(i, 0, PRINT_TYPE_ROW_LABEL, step * (table_row -2 - i), NULL);
-        assert(ret_value == RETURN_SUCCESS);
-        ret_value = set_print_table_value(i, 1, PRINT_TYPE_VERTICAL_LINE, INVALID_INT, NULL);
-        assert(ret_value == RETURN_SUCCESS);
+        ret_val = set_print_table_value(i, 0, PRINT_TYPE_ROW_LABEL, step * (table_row -2 - i), NULL);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        ret_val = set_print_table_value(i, 1, PRINT_TYPE_VERTICAL_LINE, INVALID_INT, NULL);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
     
     //初始化表格显示单元
@@ -154,8 +154,8 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
         {
             if( array[j - 2].val > step * (CHART_ROWS - i - 1))
             {
-                ret_value = set_print_table_value(i, j, PRINT_TYPE_YES, INVALID_INT, NULL);
-                assert(ret_value == RETURN_SUCCESS);
+                ret_val = set_print_table_value(i, j, PRINT_TYPE_YES, INVALID_INT, NULL);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
         }
     }
@@ -163,34 +163,34 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     //初始化行表头
     for(int i = 2; i < table_col; i++)
     {
-        ret_value = set_print_table_value(table_row - 2, i, PRINT_TYPE_HORIZONTAL_LINE, INVALID_INT, NULL);
-        assert(ret_value == RETURN_SUCCESS);
+        ret_val = set_print_table_value(table_row - 2, i, PRINT_TYPE_HORIZONTAL_LINE, INVALID_INT, NULL);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
-        ret_value = set_print_table_value(table_row - 1, i, PRINT_TYPE_COL_LABEL, INVALID_INT, array[i-2].info);
-        assert(ret_value == RETURN_SUCCESS);
+        ret_val = set_print_table_value(table_row - 1, i, PRINT_TYPE_COL_LABEL, INVALID_INT, array[i-2].info);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
-    ret_value = set_print_table_value(table_row - 2, 1, PRINT_TYPE_COL_LABEL, INVALID_INT, "  +--");
-    assert(ret_value == RETURN_SUCCESS);
+    ret_val = set_print_table_value(table_row - 2, 1, PRINT_TYPE_COL_LABEL, INVALID_INT, "  +--");
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;
 }
 
 PRIVATE ENUM_RETURN make_histogram_table(STRU_CHART_DATA array[], int array_size)
 {
-    assert(array != NULL);
-    assert(array_size > 0);
+    R_ASSERT(array != NULL, RETURN_FAILURE);
+    R_ASSERT(array_size > 0, RETURN_FAILURE);
     
     //纵坐标为单词数量，横坐标为单词长度，各增加2行2列打印标尺
     ENUM_RETURN ret_val;
 
     ret_val = alloc_histogram_table((CHART_ROWS + 2), (array_size + 2));
-    assert(ret_val == RETURN_SUCCESS);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = init_histogram_table(array, array_size);
-    assert(ret_val == RETURN_SUCCESS);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
-#if 1
+#if 0
     //打印表格
     for(int i = 0; i < table_row; i++)
     {
@@ -208,8 +208,8 @@ PRIVATE ENUM_RETURN make_histogram_table(STRU_CHART_DATA array[], int array_size
 
 PRIVATE ENUM_RETURN draw_hitogram_table(FILE *fpw)
 {
-    assert(fpw != NULL);
-    assert(pTable != NULL);
+    R_ASSERT(fpw != NULL, RETURN_FAILURE);
+    R_ASSERT(pTable != NULL, RETURN_FAILURE);
     
     for(int i = 0; i < table_row; i++)
     {
@@ -225,7 +225,7 @@ PRIVATE ENUM_RETURN draw_hitogram_table(FILE *fpw)
 
 PRIVATE ENUM_RETURN clear_hitogram_table(void)
 {
-    assert(pTable != NULL);
+    R_ASSERT(pTable != NULL, RETURN_FAILURE);
     free(pTable);
 
     init_row_and_col();
@@ -235,19 +235,19 @@ PRIVATE ENUM_RETURN clear_hitogram_table(void)
 
 ENUM_RETURN draw_histogram(FILE *fpw, STRU_CHART_DATA array[], int array_size)
 {
-    assert(fpw != NULL);
-    assert(array != NULL);
-    assert(array_size > 0);
+    R_ASSERT(fpw != NULL, RETURN_FAILURE);
+    R_ASSERT(array != NULL, RETURN_FAILURE);
+    R_ASSERT(array_size > 0, RETURN_FAILURE);
 
     ENUM_RETURN ret_value;
     ret_value = make_histogram_table(array, array_size);
-    assert(ret_value == RETURN_SUCCESS);
+    R_ASSERT(ret_value == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_value = draw_hitogram_table(fpw);
-    assert(ret_value == RETURN_SUCCESS);
+    R_ASSERT(ret_value == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_value = clear_hitogram_table();
-    assert(ret_value == RETURN_SUCCESS);
+    R_ASSERT(ret_value == RETURN_SUCCESS, RETURN_FAILURE);
     
     return RETURN_SUCCESS;
 }
