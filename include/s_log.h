@@ -1,36 +1,10 @@
-#ifndef __DEFINES_H__
-#define __DEFINES_H__
-#include <limits.h>
+#ifndef __S_LOG_H__
+#define __S_LOG_H__
+
 #include <stdio.h>
-#include "clinkage.h"
+#include "s_clinkage.h"
+#include "s_time.h"
 
-typedef enum TAG_ENUM_RETURN
-{
-    RETURN_SUCCESS = 0,
-    RETURN_FAILURE = -1,
-}ENUM_RETURN;
-
-typedef enum TAG_ENUM_BOOLEAN
-{
-    BOOLEAN_TURE = 1,
-    BOOLEAN_FALSE = 0,
-}ENUM_BOOLEAN;
-
-#define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
-#define PRIVATE static
-#define INVALID_INT INT_MAX
-#define INVALID_UINT (~(UINT)0)
-
-typedef int          INT;
-typedef unsigned int UINT;
-typedef char*        PSTR;
-
-char* get_time_string_without_usec(void);
-char* get_time_string_with_usec(void);
-
-ENUM_BOOLEAN log_isready(void);
-ENUM_RETURN log_init(void);
-FILE *log_getfp(void);
 char* log_getfn(void);
 
 #define LOG_TYPE_FILE 11
@@ -58,31 +32,28 @@ char* log_getfn(void);
 
 //不能用编译时间，蠢货!
 #define R_LOG(fmt, args...)\
-    do\
-    {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             ##args);\
-    }while(0)
 
 
 #define R_FALSE_LOG(condition, fmt, args...)\
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "FALSE("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            "FALSE("#condition")!, "fmt"\n",\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
+            ##args);\
     }
 
 #define R_FALSE_DO_LOG(condition, action, fmt, args...)\
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "FALSE("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            "FALSE("#condition")!, "fmt"\n",\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
+            ##args);\
         action;\
     }
 
@@ -104,7 +75,7 @@ char* log_getfn(void);
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "FALSE("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value, ##args);\
         return value;\
     }
@@ -114,7 +85,7 @@ char* log_getfn(void);
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "FALSE("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value, ##args);\
         action;\
         return value;\
@@ -122,11 +93,7 @@ char* log_getfn(void);
         
 
 #define R_ASSERT(condition, value)\
-    if(!(condition))\
-    {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "ASSERT("#condition")!, return  = %d.\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+    if(!(condition))    {        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"            "ASSERT("#condition")!, return  = %d.\n",            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value);\
         return value;\
     }
@@ -136,7 +103,7 @@ char* log_getfn(void);
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d.\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value);\
         action;\
         return value;\
@@ -147,7 +114,7 @@ char* log_getfn(void);
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value, ##args);\
         return value;\
     }
@@ -157,7 +124,7 @@ char* log_getfn(void);
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d, "fmt"\n",\
-            get_time_string_with_usec(), __FILE__, __LINE__, __FUNCTION__,\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value, ##args);\
         action;\
         return value;\

@@ -3,8 +3,10 @@
 #include <assert.h>
 #include <string.h>
 
-#include "draw.h"
-#include "defines.h"
+#include "s_defines.h"
+#include "s_log.h"
+#include "s_draw.h"
+
 
 #define PRINT_STRING_SIZE CHART_DATA_INFO_STR_SIZE//每个单元格的大小
 #define CHART_ROWS 20 //直方图的单位是20行

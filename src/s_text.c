@@ -2,8 +2,10 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
-#include "defines.h"
-#include "text.h"
+
+#include "s_defines.h"
+#include "s_log.h"
+#include "s_text.h"
 
 #define IN 1 /* inside a word */
 #define OUT 0 /* outside a word */
@@ -121,5 +123,52 @@ int format_words(const char* filename, const char *separator)
 
     disable_output();
     return retval;
+}
+
+/* read a line into line, return length */
+int getline(FILE *fp, char line[], int maxline)
+{
+    int c;
+    int i = 0;
+
+    while((c = fgetc(fp)) != EOF && c != '\n')
+    {
+        if(i < maxline-1)
+        {
+            line[i] = c;
+        }
+        ++i;
+    }
+
+    if(c == '\n')
+    {
+        if(i < (maxline-1))
+        {
+            line[i] = c;
+        }
+        ++i;
+    }
+
+    line[(maxline - 1) > i ? i : (maxline - 1)] = '\0';
+
+    return i;
+}
+
+ENUM_RETURN reverse(char *pstr_buf)
+{
+    R_ASSERT(pstr_buf != NULL, RETURN_FAILURE);
+    int start = 0;
+    int end = strlen(pstr_buf) - 1;
+    char temp;
+    while(start < end)
+    {
+        temp = pstr_buf[start];
+        pstr_buf[start] = pstr_buf[end];
+        pstr_buf[end] = temp;
+        start++;
+        end--;
+    }
+
+    return RETURN_SUCCESS;
 }
 

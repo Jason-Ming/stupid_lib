@@ -1,9 +1,9 @@
-#ifndef __DRAW_H__
-#define __DRAW_H__
+#ifndef __S_DRAW_H__
+#define __S_DRAW_H__
 
 #include <stdio.h>
-#include "clinkage.h"
-#include "defines.h"
+#include "s_clinkage.h"
+#include "s_defines.h"
 
 #define CHART_DATA_INFO_STR_SIZE 6 //长度为5的字符串
 

@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 
-#include "defines.h"
-
+#include "s_defines.h"
+#include "s_log.h"
 
 PRIVATE FILE *logfp = NULL;
 #define MAX_LENGTH_OF_LOG_FILE_NAME 128
@@ -25,6 +26,19 @@ FILE *log_getfp(void)
     return logfp;
 }
 
+ENUM_RETURN log_init(void)
+{
+    log_file_name[0] = '\0';
+    sprintf(log_file_name, "LOG_FILE_%s_%s.txt", get_date_string(), get_time_string());
+
+    //printf("logfile: %s\n", log_file_name);
+    
+    logfp = fopen(log_file_name, "w");
+    R_ASSERT(logfp != NULL, RETURN_FAILURE);
+    fclose(logfp);
+    return RETURN_SUCCESS;
+}
+
 char* log_getfn(void)
 {
     if(strlen(log_file_name) != 0)
@@ -33,22 +47,13 @@ char* log_getfn(void)
     }
     else
     {
-        return NULL;
+        assert(log_init() == RETURN_SUCCESS);
+        
+        return log_file_name;
     }
 }
 
-ENUM_RETURN log_init(void)
-{
-    log_file_name[0] = '\0';
-    sprintf(log_file_name, "LOG_FILE-%s.txt", get_time_string_without_usec());
 
-    printf("filename = %s\n", log_file_name);
-    
-    logfp = fopen(log_file_name, "w");
-    R_ASSERT(logfp != NULL, RETURN_FAILURE);
-    fclose(logfp);
-    return RETURN_SUCCESS;
-}
 
 void f(void)
 {
