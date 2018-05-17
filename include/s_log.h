@@ -93,7 +93,11 @@ char* log_getfn(void);
         
 
 #define R_ASSERT(condition, value)\
-    if(!(condition))    {        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"            "ASSERT("#condition")!, return  = %d.\n",            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
+    if(!(condition))\
+    {\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+            "ASSERT("#condition")!, return  = %d.\n",\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (INT)value);\
         return value;\
     }
