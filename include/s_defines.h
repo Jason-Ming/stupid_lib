@@ -26,6 +26,7 @@ typedef enum TAG_ENUM_BOOLEAN
 
 typedef int          INT;
 typedef unsigned int UINT;
+typedef long         LONG;
 typedef char*        PSTR;
 
 

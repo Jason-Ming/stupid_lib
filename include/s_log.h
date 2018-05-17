@@ -96,9 +96,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "ASSERT("#condition")!, return  = %d.\n",\
+            "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value);\
+            (LONG)value);\
         return value;\
     }
 
