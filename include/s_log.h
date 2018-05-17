@@ -76,7 +76,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "FALSE("#condition")!, return  = %d, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            (UINT)value, ##args);\
         return value;\
     }
     
@@ -86,7 +86,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "FALSE("#condition")!, return  = %d, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            (UINT)value, ##args);\
         action;\
         return value;\
     }
@@ -98,7 +98,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value);\
+            (UINT)value);\
         return value;\
     }
 
@@ -108,7 +108,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value);\
+            (UINT)value);\
         action;\
         return value;\
     }
@@ -119,7 +119,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            (UINT)value, ##args);\
         return value;\
     }
 
@@ -129,7 +129,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
             "ASSERT("#condition")!, return  = %d, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (INT)value, ##args);\
+            (UINT)value, ##args);\
         action;\
         return value;\
     }
