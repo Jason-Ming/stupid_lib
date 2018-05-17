@@ -145,7 +145,8 @@ PRIVATE ENUM_RETURN print_help_info(struct TAG_STRU_VALUE *value)
     while(p != NULL)
     {
         printf("    %10s: %s\n", p->option, p->help_info);
-        p = p->next;
+
+        p = p->next;
     }
 
     return RETURN_SUCCESS;
@@ -277,7 +278,7 @@ PRIVATE STRU_OPTION_PROC *get_option_proc_block(char* option)
         {
             return p;
         }
-        p = p->next;
+        p = p->next;
     }
 
     return NULL;
@@ -393,7 +394,7 @@ PRIVATE ENUM_RETURN process_options(int argc, char **argv)
             printf("fatal error: [%s] need vales\n", p->option);
             return RETURN_FAILURE;
         }
-        
+
     }
     
     return RETURN_SUCCESS;
@@ -414,9 +415,9 @@ PRIVATE ENUM_RETURN process_do(void)
         {
             ret_val = p->handler(p->value);
             R_FALSE_LOG(ret_val == RETURN_SUCCESS, "process option [%s] failed!\n", p->option);
-        }
+        };
 
-        p = p->next;
+        p = p->next;
     }
 
     return RETURN_SUCCESS;
@@ -446,8 +447,8 @@ PRIVATE void debug_print_option_proc_block(void)
         printf("%20s = %d\n", "value type", p->value_type);
         printf("%20s = %p\n", "handler", p->handler);
         printf("%20s = %s\n", "help_info", p->help_info);
-        
-        p = p->next;
+
+        p = p->next;
     }
 }
 
