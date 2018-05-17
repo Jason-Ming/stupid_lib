@@ -74,9 +74,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "FALSE("#condition")!, return  = %d, "fmt"\n",\
+            "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value, ##args);\
+            (LONG)value, ##args);\
         return value;\
     }
     
@@ -84,9 +84,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "FALSE("#condition")!, return  = %d, "fmt"\n",\
+            "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value, ##args);\
+            (LONG)value, ##args);\
         action;\
         return value;\
     }
@@ -106,9 +106,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "ASSERT("#condition")!, return  = %d.\n",\
+            "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value);\
+            (LONG)value);\
         action;\
         return value;\
     }
@@ -117,9 +117,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "ASSERT("#condition")!, return  = %d, "fmt"\n",\
+            "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value, ##args);\
+            (LONG)value, ##args);\
         return value;\
     }
 
@@ -127,9 +127,9 @@ char* log_getfn(void);
     if(!(condition))\
     {\
         LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
-            "ASSERT("#condition")!, return  = %d, "fmt"\n",\
+            "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (UINT)value, ##args);\
+            (LONG)value, ##args);\
         action;\
         return value;\
     }
