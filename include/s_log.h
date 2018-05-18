@@ -57,6 +57,12 @@ char* log_getfn(void);
         action;\
     }
 
+#define V_FALSE_RET(condition)\
+    if(!(condition))\
+    {\
+        return;\
+    }
+
 #define R_FALSE_RET(condition, value)\
     if(!(condition))\
     {\

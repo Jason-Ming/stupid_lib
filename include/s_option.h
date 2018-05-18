@@ -1,5 +1,5 @@
-#ifndef __S_PARAMETERS_H__
-#define __S_PARAMETERS_H__
+#ifndef __S_OPTION_H__
+#define __S_OPTION_H__
 #include "s_clinkage.h"
 #include "s_defines.h"
 
@@ -27,10 +27,6 @@ typedef struct TAG_STRU_VALUE
 typedef  ENUM_RETURN (*FUNC_OPTION_PROC)(struct TAG_STRU_VALUE *value);
 
 __BEGIN_C_DECLS
-ENUM_RETURN register_error_info(int code, const char * info);
-
-ENUM_RETURN register_introduction(const char *introduction);
-ENUM_RETURN register_usage(const char *usage);
 
 ENUM_RETURN register_option(
     const char* option_name,
@@ -39,8 +35,6 @@ ENUM_RETURN register_option(
     FUNC_OPTION_PROC handler,
     const char* help_info);
 
-
-ENUM_RETURN process(int argc, char **argv);
 __END_C_DECLS
 
 #endif

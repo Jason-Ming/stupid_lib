@@ -4,15 +4,10 @@
 #include <ctype.h>
 
 #include "s_log.h"
-#include "s_parameters.h"
+#include "s_option.h"
+#include "s_input_file.h"
 
 #define FREE(p) do{ if(p != NULL){free(p);}}while(0);
-
-typedef struct TAG_STRU_ERROR_INFO
-{
-    int code;
-    const char *info;
-} STRU_ERROR_INFO;
 
 typedef struct TAG_STRU_OPTION_PROC
 {
@@ -29,19 +24,7 @@ typedef struct TAG_STRU_OPTION_PROC
 PRIVATE STRU_OPTION_PROC *p_list_head = NULL;
 PRIVATE STRU_OPTION_PROC *p_list_tail = NULL;
 
-PRIVATE const char *p_bin = NULL;
-PRIVATE char *p_usage = NULL;
-PRIVATE char *p_introduction = NULL;
-PRIVATE int error_code = 0;
-
-#define MAX_NUM_OF_ERROR_INFO 200
-PRIVATE const char* error_info_array[MAX_NUM_OF_ERROR_INFO] = {NULL};
-
-#define MAX_NUM_OF_INPUT_FILES 64
-PRIVATE int num_of_input_files = 0;
-PRIVATE char* input_files[MAX_NUM_OF_INPUT_FILES] = {NULL};
-
-PRIVATE STRU_OPTION_PROC *get_option_proc_list_head(void)
+STRU_OPTION_PROC *get_option_proc_list_head(void)
 {
     return p_list_head;
 }
@@ -63,15 +46,7 @@ PRIVATE ENUM_RETURN add_node_to_option_proc_list(STRU_OPTION_PROC *p_new)
     return RETURN_SUCCESS;
 }
 
-PRIVATE void save_bin_name(const char *bin_name)
-{
-    p_bin = bin_name;
-}
 
-PRIVATE const char *get_bin_name(void)
-{
-    return p_bin;
-}
 
 PRIVATE ENUM_RETURN get_a_new_node_do(STRU_OPTION_PROC **pp_new, 
     const char* option_name, 
@@ -135,54 +110,6 @@ PRIVATE STRU_OPTION_PROC *get_a_new_option_proc_node(
     return p_new;
 }
 
-PRIVATE ENUM_RETURN print_help_info(struct TAG_STRU_VALUE *value)
-{
-    printf("       %s\n", p_introduction);
-    printf("Usage: %s %s\n", get_bin_name(), p_usage);
-    
-    STRU_OPTION_PROC *p = get_option_proc_list_head();
-
-    while(p != NULL)
-    {
-        printf("    %10s: %s\n", p->option, p->help_info);
-
-        p = p->next;
-    }
-
-    return RETURN_SUCCESS;
-}
-
-PRIVATE const char * get_error(void)
-{
-    return error_info_array[error_code];
-}
-
-PRIVATE void print_error_info(void)
-{
-    printf("Error: %s\n", get_error());
-}
-
-ENUM_RETURN set_error(int code)
-{
-    R_ASSERT(code >= 0 && code < MAX_NUM_OF_ERROR_INFO, RETURN_FAILURE);
-    R_ASSERT(error_info_array[code] != NULL, RETURN_FAILURE);
-    
-    error_code = code;
-
-    return RETURN_SUCCESS;
-}
-
-ENUM_RETURN register_error_info(int code, const char * info)
-{
-    R_ASSERT(code >= 0 && code < MAX_NUM_OF_ERROR_INFO, RETURN_FAILURE);
-
-    R_ASSERT(error_info_array[code] == NULL, RETURN_FAILURE);
-
-    error_info_array[code] = info;
-
-    return RETURN_SUCCESS;
-}
-
 ENUM_BOOLEAN is_option_valid(const char* option_name)
 {
     /* option 格式为    [option <arg>]或者   [option]，其中option的格式为-XXX */
@@ -239,35 +166,6 @@ ENUM_RETURN register_option(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN register_introduction(const char *introduction)
-{
-    R_ASSERT(introduction != NULL, RETURN_FAILURE);
-
-    p_introduction = malloc(strlen(introduction) + 1);
-    R_ASSERT(p_introduction != NULL, RETURN_FAILURE);
-    strcpy(p_introduction, introduction);
-    
-    return RETURN_SUCCESS;
-}
-
-ENUM_RETURN register_usage(const char *usage)
-{
-    R_ASSERT(usage != NULL, RETURN_FAILURE);
-
-    p_usage = malloc(strlen(usage) + 1);
-    R_ASSERT(p_usage != NULL, RETURN_FAILURE);
-    strcpy(p_usage, usage);
-    
-    return RETURN_SUCCESS;
-}
-
-PRIVATE ENUM_RETURN register_option_help(void)
-{
-    ENUM_RETURN ret_val = register_option("-h", OPTION_TYPE_OPTIONAL, VALUE_TYPE_SWITCH, print_help_info, "print help info");
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    return RETURN_SUCCESS;
-}
-
 PRIVATE STRU_OPTION_PROC *get_option_proc_block(char* option)
 {
     STRU_OPTION_PROC *p = get_option_proc_list_head();
@@ -307,46 +205,8 @@ PRIVATE ENUM_RETURN add_option_value(STRU_OPTION_PROC *p, const char *value)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN add_input_file(const char *file)
-{
-    R_ASSERT(file != NULL, RETURN_FAILURE);
-    R_LOG("add file: %s", file);
-    
-    input_files[num_of_input_files] = malloc(strlen(file) + 1);
-    R_ASSERT(input_files[num_of_input_files] != NULL, RETURN_FAILURE);
-    strcpy(input_files[num_of_input_files], file);
-    num_of_input_files++;
-    
-    return RETURN_SUCCESS;
-}
 
-PRIVATE int get_input_file_num(void)
-{
-    return num_of_input_files;
-}
-
-PRIVATE ENUM_RETURN process_input_files(int argc, char **argv)
-{
-    int i = 1;
-    ENUM_RETURN ret_val;
-    
-    while(i < argc)
-    {
-        if(argv[i][0] == '-')
-        {
-            break;
-        }
-
-        //处理输入的文件列表
-        ret_val = add_input_file(argv[i]);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        i++;
-    }
-    
-    return RETURN_SUCCESS;
-}
-
-PRIVATE ENUM_RETURN process_options(int argc, char **argv)
+ENUM_RETURN parse_options(int argc, char **argv)
 {
     STRU_OPTION_PROC *p = NULL;
     ENUM_RETURN ret_val;
@@ -405,34 +265,7 @@ PRIVATE ENUM_BOOLEAN is_option_need_process(STRU_OPTION_PROC *p)
     return p->need_process;
 }
 
-PRIVATE ENUM_RETURN process_do(void)
-{
-    STRU_OPTION_PROC *p = get_option_proc_list_head();
-    ENUM_RETURN ret_val;
-    while(p != NULL)
-    {
-        if(is_option_need_process(p) == BOOLEAN_TURE)
-        {
-            ret_val = p->handler(p->value);
-            R_FALSE_LOG(ret_val == RETURN_SUCCESS, "process option [%s] failed!\n", p->option);
-        };
 
-        p = p->next;
-    }
-
-    return RETURN_SUCCESS;
-}
-PRIVATE ENUM_RETURN register_default_data(void)
-{
-    ENUM_RETURN ret_val;
-    ret_val = register_option_help();
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-    ret_val = register_error_info(0, "Program run succeed!");
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-    return RETURN_SUCCESS;
-}
 
 PRIVATE void debug_print_option_proc_block(void)
 {
@@ -452,37 +285,33 @@ PRIVATE void debug_print_option_proc_block(void)
     }
 }
 
-ENUM_RETURN process(int argc, char **argv)
+void display_option_help_info(void)
 {
-    save_bin_name(argv[0]);
+    STRU_OPTION_PROC *p = get_option_proc_list_head();
 
-    register_default_data();
-    
-    if(argc < 2)
+    while(p != NULL)
     {
-        print_help_info(NULL);
-        return RETURN_FAILURE;
+        printf("    %10s: %s\n", p->option, p->help_info);
+
+        p = p->next;
     }
-    
-    R_ASSERT(argv[1] != NULL, RETURN_FAILURE);
+}
 
-    R_LOG(" %d parameters: \n", argc);
-
+ENUM_RETURN process_options(void)
+{
+    STRU_OPTION_PROC *p = get_option_proc_list_head();
     ENUM_RETURN ret_val;
-    ret_val = process_input_files(argc, argv);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    while(p != NULL)
+    {
+        if(is_option_need_process(p) == BOOLEAN_TURE)
+        {
+            ret_val = p->handler(p->value);
+            R_FALSE_LOG(ret_val == RETURN_SUCCESS, "process option [%s] failed!\n", p->option);
+        };
 
-    ret_val = process_options(argc, argv);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        p = p->next;
+    }
 
-    //debug_print_option_proc_block();
-    
-    ret_val = process_do();
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-    print_error_info();
-    
     return RETURN_SUCCESS;
-    
 }
 
