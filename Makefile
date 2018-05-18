@@ -23,8 +23,10 @@ CFLAGS  += -std=c99
 #CFLAGS  += -D CPPUTEST
 #CFLAGS  += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 CFLAGS   += -I$(ROOT_DIR)/include
+INCLUDEFLAGS = -I$(ROOT_DIR)/include
+
 #将以下变量导出到子shell中，本次相当于导出到子目录下的makefile中
-export CC CFLAGS BIN OBJS_DIR BIN_DIR ROOT_DIR LIB_DIR ALL_SOURCE
+export CC CFLAGS BIN OBJS_DIR BIN_DIR ROOT_DIR LIB_DIR INCLUDEFLAGS
 #注意这里的顺序，需要先执行SUBDIRS最后才能是DEBUG
 
 all:$(SUBDIRS) $(CUR_OBJS) DEBUG
@@ -45,9 +47,14 @@ $(CUR_OBJS):%.o:%.c
 	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
--include $(OBJS:.o=.d)
+-include $(CUR_OBJS:.o=.d)
+
+ALL_D = $(shell find -type f -name *.d)
+ALL_O = $(shell find -type f -name *.o)
 
 clean:
 	@rm -rf $(OBJS_DIR)/*
 	@rm -rf $(BIN_DIR)/*
 	@rm -rf $(LIB_DIR)/*
+	@rm -rf $(ALL_D)
+	@rm -rf $(ALL_O)

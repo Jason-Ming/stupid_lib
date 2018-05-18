@@ -2,6 +2,7 @@
 #define __S_LOG_H__
 
 #include <stdio.h>
+
 #include "s_clinkage.h"
 #include "s_time.h"
 
