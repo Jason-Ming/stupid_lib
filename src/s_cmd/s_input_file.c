@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "s_log.h"
+#include "s_cmd.h"
+#include "s_error.h"
 #include "s_input_file.h"
 
 
@@ -29,10 +31,11 @@ int get_input_file_num(void)
     return num_of_input_files;
 }
 
+/* 将文件参数处理并保存 */
 ENUM_RETURN parse_input_files(int argc, char **argv)
 {
     int i = 1;
-    ENUM_RETURN ret_val;
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
     
     while(i < argc)
     {
@@ -45,6 +48,12 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
         ret_val = add_input_file(argv[i]);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         i++;
+    }
+    
+    if(get_input_file_num() == 0)
+    {
+        ret_val = add_current_error(ERROR_CODE_NO_INPUT_FILES, NULL);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
     
     return RETURN_SUCCESS;
