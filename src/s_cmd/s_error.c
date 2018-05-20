@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "s_log.h"
+#include "s_cmd.h"
 #include "s_error.h"
 
 typedef struct TAG_STRU_ERROR_INFO
@@ -14,16 +15,20 @@ typedef struct TAG_STRU_ERROR_INFO
 
 PRIVATE STRU_ERROR_INFO system_error_infos[] = 
 {
-    {ERROR_CODE_SUCCESS, "", BOOLEAN_FALSE},
+    {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE},
+    {ERROR_CODE_MISSING_SUBCMD, "No input sub command", BOOLEAN_FALSE},
+    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command", BOOLEAN_TRUE},
+    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command", BOOLEAN_TRUE},
     {ERROR_CODE_NO_INPUT_FILES, "No input files", BOOLEAN_FALSE},
-    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option", BOOLEAN_TURE},
-    {ERROR_CODE_MISSING_ARGS, "Missing argument to", BOOLEAN_TURE},
-    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory", BOOLEAN_TURE},
-    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option", BOOLEAN_TURE},
+    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files", BOOLEAN_FALSE},
+    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option", BOOLEAN_TRUE},
+    {ERROR_CODE_MISSING_ARGS, "Missing argument to", BOOLEAN_TRUE},
+    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to", BOOLEAN_TRUE},
+    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory", BOOLEAN_TRUE},
+    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option", BOOLEAN_TRUE},
 };
-    
-#define MAX_NUM_OF_USER_DEFINE_ERROR_INFO 200
-#define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + MAX_NUM_OF_USER_DEFINE_ERROR_INFO)
+
+#define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + MAX_NUM_OF_USER_DEFINE_ERROR)
 
 #define INVALID_ERROR_CODE (-1)
 
@@ -46,27 +51,27 @@ PRIVATE STRU_CURRENT_ERROR_INFO *get_current_error_list_head(void)
 
 PRIVATE ENUM_BOOLEAN is_error_code_valid(int code)
 {
-    return (code >= 0 && code < MAX_NUM_OF_ERROR_INFO)?BOOLEAN_TURE:BOOLEAN_FALSE;
+    return (code >= 0 && code < MAX_NUM_OF_ERROR_INFO)?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 
 PRIVATE ENUM_BOOLEAN is_error_code_registered(int code)
 {
-    R_FALSE_RET(is_error_code_valid(code) == BOOLEAN_TURE, BOOLEAN_FALSE);
+    R_FALSE_RET(is_error_code_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
     
     R_FALSE_RET(error_info_array[code].code != INVALID_ERROR_CODE, BOOLEAN_FALSE);
 
-    return BOOLEAN_TURE;
+    return BOOLEAN_TRUE;
 }
 
 PRIVATE const char * get_error_info(int code)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TURE, NULL);
+    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, NULL);
     return error_info_array[code].info;
 }
 
 PRIVATE ENUM_BOOLEAN is_error_need_additional_info(int code)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TURE, BOOLEAN_FALSE);
+    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
     return error_info_array[code].need_addtional_info;
 }
 
@@ -77,7 +82,7 @@ PRIVATE void debug_print_current_error(STRU_CURRENT_ERROR_INFO *p)
 
 ENUM_BOOLEAN is_current_error_exist(void)
 {
-    return (p_current_error_list_head == NULL)?BOOLEAN_FALSE:BOOLEAN_TURE;
+    return (p_current_error_list_head == NULL)?BOOLEAN_FALSE:BOOLEAN_TRUE;
 }
 
 PRIVATE ENUM_RETURN get_a_new_error_node(STRU_CURRENT_ERROR_INFO **pp_new, 
@@ -116,15 +121,15 @@ PRIVATE ENUM_RETURN add_node_to_current_error_list(STRU_CURRENT_ERROR_INFO *p_ne
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN add_current_error(int code, const char* additional_info)
+ENUM_RETURN add_current_system_error(int code, const char* additional_info)
 {    
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TURE, RETURN_FAILURE);
-    R_ASSERT_LOG(is_error_code_registered(code) == BOOLEAN_TURE, RETURN_FAILURE,
+    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
+    R_ASSERT_LOG(is_error_code_registered(code) == BOOLEAN_TRUE, RETURN_FAILURE,
         "the error code: %d is not registered", code);
 
     STRU_CURRENT_ERROR_INFO *p_new = NULL;
 
-    if(error_info_array[code].need_addtional_info == BOOLEAN_TURE)
+    if(error_info_array[code].need_addtional_info == BOOLEAN_TRUE)
     {
         R_ASSERT(additional_info != NULL, RETURN_FAILURE);
     }
@@ -146,6 +151,11 @@ ENUM_RETURN add_current_error(int code, const char* additional_info)
     return RETURN_SUCCESS;
 }
 
+ENUM_RETURN add_current_user_error(int code, const char* additional_info)
+{
+    return add_current_system_error(code, additional_info);
+}
+
 void display_error_info(void)
 {
     STRU_CURRENT_ERROR_INFO *p = get_current_error_list_head();
@@ -154,7 +164,7 @@ void display_error_info(void)
     {
         printf("Error: %s", get_error_info(p->code));
 
-        if(is_error_need_additional_info(p->code) == BOOLEAN_TURE)
+        if(is_error_need_additional_info(p->code) == BOOLEAN_TRUE)
         {
             printf(": %s", p->additional_info);
         }
@@ -165,9 +175,9 @@ void display_error_info(void)
     }    
 }
 
-ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
+PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TURE, RETURN_FAILURE);
+    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
 
     R_ASSERT_LOG(is_error_code_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
         "the error code: %d is already registered", code);
@@ -179,6 +189,11 @@ ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_a
     error_info_array[code].need_addtional_info = need_additional_info;
     
     return RETURN_SUCCESS;
+}
+
+ENUM_RETURN register_user_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
+{
+    return register_error_info(code, info, need_additional_info);
 }
 
 ENUM_RETURN init_error_info(void)

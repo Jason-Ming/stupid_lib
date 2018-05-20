@@ -5,6 +5,7 @@
 #include "s_log.h"
 #include "s_cmd.h"
 #include "s_error.h"
+#include "s_subcmd.h"
 #include "s_input_file.h"
 
 
@@ -31,10 +32,17 @@ int get_input_file_num(void)
     return num_of_input_files;
 }
 
+const char *get_input_file_of_subcmd(const char *subcmd_name)
+{
+    R_ASSERT(subcmd_name != NULL, NULL);
+
+    return input_files[0];
+}
+
 /* 将文件参数处理并保存 */
 ENUM_RETURN parse_input_files(int argc, char **argv)
 {
-    int i = 1;
+    int i = get_argv_indicator();
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     
     while(i < argc)
@@ -50,11 +58,20 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
         i++;
     }
     
-    if(get_input_file_num() == 0)
+    const char *subcmd = get_current_subcmd_name();
+    if(is_subcmd_need_input_files(subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
     {
-        ret_val = add_current_error(ERROR_CODE_NO_INPUT_FILES, NULL);
+        ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
+
+    if(is_subcmd_need_input_files(subcmd) == BOOLEAN_FALSE && get_input_file_num() > 0)
+    {
+        ret_val = add_current_system_error(ERROR_CODE_UNEXPECTED_INPUT_FILES, NULL);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
+
+    set_argv_indicator(i);
     
     return RETURN_SUCCESS;
 }

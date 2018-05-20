@@ -17,7 +17,7 @@ ENUM_BOOLEAN log_isready(void)
     }
     else
     {
-        return BOOLEAN_TURE;
+        return BOOLEAN_TRUE;
     }
 }
 

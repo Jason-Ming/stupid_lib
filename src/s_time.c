@@ -13,6 +13,7 @@ char* get_usec_string(void)
     PRIVATE struct timeval tv;
     PRIVATE char time_string_buf[LENGTH_OF_USECS];
     gettimeofday(&tv, NULL);
+    memset(time_string_buf, '\0', LENGTH_OF_USECS);
     sprintf(time_string_buf, "%lu", tv.tv_usec);
     return time_string_buf;
 }

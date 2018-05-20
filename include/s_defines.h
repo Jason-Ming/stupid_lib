@@ -13,12 +13,12 @@ typedef enum TAG_ENUM_RETURN
 
 typedef enum TAG_ENUM_BOOLEAN
 {
-    BOOLEAN_TURE = 1,
+    BOOLEAN_TRUE = 1,
     BOOLEAN_FALSE = 0,
 }ENUM_BOOLEAN;
 
 #define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
-#define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TURE):(BOOLEAN_FALSE))
+#define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
 
 #define PRIVATE static
 #define INVALID_INT INT_MAX

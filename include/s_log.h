@@ -98,6 +98,14 @@ char* log_getfn(void);
         return value;\
     }
         
+#define V_ASSERT(condition)\
+    if(!(condition))\
+    {\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+            "ASSERT("#condition")!\n",\
+            get_time_stamp(), __FILE__, __LINE__, __FUNCTION__);\
+        return;\
+    }
 
 #define R_ASSERT(condition, value)\
     if(!(condition))\
