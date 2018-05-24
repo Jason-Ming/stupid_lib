@@ -4,6 +4,7 @@
 
 #include "s_log.h"
 #include "s_cmd.h"
+#include "s_cmd_proc.h"
 #include "s_error.h"
 
 typedef struct TAG_STRU_ERROR_INFO
@@ -22,8 +23,10 @@ PRIVATE STRU_ERROR_INFO system_error_infos[] =
     {ERROR_CODE_NO_INPUT_FILES, "No input files", BOOLEAN_FALSE},
     {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files", BOOLEAN_FALSE},
     {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option", BOOLEAN_TRUE},
+    {ERROR_CODE_MISSING_OPTION, "Missing command line option to", BOOLEAN_TRUE},
     {ERROR_CODE_MISSING_ARGS, "Missing argument to", BOOLEAN_TRUE},
     {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to", BOOLEAN_TRUE},
+    {ERROR_CODE_INVALID_ARGS, "Invalid argument", BOOLEAN_TRUE},
     {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory", BOOLEAN_TRUE},
     {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option", BOOLEAN_TRUE},
 };

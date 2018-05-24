@@ -4,13 +4,25 @@
 #include <ctype.h>
 
 #include "s_log.h"
+#include "s_cmd_proc.h"
 #include "s_option.h"
 #include "s_input_file.h"
 #include "s_error.h"
+#include "s_default.h"
 
 #include "s_subcmd.h"
 
 #define FREE(p) do{ if(p != NULL){free(p);}}while(0);
+
+typedef struct TAG_STRU_SUBCMD_CONTROL_BLOCK
+{
+    char* subcmd;
+    ENUM_BOOLEAN need_input_file;
+    FUNC_SUBCMD_PROC handler;
+    struct TAG_STRU_OPTION_CONTROL_BLOCK *option_cbs;
+    char* help_info;
+    struct TAG_STRU_SUBCMD_CONTROL_BLOCK *next;
+} STRU_SUBCMD_CONTROL_BLOCK;
 
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb_list_head = NULL;
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb_list_tail = NULL;
@@ -21,7 +33,6 @@ typedef struct TAG_STRU_SUBCMD_RUN_BLOCK
     struct TAG_STRU_OPTION_RUN_BLOCK * option_rb;
     struct TAG_STRU_SUBCMD_RUN_BLOCK *next;
 } STRU_SUBCMD_RUN_BLOCK;
-
 
 PRIVATE STRU_SUBCMD_RUN_BLOCK *p_subcmd_rb_list_head = NULL;
 PRIVATE STRU_SUBCMD_RUN_BLOCK *p_subcmd_rb_list_tail = NULL;
@@ -194,7 +205,11 @@ ENUM_RETURN register_subcmd(
     ENUM_RETURN ret_val;
     ret_val = add_a_new_subcmd_cb_to_subcmd_cb_list(p_new);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    
+
+    /* 为每个subcmd注册默认的选项 */
+    ret_val = register_default_option(subcmd_name);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
     debug_print_subcmd_cb(p_new);
 
     return RETURN_SUCCESS;
@@ -261,7 +276,7 @@ PRIVATE STRU_SUBCMD_RUN_BLOCK *get_subcmd_rb_by_name(const char* subcmd_name)
     return NULL;
 }
 
-STRU_OPTION_RUN_BLOCK *get_option_rb_list_head(const char *subcmd_name)
+STRU_OPTION_RUN_BLOCK *get_option_rb_list_head_by_name(const char *subcmd_name)
 {
     STRU_SUBCMD_RUN_BLOCK *p_current_subcmd_rb = get_subcmd_rb_by_name(subcmd_name);
     R_ASSERT(p_current_subcmd_rb != NULL, NULL);
@@ -333,6 +348,26 @@ PRIVATE STRU_SUBCMD_RUN_BLOCK *get_a_new_subcmd_rb(void)
     return p_new;
 }
 
+ENUM_RETURN add_subcmd_rb_to_subcmd_rb_list_by_name(const char *subcmd_name)
+{
+    R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
+    
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    STRU_SUBCMD_CONTROL_BLOCK *p_cb = NULL;
+    STRU_SUBCMD_RUN_BLOCK *p_rb = NULL;
+
+    p_cb = get_subcmd_cb_by_name(subcmd_name);
+    R_ASSERT(p_cb != NULL, RETURN_FAILURE);
+
+    p_rb = get_a_new_subcmd_rb();
+    R_ASSERT(p_rb != NULL, RETURN_FAILURE);
+    
+    p_rb->p_subcmd_cb = p_cb;
+    ret_val = add_a_new_subcmd_rb_to_subcmd_rb_list(p_rb);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN add_a_new_option_rb_to_subcmd_rb(STRU_OPTION_RUN_BLOCK *p_new)
 {
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
@@ -359,82 +394,158 @@ ENUM_RETURN add_a_new_option_rb_to_subcmd_rb(STRU_OPTION_RUN_BLOCK *p_new)
     return RETURN_SUCCESS;
 }
 
-/* 将子命令处理并保存 */
-ENUM_RETURN parse_subcmds(int argc, char **argv)
+STRU_OPTION_RUN_BLOCK *get_option_rb_by_name(const char* subcmd_name, const char* option_name)
+{
+    STRU_OPTION_RUN_BLOCK *p = get_option_rb_list_head_by_name(subcmd_name);
+
+    while(p != NULL)
+    {
+        if(strcmp(option_name, p->option) == 0)
+        {
+            return p;
+        }
+        p = p->next;
+    }
+
+    return NULL;
+}
+
+ENUM_BOOLEAN is_option_miss_to_subcmd(const char *subcmd_name)
+{
+    R_ASSERT(subcmd_name != NULL, BOOLEAN_TRUE);
+    STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
+    R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_TRUE);
+
+    STRU_OPTION_RUN_BLOCK *p_option_rb = get_option_rb_list_head_by_name(subcmd_name);
+    if(p_option_rb != NULL)
+    {
+        return BOOLEAN_FALSE;
+    }
+
+    STRU_OPTION_CONTROL_BLOCK *p_option_cb = p_subcmd_cb->option_cbs;
+
+    while(p_option_cb != NULL)
+    {
+        if(p_option_cb->option_type == OPTION_TYPE_MANDATORY)
+        {
+            return BOOLEAN_TRUE;
+        }
+        p_option_cb = p_option_cb->next;
+    }
+
+    return BOOLEAN_FALSE;
+}
+
+void display_subcmd_help_info(const char *subcmd_name)
+{
+    V_ASSERT(subcmd_name != NULL);
+    
+    STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = NULL;
+    
+    p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
+    V_ASSERT(p_subcmd_cb != NULL);
+
+    printf("usage: %s %s [option <arg>]\n", get_bin_name(), subcmd_name);
+
+    display_option_help_info(p_subcmd_cb->option_cbs);
+}
+
+void display_all_subcmd_help_info(void)
+{
+    STRU_SUBCMD_CONTROL_BLOCK *p = get_subcmd_cb_list_head();
+    printf("usage: %s %s\n", get_bin_name(), get_usage());
+
+    printf("\nuse %s <subcmd> -h to see help information about a specific subcommand\n", get_bin_name());
+    
+    printf("\nThese are common sub commands used in various situations:\n\n");
+    
+    while(p != NULL)
+    {
+        printf("   %-10s %s\n", p->subcmd, p->help_info);
+
+        p = p->next;
+    }
+}
+
+PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
 {
     STRU_SUBCMD_CONTROL_BLOCK *p_cb = NULL;
     STRU_SUBCMD_RUN_BLOCK *p_rb = NULL;
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     int i = get_argv_indicator();
 
-    while(i < argc)
+    R_FALSE_RET_LOG(i < argc, RETURN_SUCCESS, "i = %d, argc = %d", i, argc);
+
+    R_LOG("i = %d, argv = %s", i, argv[i]);
+    
+    /* 当前subcmd未在控制块中注册过则停止处理 */
+    p_cb = get_subcmd_cb_by_name(argv[i]);
+    if(p_cb == NULL)
     {
-        /* 如果是option则停止处理 */
-        if(argv[i][0] == '-')
-        {
-            break;
-        }
-        
-        /* 当前subcmd未在控制块中注册过则停止处理 */
-        p_cb = get_subcmd_cb_by_name(argv[i]);
-        if(p_cb == NULL)
-        {
-            ret_val = add_current_system_error(ERROR_CODE_UNKONWN_SUBCMD, argv[i]);
-            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            break;   
-        }
-
-        p_rb = get_subcmd_rb_by_name(p_cb->subcmd);
-
-        /* 重复输入subcmd则停止处理 */
-        if(p_rb != NULL)
-        {
-            ret_val = add_current_system_error(ERROR_CODE_REPETITIVE_OPTION, p_cb->subcmd);
-            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            break;
-        }
-        /* 目前只处理一个子命令 */
-        else
-        {
-            p_rb = get_a_new_subcmd_rb();
-            R_ASSERT(p_rb != NULL, RETURN_FAILURE);
-            
-            p_rb->p_subcmd_cb = p_cb;
-            ret_val = add_a_new_subcmd_rb_to_subcmd_rb_list(p_rb);
-            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            break;
-        }
+        ret_val = add_current_system_error(ERROR_CODE_UNKONWN_SUBCMD, argv[i]);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        return RETURN_SUCCESS;
     }
+
+    p_rb = get_subcmd_rb_by_name(p_cb->subcmd);
+
+    /* 重复输入subcmd则停止处理 */
+    if(p_rb != NULL)
+    {
+        ret_val = add_current_system_error(ERROR_CODE_REPETITIVE_OPTION, p_cb->subcmd);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        return RETURN_SUCCESS;
+    }
+
+    /* 目前只处理一个子命令 */
+    p_rb = get_a_new_subcmd_rb();
+    R_ASSERT(p_rb != NULL, RETURN_FAILURE);
+    
+    p_rb->p_subcmd_cb = p_cb;
+    ret_val = add_a_new_subcmd_rb_to_subcmd_rb_list(p_rb);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     i++;
     set_argv_indicator(i);
+
+    return RETURN_SUCCESS;
+}
+
+/* 将子命令处理并保存 */
+ENUM_RETURN parse_subcmds(int argc, char **argv)
+{
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+
+    ret_val = parse_subcmds_do(argc, argv);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     if(get_current_subcmd_rb() == NULL)
     {
         ret_val = add_current_system_error(ERROR_CODE_MISSING_SUBCMD, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-        return RETURN_FAILURE;
     }
 
     return RETURN_SUCCESS;
 }
 
 /* 处理保存的选项及值 */
-ENUM_RETURN process_subcmd(void)
+ENUM_RETURN process_subcmds(void)
 {
+    ENUM_RETURN user_process_result = RETURN_SUCCESS;
+
     STRU_SUBCMD_RUN_BLOCK *p = get_subcmd_rb_list_head();
     R_ASSERT(p != NULL, RETURN_FAILURE);
-    
     ENUM_RETURN ret_val = RETURN_SUCCESS;
+
     while(p != NULL)
-    {
+    {        
         /* 处理options失败时，直接停止处理 */
-        ret_val = process_options(p->option_rb);
-        R_FALSE_RET_LOG(ret_val == RETURN_SUCCESS, RETURN_FAILURE, "process subcmd [%s] options failed!\n", p->p_subcmd_cb->subcmd);
-        
-        ret_val = p->p_subcmd_cb->handler(p->option_rb);
-        R_FALSE_RET_LOG(ret_val == RETURN_SUCCESS, RETURN_FAILURE, "process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
+        ret_val = process_options(p->p_subcmd_cb->option_cbs, p->option_rb, &user_process_result);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] options failed!\n", p->p_subcmd_cb->subcmd);
+
+        user_process_result = p->p_subcmd_cb->handler(p->option_rb);
+        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
 
         p = p->next;
     }

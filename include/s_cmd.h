@@ -46,8 +46,10 @@ typedef enum TAG_ENUM_ERROR_CODE
     ERROR_CODE_NO_INPUT_FILES,
     ERROR_CODE_UNEXPECTED_INPUT_FILES,
     ERROR_CODE_UNKONWN_OPTION,
+    ERROR_CODE_MISSING_OPTION,
     ERROR_CODE_MISSING_ARGS,
     ERROR_CODE_MULTIPLE_ARGS,
+    ERROR_CODE_INVALID_ARGS, 
     ERROR_CODE_FILE_NOT_EXIST,
     ERROR_CODE_REPETITIVE_OPTION,
     ERROR_CODE_MAX,
@@ -67,11 +69,6 @@ ENUM_RETURN register_introduction(const char *introduction);
 ENUM_RETURN register_usage(const char *usage);
 
 const char *get_bin_name(void);
-const char *get_introduction(void);
-const char *get_usage(void);
-
-int get_argv_indicator(void);
-void set_argv_indicator(int new_value);
 
 const char *get_input_file_of_subcmd(const char *subcmd_name);
 
@@ -87,7 +84,11 @@ ENUM_RETURN register_option(
     ENUM_OPTION_TYPE option_type,
     ENUM_ARG_TYPE arg_type,
     FUNC_OPTION_PROC handler, 
+    ENUM_BOOLEAN finish_handle,
     const char* help_info);
+
+const char* get_option_first_arg_value(STRU_OPTION_RUN_BLOCK *p, const char *option_name);
+STRU_ARG * get_option_arg_list(STRU_OPTION_RUN_BLOCK *p, const char *option_name);
 
 ENUM_RETURN process(int argc, char **argv);
 __END_C_DECLS

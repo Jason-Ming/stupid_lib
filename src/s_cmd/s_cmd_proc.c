@@ -5,6 +5,8 @@
 
 #include "s_log.h"
 #include "s_cmd.h"
+
+#include "s_cmd_proc.h"
 #include "s_option.h"
 #include "s_error.h"
 #include "s_input_file.h"
@@ -73,10 +75,8 @@ ENUM_RETURN register_usage(const char *usage)
 PRIVATE ENUM_RETURN register_default_data(void)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    ret_val = register_subcmd_help();
+    ret_val = register_default_subcmd();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-    debug_print_subcmd_cb_list();
     
     return RETURN_SUCCESS;
 }
@@ -99,13 +99,31 @@ PRIVATE ENUM_RETURN prepare(const char * bin_name)
 PRIVATE ENUM_RETURN process_do(void)
 {
     ENUM_RETURN ret_val;
-    
-    ret_val = process_subcmd();
-    R_FALSE_LOG(ret_val == RETURN_SUCCESS, "process_subcmd failed!");
 
+    /* do noting when there is any error */
+    R_FALSE_RET_LOG(BOOLEAN_FALSE == is_current_error_exist(), RETURN_SUCCESS, "");
+    
+    ret_val = process_subcmds();
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN process_errors(void)
+{
     if(is_current_error_exist() == BOOLEAN_TRUE)
     {
         display_error_info();
+        const char *subcmd = get_current_subcmd_name();
+        if(subcmd != NULL)
+        {
+            display_subcmd_help_info(subcmd);
+        }
+        else
+        {
+            display_all_subcmd_help_info();
+        }
+        
         return RETURN_FAILURE;
     }
 
@@ -117,13 +135,13 @@ PRIVATE ENUM_RETURN parse_args_do(int argc, char **argv)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     
     ret_val = parse_subcmds(argc, argv);
-    R_FALSE_RET(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     ret_val = parse_input_files(argc, argv);
-    R_FALSE_RET(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = parse_options(argc, argv);
-    R_FALSE_RET(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;
 }
@@ -136,13 +154,7 @@ PRIVATE ENUM_RETURN parse_args(int argc, char **argv)
     set_argv_indicator(1);
     
     ret_val = parse_args_do(argc, argv);
-    R_FALSE_LOG(ret_val == RETURN_SUCCESS, "parse_args_do failed!");
-    
-    if(is_current_error_exist() == BOOLEAN_TRUE)
-    {
-        display_error_info();
-        return RETURN_FAILURE;
-    }
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;
 }
@@ -157,12 +169,11 @@ ENUM_RETURN process(int argc, char **argv)
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = parse_args(argc, argv);
-    R_FALSE_RET_LOG(ret_val == RETURN_SUCCESS, RETURN_FAILURE, "parse_args failed!");
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = process_do();
-    R_FALSE_RET_LOG(ret_val == RETURN_SUCCESS, RETURN_FAILURE, "process_do failed!");
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
-    return RETURN_SUCCESS;
-    
+    return process_errors();    
 }
 

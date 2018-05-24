@@ -4,6 +4,8 @@
 
 #include "s_log.h"
 #include "s_cmd.h"
+#include "s_cmd_proc.h"
+
 #include "s_error.h"
 #include "s_subcmd.h"
 #include "s_input_file.h"
@@ -27,7 +29,7 @@ PRIVATE ENUM_RETURN add_input_file(const char *file)
     return RETURN_SUCCESS;
 }
 
-int get_input_file_num(void)
+PRIVATE int get_input_file_num(void)
 {
     return num_of_input_files;
 }
@@ -44,6 +46,11 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
 {
     int i = get_argv_indicator();
     ENUM_RETURN ret_val = RETURN_SUCCESS;
+
+    /* do noting when there is any error */
+    R_FALSE_RET_LOG(BOOLEAN_FALSE == is_current_error_exist(), RETURN_SUCCESS,"");
+
+    R_LOG("i = %d, argv = %s", i, argv[i]);
     
     while(i < argc)
     {
