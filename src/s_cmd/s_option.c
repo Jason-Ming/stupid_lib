@@ -138,6 +138,27 @@ PRIVATE ENUM_BOOLEAN is_arg_type_valid(ENUM_ARG_TYPE type)
     return (0 <= type && type < ARG_TYPE_MAX)?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 
+PRIVATE STRU_OPTION_CONTROL_BLOCK *get_option_cb_by_name(const char* subcmd_name, const char* option_name)
+{
+    STRU_OPTION_CONTROL_BLOCK *p = get_option_cb_list_head(subcmd_name);
+
+    while(p != NULL)
+    {
+        if(strcmp(option_name, p->option) == 0)
+        {
+            return p;
+        }
+        p = p->next;
+    }
+
+    return NULL;
+}
+
+PRIVATE ENUM_BOOLEAN is_option_registered(const char* subcmd_name, const char* option_name)
+{
+    return get_option_cb_by_name(subcmd_name, option_name) == NULL?BOOLEAN_FALSE:BOOLEAN_TRUE;
+}
+
 ENUM_RETURN register_option(
     const char* subcmd_name,
     const char* option_name,
@@ -156,6 +177,8 @@ ENUM_RETURN register_option(
     R_ASSERT_LOG(finish_handle == BOOLEAN_FALSE || finish_handle == BOOLEAN_TRUE, RETURN_FAILURE, "finish_handle: %d", finish_handle);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
+    R_ASSERT(is_option_registered(subcmd_name, option_name) == BOOLEAN_FALSE, RETURN_FAILURE);
+    
     STRU_OPTION_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_option_cb(subcmd_name, 
         option_name, 
@@ -173,22 +196,6 @@ ENUM_RETURN register_option(
     debug_print_option_cb(p_new);
 
     return RETURN_SUCCESS;
-}
-
-PRIVATE STRU_OPTION_CONTROL_BLOCK *get_option_cb_by_name(const char* subcmd_name, const char* option_name)
-{
-    STRU_OPTION_CONTROL_BLOCK *p = get_option_cb_list_head(subcmd_name);
-
-    while(p != NULL)
-    {
-        if(strcmp(option_name, p->option) == 0)
-        {
-            return p;
-        }
-        p = p->next;
-    }
-
-    return NULL;
 }
 
 PRIVATE ENUM_RETURN get_a_new_option_rb_do(STRU_OPTION_RUN_BLOCK **pp_new)

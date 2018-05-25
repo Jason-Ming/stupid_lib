@@ -198,6 +198,8 @@ ENUM_RETURN register_subcmd(
     R_ASSERT(handler != NULL, RETURN_FAILURE);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
+    R_ASSERT(is_subcmd_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
+    
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_subcmd_cb(subcmd_name, need_input_file, handler, help_info);
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
