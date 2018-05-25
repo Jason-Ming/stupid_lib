@@ -228,6 +228,8 @@ PRIVATE STRU_OPTION_RUN_BLOCK *get_a_new_option_rb(void)
 
 PRIVATE ENUM_RETURN add_arg_to_option_rb(STRU_OPTION_RUN_BLOCK *p, const char *value)
 {
+    R_ASSERT(value != NULL, RETURN_FAILURE);
+    
     STRU_ARG* temp_arg = (STRU_ARG*)malloc(sizeof(STRU_ARG));
     R_ASSERT(temp_arg != NULL, RETURN_FAILURE);
 
@@ -375,9 +377,11 @@ ENUM_RETURN parse_options(int argc, char **argv)
 
         if(p_rb->arg == NULL)
         {
+            ret_val = add_arg_to_option_rb(p_rb, "invalid arg");
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            
             ret_val = add_current_system_error(ERROR_CODE_MISSING_ARGS, p_cb->option);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            break;
         }
 
         ret_val = add_a_new_option_rb_to_subcmd_rb(p_rb);
@@ -413,11 +417,35 @@ ENUM_RETURN process_options(STRU_OPTION_CONTROL_BLOCK *p_option_cb, STRU_OPTION_
         R_FALSE_RET_LOG(*user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "option [%s] process failed!\n", p_option_cb->option);
 
         /* 成功处理一个option之后，判断是否停止处理 */
-        R_FALSE_RET_LOG(p_option_cb->finish_handle == BOOLEAN_FALSE, RETURN_SUCCESS, "option [%s] will return!", p_option_cb->option);
+        R_FALSE_DO_LOG(p_option_cb->finish_handle == BOOLEAN_FALSE, p_option_cb = p_option_cb->next;break, "option [%s] will return!", p_option_cb->option);
 
         p_option_cb = p_option_cb->next;
     }
 
+    char string_buf[256] = "These options are ignored:";
+    int buffer_size = sizeof(string_buf);
+    int ignored_option_num = 0;
+    while(p_option_cb != NULL)
+    {
+        /* 当前option没有输入 */
+        STRU_ARG *args = get_option_arg_list(p_option_rb, p_option_cb->option);
+        if(args != NULL)
+        {
+            R_ASSERT(buffer_size - strlen(string_buf - 1) > strlen(p_option_cb->option) + 1, RETURN_FAILURE);
+            strcat(string_buf, " ");
+            strcat(string_buf, p_option_cb->option);
+            R_LOG("option [%s] is ignored", p_option_cb->option);
+            ignored_option_num++;
+        }
+        
+        p_option_cb = p_option_cb->next;
+    }
+
+    if(ignored_option_num > 0)
+    {
+        printf("%s\n", string_buf);
+    }
+    
     return RETURN_SUCCESS;
 }
 

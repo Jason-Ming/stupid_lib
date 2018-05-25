@@ -33,7 +33,7 @@ char* log_getfn(void);
 
 //不能用编译时间，蠢货!
 #define R_LOG(fmt, args...)\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             ##args);\
@@ -42,7 +42,7 @@ char* log_getfn(void);
 #define R_FALSE_LOG(condition, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "FALSE("#condition")!, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             ##args);\
@@ -51,7 +51,7 @@ char* log_getfn(void);
 #define R_FALSE_DO_LOG(condition, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "FALSE("#condition")!, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             ##args);\
@@ -80,7 +80,7 @@ char* log_getfn(void);
 #define R_FALSE_RET_LOG(condition, value, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value, ##args);\
@@ -90,7 +90,7 @@ char* log_getfn(void);
 #define R_FALSE_RET_DO_LOG(condition, value, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value, ##args);\
@@ -101,7 +101,7 @@ char* log_getfn(void);
 #define V_ASSERT(condition)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "ASSERT("#condition")!\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__);\
         return;\
@@ -110,7 +110,7 @@ char* log_getfn(void);
 #define R_ASSERT(condition, value)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value);\
@@ -120,7 +120,7 @@ char* log_getfn(void);
 #define R_ASSERT_DO(condition, value, action)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value);\
@@ -131,7 +131,7 @@ char* log_getfn(void);
 #define R_ASSERT_LOG(condition, value, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value, ##args);\
@@ -141,7 +141,7 @@ char* log_getfn(void);
 #define R_ASSERT_DO_LOG(condition, value, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]"\
+        LOG_PRINT("[%s] [file: %s, line: %u] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
             (LONG)value, ##args);\
