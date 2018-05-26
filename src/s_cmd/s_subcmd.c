@@ -17,7 +17,6 @@
 typedef struct TAG_STRU_SUBCMD_CONTROL_BLOCK
 {
     char* subcmd;
-    ENUM_BOOLEAN need_input_file;
     FUNC_SUBCMD_PROC handler;
     struct TAG_STRU_OPTION_CONTROL_BLOCK *option_cbs;
     char* help_info;
@@ -79,9 +78,8 @@ STRU_OPTION_CONTROL_BLOCK *get_option_cb_list_head(const char *subcmd_name)
 
 PRIVATE void debug_print_subcmd_cb(STRU_SUBCMD_CONTROL_BLOCK *p)
 {
-    R_LOG("%s = %s, %s = %d, %s = %p, %s = %s\n", 
+    R_LOG("%s = %s, %s = %p, %s = %s\n", 
         "subcmd", p->subcmd,
-        "need_input_file", p->need_input_file,
         "handler", p->handler,
         "help_info", p->help_info);
 
@@ -119,7 +117,6 @@ PRIVATE ENUM_RETURN add_a_new_subcmd_cb_to_subcmd_cb_list(STRU_SUBCMD_CONTROL_BL
 
 PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new, 
     const char* subcmd_name, 
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
@@ -129,7 +126,6 @@ PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new,
     R_ASSERT(*pp_new != NULL, RETURN_FAILURE);
 
     (*pp_new)->subcmd = NULL;
-    (*pp_new)->need_input_file = need_input_file;
     (*pp_new)->option_cbs = NULL;
     (*pp_new)->handler = handler;
     (*pp_new)->help_info = NULL;
@@ -160,13 +156,12 @@ PRIVATE void get_a_new_subcmd_cb_do_error(STRU_SUBCMD_CONTROL_BLOCK *p_new)
 
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *get_a_new_subcmd_cb(
     const char* subcmd_name, 
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
     ENUM_RETURN ret_val;
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, need_input_file, handler, help_info);
+    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, handler, help_info);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, NULL, get_a_new_subcmd_cb_do_error(p_new));
 
     return p_new;
@@ -189,7 +184,6 @@ ENUM_BOOLEAN is_subcmd_name_valid(const char* subcmd_name)
 
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
@@ -201,7 +195,7 @@ ENUM_RETURN register_subcmd(
     R_ASSERT(is_subcmd_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
     
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    p_new = get_a_new_subcmd_cb(subcmd_name, need_input_file, handler, help_info);
+    p_new = get_a_new_subcmd_cb(subcmd_name, handler, help_info);
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val;
@@ -247,14 +241,6 @@ ENUM_BOOLEAN is_subcmd_registered(const char *subcmd_name)
     R_FALSE_RET_LOG(subcmd_name != NULL, BOOLEAN_FALSE, "subcmd_name: %s", subcmd_name);
     
     return (get_subcmd_cb_by_name(subcmd_name) != NULL)? BOOLEAN_TRUE:BOOLEAN_FALSE;
-}
-
-ENUM_BOOLEAN is_subcmd_need_input_files(const char *subcmd_name)
-{
-    STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
-    R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_FALSE);
-
-    return p_subcmd_cb->need_input_file;
 }
 
 PRIVATE STRU_SUBCMD_RUN_BLOCK *get_subcmd_rb_list_head(void)
@@ -447,7 +433,7 @@ void display_subcmd_help_info(const char *subcmd_name)
     p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
     V_ASSERT(p_subcmd_cb != NULL);
 
-    printf("usage: %s %s [option <arg>]\n", get_bin_name(), subcmd_name);
+    printf("usage: %s %s [<option> [<arg>]] [<input files>]\n", get_bin_name(), subcmd_name);
 
     display_option_help_info(p_subcmd_cb->option_cbs);
 }
@@ -457,7 +443,7 @@ void display_all_subcmd_help_info(void)
     STRU_SUBCMD_CONTROL_BLOCK *p = get_subcmd_cb_list_head();
     printf("usage: %s %s\n", get_bin_name(), get_usage());
 
-    printf("\nuse %s <subcmd> -h to see help information about a specific subcommand\n", get_bin_name());
+    printf("\nuse %s <sub command> -h to see help information about a specific subcommand\n", get_bin_name());
     
     printf("\nThese are common sub commands used in various situations:\n\n");
     

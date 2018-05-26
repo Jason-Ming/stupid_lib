@@ -75,6 +75,9 @@ ENUM_RETURN register_usage(const char *usage)
 PRIVATE ENUM_RETURN register_default_data(void)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
+    ret_val = register_usage("<sub command> [<option> [<arg>]] [<input file>] ");
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
     ret_val = register_default_subcmd();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
@@ -136,11 +139,11 @@ PRIVATE ENUM_RETURN parse_args_do(int argc, char **argv)
     
     ret_val = parse_subcmds(argc, argv);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    
-    ret_val = parse_input_files(argc, argv);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = parse_options(argc, argv);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    ret_val = parse_input_files(argc, argv);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;

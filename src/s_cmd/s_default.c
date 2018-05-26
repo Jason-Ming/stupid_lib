@@ -38,8 +38,10 @@ ENUM_RETURN register_default_option(const char *subcmd_name)
 {
     R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
     
-    ENUM_RETURN ret_val = register_option(subcmd_name, 
-        "-h", 
+    ENUM_RETURN ret_val = register_option(
+        subcmd_name, 
+        "-h",
+        BOOLEAN_FALSE,
         OPTION_TYPE_OPTIONAL,
         ARG_TYPE_SWITCH,
         default_option_h_proc_handler,
@@ -52,7 +54,10 @@ ENUM_RETURN register_default_option(const char *subcmd_name)
 
 ENUM_RETURN register_default_subcmd(void)
 {
-    ENUM_RETURN ret_val = register_subcmd("help", BOOLEAN_FALSE, subcmd_help_proc, "display help information");
+    ENUM_RETURN ret_val = register_subcmd(
+        "help", 
+        subcmd_help_proc, 
+        "display help information");
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;

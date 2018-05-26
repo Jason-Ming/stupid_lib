@@ -9,6 +9,7 @@ typedef struct TAG_STRU_OPTION_CONTROL_BLOCK
 {
     char *subcmd;
     char* option;
+    ENUM_BOOLEAN need_input_file;
     ENUM_OPTION_TYPE option_type;
     ENUM_ARG_TYPE arg_type;
     FUNC_OPTION_PROC handler;

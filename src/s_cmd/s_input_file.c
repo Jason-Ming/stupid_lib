@@ -29,7 +29,7 @@ PRIVATE ENUM_RETURN add_input_file(const char *file)
     return RETURN_SUCCESS;
 }
 
-PRIVATE int get_input_file_num(void)
+int get_input_file_num(void)
 {
     return num_of_input_files;
 }
@@ -63,19 +63,6 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
         ret_val = add_input_file(argv[i]);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         i++;
-    }
-    
-    const char *subcmd = get_current_subcmd_name();
-    if(is_subcmd_need_input_files(subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
-    {
-        ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, NULL);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    }
-
-    if(is_subcmd_need_input_files(subcmd) == BOOLEAN_FALSE && get_input_file_num() > 0)
-    {
-        ret_val = add_current_system_error(ERROR_CODE_UNEXPECTED_INPUT_FILES, NULL);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
     set_argv_indicator(i);

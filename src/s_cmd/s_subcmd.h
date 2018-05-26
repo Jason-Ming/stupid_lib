@@ -11,7 +11,6 @@ void display_subcmd_help_info(const char *subcmd_name);
 void display_all_subcmd_help_info(void);
 
 ENUM_BOOLEAN is_subcmd_registered(const char *subcmd_name);
-ENUM_BOOLEAN is_subcmd_need_input_files(const char *subcmd_name);
 
 const char *get_current_subcmd_name(void);
 
