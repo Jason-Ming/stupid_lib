@@ -172,3 +172,87 @@ ENUM_RETURN reverse(char *pstr_buf)
     return RETURN_SUCCESS;
 }
 
+ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, int fold_num)
+{
+    R_ASSERT(pstr_buf_source != NULL, RETURN_FAILURE);
+    R_ASSERT(pstr_buf_temp != NULL, RETURN_FAILURE);
+    R_ASSERT(fold_num > 0, RETURN_FAILURE);
+    
+    int len = strlen(pstr_buf_source);
+    //if(len >= fold_num, RETURN_SUCCESS);
+
+    memset(pstr_buf_temp, '\0', buf_temp_len);
+
+    printf("source: %s\nsource len: %d\ndest: %s\ndest len: %d\n",
+        pstr_buf_source, len, pstr_buf_temp, buf_temp_len);
+    
+    int pos = 0;
+    int pos_blank = -1;
+    int fold_len = 0;
+    int start_pos = pos;
+    
+    while(pos < len)
+    {
+        if(fold_len >= fold_num)
+        {
+            if(pos_blank != -1)
+            {
+                pstr_buf_source[pos_blank] = '\0';
+                
+                R_ASSERT_LOG(
+                    buf_temp_len - strlen(pstr_buf_temp) >= pos - start_pos + 1, 
+                    RETURN_FAILURE,
+                    "buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+                    "pos = %d, start_pos = %d",
+                    buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+
+                printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+                    "pos = %d, start_pos = %d\n",
+                    buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+                
+                strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
+
+                R_ASSERT_LOG(
+                    buf_temp_len - strlen(pstr_buf_temp) >= 2, 
+                    RETURN_FAILURE,
+                    "buf_temp_len = %d, strlen(pstr_buf_temp) = %d\n",
+                    buf_temp_len, strlen(pstr_buf_temp));
+
+                strcat(pstr_buf_temp, "\n");
+                
+                pos = pos_blank + 1;
+                fold_len = 0;
+                pos_blank = -1;
+                start_pos = pos;
+                continue;
+            }
+            else
+            {
+                
+            }
+        }
+        
+        if(pstr_buf_source[pos] == ' ' || pstr_buf_source[pos] == '\n')
+        {
+            pos_blank = pos;
+        }
+
+        pos++;
+        fold_len++;
+    }
+
+    R_ASSERT_LOG(
+        buf_temp_len - strlen(pstr_buf_temp) >= pos - start_pos + 1, 
+        RETURN_FAILURE,
+        "buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+        "pos = %d, start_pos = %d",
+        buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+
+    printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+        "pos = %d, start_pos = %d\n",
+        buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+    strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
+
+    return RETURN_SUCCESS;
+}
+

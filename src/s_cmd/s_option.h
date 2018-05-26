@@ -21,6 +21,7 @@ typedef struct TAG_STRU_OPTION_CONTROL_BLOCK
 __BEGIN_C_DECLS
 void debug_print_option_cb_list(STRU_OPTION_CONTROL_BLOCK *p);
 void display_option_help_info(STRU_OPTION_CONTROL_BLOCK *p_option_cb);
+ENUM_BOOLEAN is_option_h_processed(void);
 
 ENUM_RETURN parse_options(int argc, char **argv);
 ENUM_RETURN process_options(STRU_OPTION_CONTROL_BLOCK *p_option_cb, 

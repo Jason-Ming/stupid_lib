@@ -93,5 +93,14 @@ STRU_ARG * get_option_arg_list(STRU_OPTION_RUN_BLOCK *p, const char *option_name
 ENUM_RETURN process(int argc, char **argv);
 __END_C_DECLS
 
+#define FALSE_ADD_ERROR_DO(condition, error_code, additional_info, action)\
+    if(!(condition))\
+    {\
+        ENUM_RETURN ret_val = add_current_user_error(\
+            error_code, additional_info);\
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);\
+        action;\
+    }
+
 #endif
 

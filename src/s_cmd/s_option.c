@@ -313,6 +313,14 @@ STRU_ARG * get_option_arg_list(STRU_OPTION_RUN_BLOCK *p, const char *option_name
     return NULL;
 }
 
+ENUM_BOOLEAN is_option_h_processed(void)
+{
+    STRU_OPTION_RUN_BLOCK *p_option_rb = get_option_rb_by_name(get_current_subcmd_name(), "-h");
+    R_FALSE_RET(p_option_rb == NULL, BOOLEAN_TRUE);
+
+    return BOOLEAN_FALSE;
+}
+
 void display_option_help_info(STRU_OPTION_CONTROL_BLOCK *p_option_cb)
 {
     char temp_buf[64] = {'\0'};

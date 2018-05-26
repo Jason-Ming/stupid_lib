@@ -531,7 +531,8 @@ ENUM_RETURN process_subcmds(void)
         ret_val = process_options(p->p_subcmd_cb->option_cbs, p->option_rb, &user_process_result);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] options failed!\n", p->p_subcmd_cb->subcmd);
-
+        
+        R_FALSE_DO_LOG(is_option_h_processed() == BOOLEAN_FALSE, p = p->next; continue, "process subcmd [%s] option -h is processed, coninue!\n", p->p_subcmd_cb->subcmd);
         user_process_result = p->p_subcmd_cb->handler(p->option_rb);
         R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
 
