@@ -12,7 +12,6 @@
 
 #include "s_subcmd.h"
 
-#define FREE(p) do{ if(p != NULL){free(p);}}while(0);
 
 typedef struct TAG_STRU_SUBCMD_CONTROL_BLOCK
 {
@@ -530,9 +529,25 @@ ENUM_RETURN process_subcmds(void)
         /* 处理options失败时，直接停止处理 */
         ret_val = process_options(p->p_subcmd_cb->option_cbs, p->option_rb, &user_process_result);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] options failed!\n", p->p_subcmd_cb->subcmd);
+        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, 
+            RETURN_SUCCESS, 
+            "process subcmd [%s] options failed!\n", 
+            p->p_subcmd_cb->subcmd);
         
-        R_FALSE_DO_LOG(is_option_h_processed() == BOOLEAN_FALSE, p = p->next; continue, "process subcmd [%s] option -h is processed, coninue!\n", p->p_subcmd_cb->subcmd);
+        R_FALSE_DO_LOG(is_option_h_processed() == BOOLEAN_FALSE, 
+            p = p->next; continue, 
+            "process subcmd [%s] option -h is processed, coninue!\n", 
+            p->p_subcmd_cb->subcmd);
+
+        //没有处理任何的option，需要检查是否有
+        if(p->option_rb == NULL && get_input_file_num() == 0)
+        {
+            ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, p->p_subcmd_cb->subcmd);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            p = p->next;
+            continue;
+        }
+        
         user_process_result = p->p_subcmd_cb->handler(p->option_rb);
         R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
 

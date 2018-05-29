@@ -28,6 +28,7 @@ PRIVATE STRU_ERROR_INFO system_error_infos[] =
     {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to", BOOLEAN_TRUE},
     {ERROR_CODE_INVALID_ARGS, "Invalid argument", BOOLEAN_TRUE},
     {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory", BOOLEAN_TRUE},
+    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File can not be created", BOOLEAN_TRUE},
     {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option", BOOLEAN_TRUE},
 };
 

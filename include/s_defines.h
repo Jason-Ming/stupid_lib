@@ -16,7 +16,9 @@ typedef enum TAG_ENUM_BOOLEAN
     BOOLEAN_TRUE = 1,
     BOOLEAN_FALSE = 0,
 }ENUM_BOOLEAN;
-
+    
+#define FREE(p) do{ if(p != NULL){free(p);}}while(0);
+#define MIN(x, y) ((x) < (y)? (x):(y))
 #define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
 #define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
 

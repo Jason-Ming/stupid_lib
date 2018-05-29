@@ -13,8 +13,6 @@
 
 #include "s_option.h"
 
-#define FREE(p) do{ if(p != NULL){free(p);}}while(0);
-
 PRIVATE void debug_print_option_cb(STRU_OPTION_CONTROL_BLOCK *p)
 {
     R_LOG("%s = %s, %s = %s, %s = %d, %s = %d, %s = %d, %s = %p, %s = %s\n", 
@@ -513,7 +511,7 @@ ENUM_RETURN process_options(
 
         p_option_cb = p_option_cb->next;
     }
-
+    
     display_ignored_options(p_option_cb, p_option_rb);
     
     return RETURN_SUCCESS;
