@@ -42,6 +42,8 @@ ENUM_RETURN stack_delete(STACK *p_stack)
 ENUM_RETURN stack_push(STACK *p_stack, void * p_data, unsigned int data_size)
 {
     R_ASSERT(p_stack != NULL, RETURN_FAILURE);
+    R_ASSERT(p_data != NULL, RETURN_FAILURE);
+    R_ASSERT(data_size != 0, RETURN_FAILURE);
 
     void * p_data_temp = malloc(data_size);
     R_ASSERT(p_data_temp != NULL, RETURN_FAILURE);
