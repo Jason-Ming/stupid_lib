@@ -244,11 +244,11 @@ ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, i
     R_ASSERT_LOG(
         buf_temp_len - strlen(pstr_buf_temp) >= pos - start_pos + 1, 
         RETURN_FAILURE,
-        "buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+        "buf_temp_len = %d, strlen(pstr_buf_temp) = %ul, "
         "pos = %d, start_pos = %d",
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
 
-    printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %d, "
+    printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %ul, "
         "pos = %d, start_pos = %d\n",
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
     strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
