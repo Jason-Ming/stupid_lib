@@ -6,10 +6,10 @@
 
 #define SET_VAR_MEM_LONG_DOUBLE(dest, value)\
     {\
-        long long int x = CONC(value, _L32);\
-        memcpy(((void*)&(dest)), (void*)&(x), 4);\
+        long long int x = CONC(value, _L64);\
+        memcpy(((void*)&(dest)), (void*)&(x), 8);\
         x = CONC(value, _U64);\
-        memcpy(((void*)&(dest)) + 4, (void*)&(x), 8);\
+        memcpy(((void*)&(dest)) + 8, (void*)&(x), sizeof(dest) - 8);\
     }
 
 struct T {
@@ -76,10 +76,10 @@ void print_types(void)
     printf("Value of float zero minus                          %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
     SET_VAR_MEM(f, FLOAT_ZERO_PLUS);
     printf("Value of float zero plus                           %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
-    SET_VAR_MEM(f, FLOAT_ZERO_OVERFLOW_MINUS);
-    printf("Value of float overflow minus                      %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
-    SET_VAR_MEM(f, FLOAT_ZERO_OVERFLOW_PLUS);
-    printf("Value of float overflow plus                       %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    SET_VAR_MEM(f, FLOAT_INFINITY_MINUS);
+    printf("Value of float infinity minus                      %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    SET_VAR_MEM(f, FLOAT_INFINITY_PLUS);
+    printf("Value of float infinity plus                       %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
     SET_VAR_MEM(f, FLOAT_NAN_MINUS);
     printf("Value of float NaN minus                           %24e    %24lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
     SET_VAR_MEM(f, FLOAT_NAN_PLUS);
@@ -113,12 +113,12 @@ void print_types(void)
     printf("Value of double zero plus                          %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
     //DISPLAY_VAR_MEM(d);
 
-    SET_VAR_MEM(d, DOUBLE_ZERO_OVERFLOW_MINUS);
-    printf("Value of double overflow minus                     %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    SET_VAR_MEM(d, DOUBLE_INFINITY_MINUS);
+    printf("Value of double infinity minus                     %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
     //DISPLAY_VAR_MEM(d);
 
-    SET_VAR_MEM(d, DOUBLE_ZERO_OVERFLOW_PLUS);
-    printf("Value of double overflow plus                      %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    SET_VAR_MEM(d, DOUBLE_INFINITY_PLUS);
+    printf("Value of double infinity plus                      %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
     //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_NAN_MINUS);
@@ -157,12 +157,12 @@ void print_types(void)
     printf("Value of long double zero plus                     %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
     //DISPLAY_VAR_MEM(ld);
 
-    SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_ZERO_OVERFLOW_MINUS);
-    printf("Value of long double overflow minus                %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
+    SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_INFINITY_MINUS);
+    printf("Value of long double infinity minus                %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
     //DISPLAY_VAR_MEM(ld);
 
-    SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_ZERO_OVERFLOW_PLUS);
-    printf("Value of long double overflow plus                 %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
+    SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_INFINITY_PLUS);
+    printf("Value of long double infinity plus                 %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
     //DISPLAY_VAR_MEM(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_NAN_MINUS);
