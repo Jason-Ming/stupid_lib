@@ -26,10 +26,10 @@ void print_types(void)
     struct T t = {0x12,0x3456789a,0xbc};
     struct E e;
     printf("Size of struct T               sizeof(struct T)    %24zd\n", sizeof(t));
-    DISPLAY_VAR_MEM(t);
+    DISPLAY_VAR_MEM_MULTI_LINES(t);
 
     printf("Size of struct E               sizeof(struct E)    %24zd\n", sizeof(e));
-    DISPLAY_VAR_MEM(e);
+    DISPLAY_VAR_MEM_MULTI_LINES(e);
     
     printf("Size of char                   sizeof(char)        %24zd\n", sizeof(char));
     printf("Value of char                  CHAR_BIT            %24d    %24X\n", CHAR_BIT, CHAR_BIT);
@@ -91,87 +91,77 @@ void print_types(void)
     
     SET_VAR_MEM(d, DOUBLE_MIN_MINUS);
     printf("Value of double min minus                          %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d)); 
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_MAX_MINUS);
     printf("Value of double max minus                          %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_MIN_PLUS);
     printf("Value of double min plus                           %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d)); 
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_MAX_PLUS);
     printf("Value of double max plus                           %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_ZERO_MINUS);
     printf("Value of double zero minus                         %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_ZERO_PLUS);
     printf("Value of double zero plus                          %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_INFINITY_MINUS);
     printf("Value of double infinity minus                     %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_INFINITY_PLUS);
     printf("Value of double infinity plus                      %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_NAN_MINUS);
     printf("Value of double NaN minus                          %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     SET_VAR_MEM(d, DOUBLE_NAN_PLUS);
     printf("Value of double NaN plus                           %24e    %24llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
-    //DISPLAY_VAR_MEM(d);
 
     long double ld;
 
     printf("Size of long double            sizeof(long double) %24zd\n", sizeof(long double));
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_MIN_MINUS);
-    printf("Value of long double min minus                     %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld)); 
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double min minus                     %24Le    ", ld); 
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_MAX_MINUS);
-    printf("Value of long double max minus                     %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double max minus                     %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_MIN_PLUS);
-    printf("Value of long double min plus                      %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld)); 
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double min plus                      %24Le    ", ld);; 
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_MAX_PLUS);
-    printf("Value of long double max plus                      %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double max plus                      %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_ZERO_MINUS);
-    printf("Value of long double zero minus                    %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double zero minus                    %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_ZERO_PLUS);
-    printf("Value of long double zero plus                     %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double zero plus                     %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_INFINITY_MINUS);
-    printf("Value of long double infinity minus                %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double infinity minus                %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_INFINITY_PLUS);
-    printf("Value of long double infinity plus                 %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double infinity plus                 %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_NAN_MINUS);
-    printf("Value of long double NaN minus                     %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double NaN minus                     %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
 
     SET_VAR_MEM_LONG_DOUBLE(ld, LONG_DOUBLE_NAN_PLUS);
-    printf("Value of long double NaN plus                      %24Le    %08X%016llX\n", ld, VALUE_UINT_OF_ADDR((void*)&ld + 8), VALUE_LONG_LONG_UINT_OF_ADDR(&ld));
-    //DISPLAY_VAR_MEM(ld);
+    printf("Value of long double NaN plus                      %24Le    ", ld);;
+    DISPLAY_VAR_MEM_ONE_LINE(ld);
     
     printf("Size of void                   sizeof(void)        %24zd    %18zX\n", sizeof(void), sizeof(void));         //x86 1   x64 1   
     printf("Size of void*                  sizeof(void*)       %24zd    %18zX\n", sizeof(void*), sizeof(void*));        //x86 4   x64 8   

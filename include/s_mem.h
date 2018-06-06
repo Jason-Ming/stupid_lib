@@ -9,9 +9,17 @@
 
 __BEGIN_C_DECLS
 void display_mem(void *addr, size_t size);
+void display_var(void *addr, size_t size);
+
 __END_C_DECLS
 
-#define DISPLAY_VAR_MEM(var)\
+#define DISPLAY_VAR_MEM_ONE_LINE(var)\
+    do\
+    {\
+        display_var((void *)&var, sizeof(var));\
+    }while(0)
+
+#define DISPLAY_VAR_MEM_MULTI_LINES(var)\
     do\
     {\
         printf("    "#var":\n");\

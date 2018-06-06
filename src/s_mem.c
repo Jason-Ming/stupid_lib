@@ -21,3 +21,13 @@ void display_mem(void *addr, size_t size)
         printf("        %p: %02x\n", (char*)addr+i, (char)*((char*)addr+i));
     }
 }
+
+void display_var(void *addr, size_t size)
+{
+    for(size_t i = 0; i < size; i++)
+    {
+        int x = ((int)*((char*)addr+ size - i - 1))&0x000000FF;
+        printf("%02X", x);
+    }
+    printf("\n");
+}
