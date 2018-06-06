@@ -4,11 +4,13 @@
 #include <ctype.h>
 
 #include "s_log.h"
+#include "s_text.h"
 #include "s_cmd_proc.h"
 #include "s_option.h"
 #include "s_input_file.h"
 #include "s_error.h"
 #include "s_default.h"
+
 
 #include "s_subcmd.h"
 

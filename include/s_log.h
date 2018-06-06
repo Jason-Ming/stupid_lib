@@ -5,6 +5,7 @@
 
 #include "s_clinkage.h"
 #include "s_time.h"
+#include "s_type.h"
 
 char* log_getfn(void);
 
