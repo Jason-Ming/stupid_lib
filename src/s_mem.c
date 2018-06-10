@@ -14,11 +14,20 @@
 //    }
 //}
 
+
 void display_mem(void *addr, size_t size)
 {
     for(size_t i = 0; i < size; i++)
     {
-        printf("        %p: %02x\n", (char*)addr+i, (char)*((char*)addr+i));
+        int x = ((int)*((char*)addr+ size - i - 1))&0x000000FF;
+        printf("        %p: %02x ", (char*)addr+i, x);
+
+        for(size_t j = 0; j < sizeof(char)*8; j++)
+        {
+            printf("%d", (x&(0x01 << (sizeof(char)*8 - j - 1)))?1:0);
+        }
+
+        printf("\n");
     }
 }
 
@@ -29,5 +38,6 @@ void display_var(void *addr, size_t size)
         int x = ((int)*((char*)addr+ size - i - 1))&0x000000FF;
         printf("%02X", x);
     }
+    
     printf("\n");
 }

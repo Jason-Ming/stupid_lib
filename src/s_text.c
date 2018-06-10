@@ -6,6 +6,7 @@
 #include "s_defines.h"
 #include "s_log.h"
 #include "s_text.h"
+#include "s_mem.h"
 
 #define IN 1 /* inside a word */
 #define OUT 0 /* outside a word */
@@ -126,7 +127,7 @@ int format_words(const char* filename, const char *separator)
 }
 
 /* read a line into line, return length */
-int getline(FILE *fp, char line[], int maxline)
+int get_line(FILE *fp, char line[], int maxline)
 {
     int c;
     int i = 0;
@@ -256,3 +257,83 @@ ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, i
     return RETURN_SUCCESS;
 }
 
+
+unsigned long long htou(const char *str)
+{
+    unsigned long long sum = 0;
+    size_t len = strlen(str);
+
+    if(len > 2)
+    {
+        if(str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+        {
+            str = str + 2;
+            len = len - 2;
+        }
+    }
+
+    if(len > sizeof(long long int)*2)
+    {
+        perror("the string length is too large!\n");
+        return 0;
+    }
+    
+    for(size_t i = 0; i < len; i++)
+    {
+        size_t index =i;
+        char c = str[index];
+        int temp = 0;
+        printf("%c\n", c);
+        /* between 0 ~ 9, a ~ f, A ~ F*/
+        if(c >= '0' && c <= '9')
+        {
+            temp = c - '0';
+        }
+        else if(c >= 'a' && c <= 'f')
+        {
+            temp = c - 'a' + 10;
+        }
+        else if(c >= 'A' && c <= 'F')
+        {
+            temp = c - 'A' + 10;
+        }
+        else
+        {
+            perror("invalid input");
+            return 0;
+        }
+        
+
+        sum = sum * 16 + temp;
+    }
+
+    return sum;
+}
+
+long long htoi(const char *str)
+{
+    unsigned long long temp = htou(str);
+    return VALUE_LONG_LONG_INT_OF_ADDR(&temp);
+}
+
+void squeeze(char s1[], const char s2[])
+{
+    char s[256] = {0};
+    int c;
+    while((c = *s2) != '\0')
+    {
+        s[c] = 1;
+        s2++;
+    }
+    char *p = s1;
+    while((c = *s1) != '\0')
+    {
+        if(s[c] == 0)
+        {
+            *p = *s1;
+            p++;
+        }
+        s1++;
+    }
+    *p = '\0';
+}
