@@ -65,59 +65,89 @@ void print_types(void)
     printf("Size of float                  sizeof(float)       %20zd\n", sizeof(float));
 
     SET_VAR_MEM(f, FLOAT_MIN_MINUS);
-    printf("Value of float min minus                           %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f)); 
+    printf("Value of float min minus                           %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_MAX_MINUS);
-    printf("Value of float max minus                           %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float max minus                           %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_MIN_PLUS);
-    printf("Value of float min plus                            %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f)); 
+    printf("Value of float min plus                            %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_MAX_PLUS);
-    printf("Value of float max plus                            %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float max plus                            %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_ZERO_MINUS);
-    printf("Value of float zero minus                          %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float zero minus                          %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_ZERO_PLUS);
-    printf("Value of float zero plus                           %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float zero plus                           %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_INFINITY_MINUS);
-    printf("Value of float infinity minus                      %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float infinity minus                      %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_INFINITY_PLUS);
-    printf("Value of float infinity plus                       %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float infinity plus                       %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_NAN_MINUS);
-    printf("Value of float NaN minus                           %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float NaN minus                           %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
     SET_VAR_MEM(f, FLOAT_NAN_PLUS);
-    printf("Value of float NaN plus                            %20e    %20lX\n", f, VALUE_LONG_UINT_OF_ADDR(&f));
+    printf("Value of float NaN plus                            %20e    ", f); 
+    DISPLAY_VAR_MEM_ONE_LINE(f);
+    
 
 
     double d;
     printf("Size of double                 sizeof(double)      %20zd\n", sizeof(double)); 
     
     SET_VAR_MEM(d, DOUBLE_MIN_MINUS);
-    printf("Value of double min minus                          %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d)); 
+    printf("Value of double min minus                          %20e    ", d); 
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_MAX_MINUS);
-    printf("Value of double max minus                          %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double max minus                          %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_MIN_PLUS);
-    printf("Value of double min plus                           %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d)); 
+    printf("Value of double min plus                           %20e    ", d); 
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_MAX_PLUS);
-    printf("Value of double max plus                           %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double max plus                           %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_ZERO_MINUS);
-    printf("Value of double zero minus                         %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double zero minus                         %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_ZERO_PLUS);
-    printf("Value of double zero plus                          %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double zero plus                          %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_INFINITY_MINUS);
-    printf("Value of double infinity minus                     %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double infinity minus                     %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_INFINITY_PLUS);
-    printf("Value of double infinity plus                      %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double infinity plus                      %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_NAN_MINUS);
-    printf("Value of double NaN minus                          %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double NaN minus                          %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     SET_VAR_MEM(d, DOUBLE_NAN_PLUS);
-    printf("Value of double NaN plus                           %20e    %20llX\n", d, VALUE_LONG_LONG_UINT_OF_ADDR(&d));
+    printf("Value of double NaN plus                           %20e    ", d);
+    DISPLAY_VAR_MEM_ONE_LINE(d);
 
     long double ld;
 

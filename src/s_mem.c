@@ -37,6 +37,16 @@ void display_var(void *addr, size_t size)
     {
         int x = ((int)*((char*)addr+ size - i - 1))&(~(~0 << 8));
         printf("%02X", x);
+
+    }
+    printf("\n");
+    for(size_t i = 0; i < size; i++)
+    {
+        int x = ((int)*((char*)addr+ size - i - 1))&(~(~0 << 8));
+        for(size_t j = 0; j < sizeof(char)*8; j++)
+        {
+            printf("%d", (x&(0x01 << (sizeof(char)*8 - j - 1)))?1:0);
+        }
     }
     
     printf("\n");
