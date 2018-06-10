@@ -283,7 +283,7 @@ unsigned long long htou(const char *str)
         size_t index =i;
         char c = str[index];
         int temp = 0;
-        printf("%c\n", c);
+
         /* between 0 ~ 9, a ~ f, A ~ F*/
         if(c >= '0' && c <= '9')
         {
