@@ -27,6 +27,7 @@ ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, i
 unsigned long long htou(const char *str);
 long long htoi(const char *str);
 void squeeze(char s1[], const char s2[]);
+char* any(char s1[], const char s2[]);
 
 
 __END_C_DECLS

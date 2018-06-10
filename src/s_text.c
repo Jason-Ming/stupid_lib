@@ -337,3 +337,28 @@ void squeeze(char s1[], const char s2[])
     }
     *p = '\0';
 }
+
+char* any(char s1[], const char s2[])
+{
+    char s[256] = {0};
+    int c;
+    while((c = *s2) != '\0')
+    {
+        s[c] = 1;
+        s2++;
+    }
+    
+    char *p = NULL;
+    while((c = *s1) != '\0')
+    {
+        if(s[c] == 1)
+        {
+            p = s1;
+            break;
+        }
+        s1++;
+    }
+
+    return p;
+}
+
