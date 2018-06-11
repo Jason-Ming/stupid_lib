@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "s_defines.h"
+#include "s_limits.h"
 #include "s_log.h"
 #include "s_draw.h"
 
@@ -135,7 +136,7 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     {
         for(int j = 0; j < table_col; j++)
         {
-            ret_val = set_print_table_value(i, j, PRINT_TYPE_NO, INVALID_INT, NULL);
+            ret_val = set_print_table_value(i, j, PRINT_TYPE_NO, INVALID_I32, NULL);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
     }
@@ -145,7 +146,7 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     {
         ret_val = set_print_table_value(i, 0, PRINT_TYPE_ROW_LABEL, step * (table_row -2 - i), NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        ret_val = set_print_table_value(i, 1, PRINT_TYPE_VERTICAL_LINE, INVALID_INT, NULL);
+        ret_val = set_print_table_value(i, 1, PRINT_TYPE_VERTICAL_LINE, INVALID_I32, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
     
@@ -156,7 +157,7 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
         {
             if( array[j - 2].val > step * (CHART_ROWS - i - 1))
             {
-                ret_val = set_print_table_value(i, j, PRINT_TYPE_YES, INVALID_INT, NULL);
+                ret_val = set_print_table_value(i, j, PRINT_TYPE_YES, INVALID_I32, NULL);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
         }
@@ -165,14 +166,14 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     //初始化行表头
     for(int i = 2; i < table_col; i++)
     {
-        ret_val = set_print_table_value(table_row - 2, i, PRINT_TYPE_HORIZONTAL_LINE, INVALID_INT, NULL);
+        ret_val = set_print_table_value(table_row - 2, i, PRINT_TYPE_HORIZONTAL_LINE, INVALID_I32, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
-        ret_val = set_print_table_value(table_row - 1, i, PRINT_TYPE_COL_LABEL, INVALID_INT, array[i-2].info);
+        ret_val = set_print_table_value(table_row - 1, i, PRINT_TYPE_COL_LABEL, INVALID_I32, array[i-2].info);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
-    ret_val = set_print_table_value(table_row - 2, 1, PRINT_TYPE_COL_LABEL, INVALID_INT, "  +--");
+    ret_val = set_print_table_value(table_row - 2, 1, PRINT_TYPE_COL_LABEL, INVALID_I32, "  +--");
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;

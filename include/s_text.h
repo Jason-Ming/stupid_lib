@@ -17,6 +17,7 @@
 #define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
 
 #define CONC(x, y) x##y
+#define CONC_(x, y) x##_##y
 
 __BEGIN_C_DECLS
 int count_words(const char* filename);

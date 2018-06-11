@@ -2,7 +2,7 @@
 #define __S_MEM_H__
 
 #include <string.h>
-
+#include <endian.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
 
@@ -26,21 +26,87 @@ __END_C_DECLS
         display_mem((void *)&var, sizeof(var));\
     }while(0)
 
-#define  VALUE_CHAR_OF_ADDR( x )  ( *( (char *) (x) ) )
-#define  VALUE_SHORT_OF_ADDR( x )  ( *( (short *) (x) ) )
-#define  VALUE_INT_OF_ADDR( x )  ( *( (int *) (x) ) )
-#define  VALUE_LONG_INT_OF_ADDR( x )  ( *( (long *) (x) ) )
-#define  VALUE_LONG_LONG_INT_OF_ADDR( x )  ( *( (long long *) (x) ) )
-#define  VALUE_UINT_OF_ADDR( x )  ( *( (unsigned int *) (x) ) )
-#define  VALUE_LONG_UINT_OF_ADDR( x )  ( *( (long unsigned *) (x) ) )
-#define  VALUE_LONG_LONG_UINT_OF_ADDR( x )  ( *( (long long unsigned *) (x) ) )
+#define  VALUE_S8_OF_ADDR( x )  ( *( (_S8 *) (x) ) )
+#define  VALUE_U8_OF_ADDR( x )  ( *( (_U8 *) (x) ) )
+#define  VALUE_SC_OF_ADDR( x )  ( *( (_SC *) (x) ) )
+#define  VALUE_UC_OF_ADDR( x )  ( *( (_UC *) (x) ) )
 
-#define  VALUE_FLOAT_OF_ADDR( x )  ( *( (float *) (x) ) )
-#define  VALUE_DOUBLE_OF_ADDR( x )  ( *( (double *) (x) ) )
-#define  VALUE_LONG_DOUBLE_OF_ADDR( x )  ( *( (long double*) (x) ) )
 
-#define SET_VAR_MEM(dest, value)  {long long int x = value; memcpy((void*)&(dest), (void*)&(x), sizeof(dest));}
+#define  VALUE_S16_OF_ADDR( x )  ( *( (_S16 *) (x) ) )
+#define  VALUE_U16_OF_ADDR( x )  ( *( (_U16 *) (x) ) )
+#define  VALUE_SS_OF_ADDR( x )  ( *( (_SS *) (x) ) )
+#define  VALUE_US_OF_ADDR( x )  ( *( (_US *) (x) ) )
 
+#define  VALUE_S32_OF_ADDR( x )  ( *( (_S32 *) (x) ) )
+#define  VALUE_U32_OF_ADDR( x )  ( *( (_U32 *) (x) ) )
+#define  VALUE_SI_OF_ADDR( x )  ( *( (_SI *) (x) ) )
+#define  VALUE_UI_OF_ADDR( x )  ( *( (_UI *) (x) ) )
+
+#define  VALUE_SL_OF_ADDR( x )  ( *( (_SL *) (x) ) )
+#define  VALUE_UL_OF_ADDR( x )  ( *( (_UL*) (x) ) )
+
+#define  VALUE_S64_OF_ADDR( x )  ( *( (_S64 *) (x) ) )
+#define  VALUE_U64_OF_ADDR( x )  ( *( (_U64  *) (x) ) )
+#define  VALUE_SLL_OF_ADDR( x )  ( *( (_SLL *) (x) ) )
+#define  VALUE_ULL_OF_ADDR( x )  ( *( (_ULL*) (x) ) )
+
+#define  VALUE_SF_OF_ADDR( x )  ( *( (_SF *) (x) ) )
+#define  VALUE_SD_OF_ADDR( x )  ( *( (_SD *) (x) ) )
+#define  VALUE_SLD_OF_ADDR( x )  ( *( (_SLD*) (x) ) )
+#if defined __USE_MISC && !defined __ASSEMBLER__
+//#error this is a compile error!
+#endif
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+//#error this is a compile error!
+    /* set value to dest, if value size is larger than dest,k keep the lower bits of value */
+#define SET_VAR_VALUE(dest, value)\
+    do{\
+        _U64 x = value;\
+        size_t __l_dest = sizeof(dest);\
+        memcpy((void*)&(dest), (void*)&(x), __l_dest);\
+    }while(0);
+
+#define SET_LONG_DOUBLE_VALUE(dest, value_u64, value_l64)\
+    {\
+        size_t __l_dest = sizeof(dest);\
+        _U64 x = value_l64;\
+        memcpy(((void*)&(dest)), (void*)&(x), 8);\
+        x = value_u64;\
+        memcpy(((void*)&(dest)) + 8, (void*)&(x), __l_dest - 8);\
+    }
+#else
+    /* set value to dest, if value size is larger than dest,k keep the lower bits of value */
+#define SET_VAR_VALUE(dest, value)\
+    do{\
+        _U64 x = value;\
+        SWAP_BITS_64(x);\
+        size_t __l_dest = sizeof(dest);\
+        memcpy((void*)&(dest), (void*)&(x), __l_dest);\
+        if(__l_dest == 2)\
+        {\
+            SWAP_BITS_16(dest);\
+        }else if(__l_dest == 4)\
+        {\
+            SWAP_BITS_32(dest);\
+        }else if(__l_dest == 8)\
+        {\
+            SWAP_BITS_64(dest);\
+        }\
+    }while(0);
+
+#define SET_LONG_DOUBLE_VALUE(dest, value_u64, value_l64)\
+    {\
+        size_t __l_dest = sizeof(dest);\
+
+        _U64 x = value_u64;\
+        SWAP_BITS_64(x);\
+        memcpy(((void*)&(dest)), (void*)&(x) + __l_dest - 8, __l_dest - 8);\
+        x = value_l64;\
+        SWAP_BITS_64(x);\
+        memcpy(((void*)&(dest)) + __l_dest - 8, (void*)&(x), 8);\
+    }
+#endif
 
 #endif
 

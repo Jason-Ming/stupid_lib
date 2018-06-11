@@ -84,7 +84,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value, ##args);\
+            (_SL)value, ##args);\
         return value;\
     }
     
@@ -94,7 +94,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "FALSE("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value, ##args);\
+            (_SL)value, ##args);\
         action;\
         return value;\
     }
@@ -114,7 +114,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value);\
+            (_SL)value);\
         return value;\
     }
 
@@ -124,7 +124,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld.\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value);\
+            (_SL)value);\
         action;\
         return value;\
     }
@@ -135,7 +135,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value, ##args);\
+            (_SL)value, ##args);\
         return value;\
     }
 
@@ -145,7 +145,7 @@ char* log_getfn(void);
         LOG_PRINT("[%s] [file: %s, line: %ul] [function: %s]\n   "\
             "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
             get_time_stamp(), __FILE__, __LINE__, __FUNCTION__,\
-            (LONG)value, ##args);\
+            (_SL)value, ##args);\
         action;\
         return value;\
     }

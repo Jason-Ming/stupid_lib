@@ -50,11 +50,15 @@ $(CUR_OBJS):%.o:%.c
 -include $(CUR_OBJS:.o=.d)
 
 ALL_D = $(shell find -type f -name *.d)
+ALL_D_TEMP = $(shell find -type f -name *.d.*)
 ALL_O = $(shell find -type f -name *.o)
+ALL_I = $(shell find -type f -name *.i)
 
 clean:
 	@rm -rf $(OBJS_DIR)/*
 	@rm -rf $(BIN_DIR)/*
 	@rm -rf $(LIB_DIR)/*
 	@rm -rf $(ALL_D)
+	@rm -rf $(ALL_D_TEMP)
 	@rm -rf $(ALL_O)
+	@rm -rf $(ALL_I)

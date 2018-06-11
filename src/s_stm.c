@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 #include "s_defines.h"
+#include "s_limits.h"
+
 #include "s_text.h"
 #include "s_cmd.h"
 #include "s_log.h"
@@ -43,9 +45,9 @@ ENUM_RETURN stm_create(STM *p_stm, unsigned int state_num)
     R_ASSERT(p_stm_temp != NULL, RETURN_FAILURE);
 
     p_stm_temp->state_num = state_num;
-    p_stm_temp->current_state = INVALID_INT;
-    p_stm_temp->start_state = INVALID_INT;
-    p_stm_temp->end_state = INVALID_INT;
+    p_stm_temp->current_state = INVALID_I32;
+    p_stm_temp->start_state = INVALID_I32;
+    p_stm_temp->end_state = INVALID_I32;
     p_stm_temp->state_notifier = NULL;
     p_stm_temp->prepare_handler = NULL;
     p_stm_temp->clear_handler = NULL;
@@ -56,7 +58,7 @@ ENUM_RETURN stm_create(STM *p_stm, unsigned int state_num)
 
     for(int i = 0; i < state_num; i++)
     {
-        p_stm_temp->state_handlers[i].state = INVALID_INT;
+        p_stm_temp->state_handlers[i].state = INVALID_I32;
         p_stm_temp->state_handlers[i].handler = NULL;
         p_stm_temp->state_handlers[i].info = NULL;
     }
@@ -217,7 +219,7 @@ PRIVATE STM_PROC get_stm_state_handler(STRU_STM *p_stm, STM_STATE state)
 
 STM_STATE get_current_stm_state(STM p_stm)
 {
-    R_ASSERT(p_stm != NULL, INVALID_INT);
+    R_ASSERT(p_stm != NULL, INVALID_I32);
 
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
     return p_stm_temp->current_state;
@@ -249,9 +251,9 @@ ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
 PRIVATE ENUM_BOOLEAN is_stm_ready(STRU_STM *p_stm)
 {
     R_ASSERT(p_stm != NULL, BOOLEAN_FALSE);
-    R_ASSERT_LOG(p_stm->current_state != INVALID_INT 
-        && p_stm->start_state != INVALID_INT 
-        && p_stm->end_state != INVALID_INT
+    R_ASSERT_LOG(p_stm->current_state != INVALID_I32 
+        && p_stm->start_state != INVALID_I32 
+        && p_stm->end_state != INVALID_I32
         && p_stm->state_num != 0, 
         BOOLEAN_FALSE,
         "current_state = %d, start_state = %d, end_state = %d, state_num = %d",
@@ -268,7 +270,7 @@ PRIVATE ENUM_BOOLEAN is_stm_ready(STRU_STM *p_stm)
 
     for(int i = 0; i < p_stm->state_num; i++)
     {
-        R_ASSERT(state_handlers[i].state != INVALID_INT, BOOLEAN_FALSE);
+        R_ASSERT(state_handlers[i].state != INVALID_I32, BOOLEAN_FALSE);
         R_ASSERT(state_handlers[i].handler != NULL, BOOLEAN_FALSE);
         R_ASSERT(state_handlers[i].info != NULL, BOOLEAN_FALSE);
     }

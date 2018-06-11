@@ -313,7 +313,7 @@ unsigned long long htou(const char *str)
 long long htoi(const char *str)
 {
     unsigned long long temp = htou(str);
-    return VALUE_LONG_LONG_INT_OF_ADDR(&temp);
+    return VALUE_S64_OF_ADDR(&temp);
 }
 
 void squeeze(char s1[], const char s2[])
