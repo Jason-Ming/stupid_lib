@@ -3,6 +3,7 @@
 
 #include "s_clinkage.h"
 #include "s_defines.h"
+#include "s_type.h"
 
 //将一个字母转换为大写
 #define UPCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0×20) : (c) )

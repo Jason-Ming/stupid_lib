@@ -4,4 +4,9 @@
 *.so
 *.bin
 *.txt
+*.i
 *.d
+*/debug/bin/*
+*/test/debug/bin*
+*.txt.*
+

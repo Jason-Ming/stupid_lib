@@ -2,7 +2,6 @@
 #define __S_DEFINES_H__
 
 #include "s_clinkage.h"
-#include "s_type.h"
 
     
 #define FREE(p) do{ if(p != NULL){free(p); p = NULL;}}while(0);

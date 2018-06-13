@@ -2,6 +2,7 @@
 #define __S_CMD_H__
 #include "s_clinkage.h"
 #include "s_defines.h"
+#include "s_type.h"
 
 
 typedef enum TAG_ENUM_OPTION_TYPE

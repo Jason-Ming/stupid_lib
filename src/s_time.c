@@ -51,3 +51,8 @@ char* get_time_stamp(void)
     return time_string_buf;
 }
 
+ENUM_BOOLEAN is_leapyear(_U32 year)
+{
+    return ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)? BOOLEAN_TRUE:BOOLEAN_FALSE;
+}
+

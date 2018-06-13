@@ -1,0 +1,1 @@
+./test/debug/bin/tst

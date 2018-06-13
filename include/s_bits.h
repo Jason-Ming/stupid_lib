@@ -20,7 +20,7 @@ _U64 get_bits(_U64 x, _S32 p, _S32 n);
 _U64 set_bits(_U64 x, _S32 p, _S32 n, _U64 y);
 _U64 invert_bits(_U64 x, _S32 p, _S32 n);
 _U64 right_rot_bits(_U64 x, _S32 n);
-
+_U32 bits_count(_U64 x);
 __END_C_DECLS
 
 #endif

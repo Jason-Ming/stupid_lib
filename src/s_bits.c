@@ -19,3 +19,17 @@ _U64 right_rot_bits(_U64 x, _S32 n)
     return ((sizeof(x)*8 == n)?(x):(((x >> n) & (~(~0 << (sizeof(x)*8 - n)))) | (x << (sizeof(x)*8 - n))));
 }
 
+_U32 bits_count(_U64 x)
+{
+    _U32 b;
+    for (b = 0; x != 0; x >>= 1)
+    {
+        if (x & 01)
+        {
+            b++;
+        }
+    }
+    
+    return b; 
+}
+
