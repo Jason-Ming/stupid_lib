@@ -8,14 +8,17 @@ using namespace std;
 
 TEST_GROUP(TEXT)
 {
+    char *p = NULL;
     void setup()
     {
+        p = (char*)malloc(100);
     	//设置自己的测试准备
         //cout << "Test start ......" << endl;
     }
 
     void teardown()
     {
+        free(p);
     	//清理测试设置
         //cout << "Test end ......" << endl;
     }
