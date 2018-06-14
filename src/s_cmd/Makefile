@@ -13,6 +13,9 @@ $(SUBDIRS):ECHO
 $(CUR_OBJS):%.o:%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 	cp $@ $(ROOT_DIR)/$(CUR_OBJS_DIR)/$@
+	$(CC) -o $@ -c $< $(CFLAGS) $(CFLAGS_TEST)
+	cp $@ $(ROOT_DIR)/$(CUR_OBJS_TEST_DIR)/$@
+#cp $@ $(ROOT_DIR)/test/$(CUR_OBJS_DIR)/$@
 
 %.d:%.c
 	@set -e; rm -f $@; $(CC) -MM $< $(INCLUDEFLAGS) > $@.$$$$; \

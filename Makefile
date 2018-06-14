@@ -16,6 +16,8 @@ ROOT_DIR=$(shell pwd)
 CUR_DIR=$(shell pwd)
 #目标文件所在的目录
 CUR_OBJS_DIR=debug/obj
+#目标文件所在的目录
+CUR_OBJS_TEST_DIR=debug/obj_test
 #bin文件所在的目录
 CUR_BIN_DIR=debug/bin
 #lib文件所在的目录，此目录为项目生成的动态库目标目录
@@ -55,9 +57,9 @@ CPPINCLUDEFLAGS += -I$(ROOT_DIR)/src/include
 CPPINCLUDEFLAGS  += -I$(ROOT_DIR)/src/s_cmd
 #CPPINCLUDEFLAGS += -I$(LIB_PATH)/include
 
-CXXLDFLAGS := -L$(CPPUTEST_HOME)/lib -Wl,-rpath $(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt
+CXXLDFLAGS := -L$(CUR_DIR)/$(CUR_LIB_DIR) -l$(CUR_LIB_BIN_TEST)
 #CXXLDFLAGS += -L$(LIB_PATH)/debug/lib -Wl,-rpath $(LIB_PATH)/debug/lib -l$(LIB_BIN_TEST)
-CXXLDFLAGS += -L$(CUR_DIR)/$(CUR_LIB_DIR) -Wl,-rpath $(CUR_DIR)/$(CUR_LIB_DIR) -l$(CUR_LIB_BIN_TEST)
+CXXLDFLAGS += -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt
 
 #设置编译器
 CC=gcc
@@ -75,10 +77,10 @@ INCLUDEFLAGS += -I$(ROOT_DIR)/src/include
 #INCLUDEFLAGS += -I$(LIB_PATH)/include
 
 #CLDFLAGS += -L$(LIB_PATH)/debug/lib -Wl,-rpath $(LIB_PATH)/debug/lib -l$(LIB_BIN)
-CLDFLAGS_TEST = -L$(CPPUTEST_HOME)/lib -Wl,-rpath $(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt
+CLDFLAGS_TEST = -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt
 
 #将以下变量导出到子shell中，本次相当于导出到子目录下的makefile中
-export CPPUTEST_HOME CC CFLAGS CFLAGS_TEST CLDFLAGS CLDFLAGS_TEST CPP CPPFLAGS CXXFLAGS CXXLDFLAGS INCLUDEFLAGS CPPINCLUDEFLAGS CUR_BIN CUR_BIN_TEST CUR_LIB_BIN CUR_LIB_BIN_TEST ROOT_DIR CUR_OBJS_DIR CUR_BIN_DIR CUR_LIB_DIR LIB_PATH LIB_BIN LIB_BIN_TEST
+export CPPUTEST_HOME CC CFLAGS CFLAGS_TEST CLDFLAGS CLDFLAGS_TEST CPP CPPFLAGS CXXFLAGS CXXLDFLAGS INCLUDEFLAGS CPPINCLUDEFLAGS CUR_BIN CUR_BIN_TEST CUR_LIB_BIN CUR_LIB_BIN_TEST ROOT_DIR CUR_OBJS_DIR CUR_OBJS_TEST_DIR CUR_BIN_DIR CUR_LIB_DIR LIB_PATH LIB_BIN LIB_BIN_TEST
 
 #注意这里的顺序，需要先执行SUBDIRS最后才能是DEBUG
 all:$(SUBDIRS) $(CUR_OBJS) DEBUG TEST
@@ -102,6 +104,8 @@ ECHO:
 $(CUR_OBJS):%.o:%.c
 	$(CC) -o $@ -c $< $(CFLAGS)
 	@cp $@ $(ROOT_DIR)/$(CUR_OBJS_DIR)/$@
+	$(CC) -o $@ -c $< $(CFLAGS) $(CFLAGS_TEST)
+	@cp $@ $(ROOT_DIR)/$(CUR_OBJS_TEST_DIR)/$@
 
 %.d:%.c
 	@set -e; rm -f $@; $(CC) -MM $< $(INCLUDEFLAGS) > $@.$$$$; \
@@ -118,6 +122,7 @@ ALL_I = $(shell find -type f -name '*.i')
 
 clean:
 	@rm -rf $(CUR_OBJS_DIR)/*
+	@rm -rf $(CUR_OBJS_TEST_DIR)/*
 	@rm -rf $(CUR_BIN_DIR)/*
 	@rm -rf $(CUR_LIB_DIR)/*
 	@rm -rf test/$(CUR_OBJS_DIR)/*
