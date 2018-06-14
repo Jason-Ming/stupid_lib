@@ -58,7 +58,7 @@ CPPINCLUDEFLAGS  += -I$(ROOT_DIR)/src/s_cmd
 #CPPINCLUDEFLAGS += -I$(LIB_PATH)/include
 
 CXXLDFLAGS := -L$(CUR_DIR)/$(CUR_LIB_DIR) -l$(CUR_LIB_BIN_TEST)
-#CXXLDFLAGS += -L$(LIB_PATH)/debug/lib -Wl,-rpath $(LIB_PATH)/debug/lib -l$(LIB_BIN_TEST)
+#CXXLDFLAGS += -L$(LIB_PATH)/debug/lib -l$(LIB_BIN_TEST)
 CXXLDFLAGS += -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt
 
 #…Ë÷√±‡“Î∆˜
