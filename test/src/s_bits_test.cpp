@@ -244,3 +244,80 @@ TEST(GET_BITS, 16bits)
 }
 
 
+TEST_GROUP(bits_count)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        //cout << "Test start ......" << endl;
+    }
+
+    void teardown()
+    {
+    	//清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+};
+
+TEST(bits_count, 8bits)
+{
+    _UC c = 0x00;
+    _U32 count = bits_count(c);
+    CHECK_EQUAL(0, count);
+    
+    c = 0x88;
+    count = bits_count(c);
+    CHECK_EQUAL(2, count);
+
+    c = 0xff;
+    count = bits_count(c);
+    CHECK_EQUAL(8, count);
+}
+
+TEST(bits_count, 16bits)
+{
+    _US c = 0x00;
+    _U32 count = bits_count(c);
+    CHECK_EQUAL(0, count);
+    
+    c = 0x837d;
+    count = bits_count(c);
+    CHECK_EQUAL(9, count);
+
+    c = 0xffff;
+    count = bits_count(c);
+    CHECK_EQUAL(16, count);
+}
+
+TEST(bits_count, 32bits)
+{
+    _UI c = 0x00;
+    _U32 count = bits_count(c);
+    CHECK_EQUAL(0, count);
+    
+    c = 0x837d4e75;
+    count = bits_count(c);
+    CHECK_EQUAL(18, count);
+
+    c = 0xffffffff;
+    count = bits_count(c);
+    CHECK_EQUAL(32, count);
+}
+
+TEST(bits_count, 64bits)
+{
+    _U64 c = 0x00;
+    _U32 count = bits_count(c);
+    CHECK_EQUAL(0, count);
+    
+    c = 0x837d4e7518ef60bc;
+    count = bits_count(c);
+    CHECK_EQUAL(34, count);
+
+    c = 0xffffffffffffffff;
+    count = bits_count(c);
+    CHECK_EQUAL(64, count);
+}
+
+
+

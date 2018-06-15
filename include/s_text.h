@@ -6,8 +6,8 @@
 #include "s_type.h"
 
 //将一个字母转换为大写
-#define UPCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0×20) : (c) )
-#define LOWCASE( c ) ( ((c) >= 'A' && (c) <= 'Z') ? ((c) + 0×20) : (c) )
+#define UPPERCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0×20) : (c) )
+#define LOWERCASE( c ) ( ((c) >= 'A' && (c) <= 'Z') ? ((c) + 0×20) : (c) )
 
 //判断字符是不是10进值的数字
 #define IS_DEC( c ) ((c) >= '0' && (c) <= '9')
