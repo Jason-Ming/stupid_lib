@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
+#include "s_type.h"
 
 #define CHART_DATA_INFO_STR_SIZE 6 //长度为5的字符串
 

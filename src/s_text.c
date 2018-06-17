@@ -14,20 +14,20 @@
 #define SWITCH_ENABLE 1
 #define SWITCH_DISABLE 0
 
-int output_switch = SWITCH_DISABLE;
+_S32 output_switch = SWITCH_DISABLE;
 
-void enable_output(void)
+PRIVATE void enable_output(void)
 {
     output_switch = SWITCH_ENABLE;
 }
 
-void disable_output(void)
+PRIVATE void disable_output(void)
 {
     output_switch = SWITCH_DISABLE;
 }
 
-/* count lines, words, and charactors in input */
-int process_words(const char* filename, const char *separator)
+/* count lines, words, and _S8actors in input */
+PRIVATE _S32 process_words(const _S8* filename, const _S8 *separator)
 {
     assert(filename != NULL);
     assert((separator != NULL && output_switch == SWITCH_ENABLE) 
@@ -37,7 +37,7 @@ int process_words(const char* filename, const char *separator)
     fpr = fopen(filename, "r");
 	assert(fpr != NULL);
     FILE *fpw = NULL;
-    char *filename_ouput = NULL;
+    _S8 *filename_ouput = NULL;
 
 
     if(output_switch == SWITCH_ENABLE)
@@ -52,7 +52,7 @@ int process_words(const char* filename, const char *separator)
         assert(fpw != NULL);
     }
     
-    int c, nl, nw, nc, state;
+    _S32 c, nl, nw, nc, state;
 
     state = OUT;
     nl = nw = nc = 0;
@@ -92,7 +92,7 @@ int process_words(const char* filename, const char *separator)
         }
     }
 
-    //printf("%d, %d, %d\n", nl, nw, nc);
+    //pr_S32f("%d, %d, %d\n", nl, nw, nc);
 	fclose(fpr);
     if(output_switch == SWITCH_ENABLE)
     {
@@ -101,9 +101,9 @@ int process_words(const char* filename, const char *separator)
 
     return nw;
 }
-int count_words(const char* filename)
+_S32 count_words(const _S8* filename)
 {
-    int retval;
+    _S32 retval;
     assert(filename != NULL);
     disable_output();
 
@@ -112,9 +112,9 @@ int count_words(const char* filename)
     return retval;
 }
 
-int format_words(const char* filename, const char *separator)
+_S32 format_words(const _S8* filename, const _S8 *separator)
 {
-    int retval;
+    _S32 retval;
     assert(filename != NULL);
     assert(separator != NULL);
 
@@ -126,11 +126,11 @@ int format_words(const char* filename, const char *separator)
     return retval;
 }
 
-/* read a line into line, return length */
-int get_line(FILE *fp, char line[], int maxline)
+/* read a line _S32o line, return length */
+_S32 get_line(FILE *fp, _S8 line[], _S32 maxline)
 {
-    int c;
-    int i = 0;
+    _S32 c;
+    _S32 i = 0;
 
     while((c = fgetc(fp)) != EOF && c != '\n')
     {
@@ -155,12 +155,12 @@ int get_line(FILE *fp, char line[], int maxline)
     return i;
 }
 
-ENUM_RETURN reverse(char *pstr_buf)
+ENUM_RETURN reverse(_S8 *pstr_buf)
 {
     R_ASSERT(pstr_buf != NULL, RETURN_FAILURE);
-    int start = 0;
-    int end = strlen(pstr_buf) - 1;
-    char temp;
+    _S32 start = 0;
+    _S32 end = strlen(pstr_buf) - 1;
+    _S8 temp;
     while(start < end)
     {
         temp = pstr_buf[start];
@@ -173,13 +173,13 @@ ENUM_RETURN reverse(char *pstr_buf)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, int fold_num)
+ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num)
 {
     R_ASSERT(pstr_buf_source != NULL, RETURN_FAILURE);
     R_ASSERT(pstr_buf_temp != NULL, RETURN_FAILURE);
     R_ASSERT(fold_num > 0, RETURN_FAILURE);
     
-    int len = strlen(pstr_buf_source);
+    _S32 len = strlen(pstr_buf_source);
     //if(len >= fold_num, RETURN_SUCCESS);
 
     memset(pstr_buf_temp, '\0', buf_temp_len);
@@ -187,10 +187,10 @@ ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, i
     printf("source: %s\nsource len: %d\ndest: %s\ndest len: %d\n",
         pstr_buf_source, len, pstr_buf_temp, buf_temp_len);
     
-    int pos = 0;
-    int pos_blank = -1;
-    int fold_len = 0;
-    int start_pos = pos;
+    _S32 pos = 0;
+    _S32 pos_blank = -1;
+    _S32 fold_len = 0;
+    _S32 start_pos = pos;
     
     while(pos < len)
     {
@@ -258,9 +258,9 @@ ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, i
 }
 
 
-unsigned long long htou(const char *str)
+_U64 htou(const _S8 *str)
 {
-    unsigned long long sum = 0;
+    _U64 sum = 0;
     size_t len = strlen(str);
 
     if(len > 2)
@@ -272,7 +272,7 @@ unsigned long long htou(const char *str)
         }
     }
 
-    if(len > sizeof(long long int)*2)
+    if(len > sizeof(_U64)*2)
     {
         perror("the string length is too large!\n");
         return 0;
@@ -281,8 +281,8 @@ unsigned long long htou(const char *str)
     for(size_t i = 0; i < len; i++)
     {
         size_t index =i;
-        char c = str[index];
-        int temp = 0;
+        _S8 c = str[index];
+        _S32 temp = 0;
 
         /* between 0 ~ 9, a ~ f, A ~ F*/
         if(c >= '0' && c <= '9')
@@ -310,22 +310,22 @@ unsigned long long htou(const char *str)
     return sum;
 }
 
-long long htoi(const char *str)
+_S64 htoi(const _S8 *str)
 {
-    unsigned long long temp = htou(str);
+    _U64 temp = htou(str);
     return VALUE_S64_OF_ADDR(&temp);
 }
 
-void squeeze(char s1[], const char s2[])
+_VOID squeeze(_S8 s1[], const _S8 s2[])
 {
-    char s[256] = {0};
-    int c;
+    _S8 s[256] = {0};
+    _S32 c;
     while((c = *s2) != '\0')
     {
         s[c] = 1;
         s2++;
     }
-    char *p = s1;
+    _S8 *p = s1;
     while((c = *s1) != '\0')
     {
         if(s[c] == 0)
@@ -338,17 +338,17 @@ void squeeze(char s1[], const char s2[])
     *p = '\0';
 }
 
-char* any(char s1[], const char s2[])
+_S8* any(_S8 s1[], const _S8 s2[])
 {
-    char s[256] = {0};
-    int c;
+    _S8 s[256] = {0};
+    _S32 c;
     while((c = *s2) != '\0')
     {
         s[c] = 1;
         s2++;
     }
     
-    char *p = NULL;
+    _S8 *p = NULL;
     while((c = *s1) != '\0')
     {
         if(s[c] == 1)

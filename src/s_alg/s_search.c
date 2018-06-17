@@ -5,6 +5,7 @@
 
 #include "s_defines.h"
 #include "s_log.h"
+#include "s_alg.h"
 
 /* binsearch: find x in v[0] <= v[1] <= ... <= v[n-1] */ 
 _S32 binsearch(_S32 x, _S32 v[], _S32 n) 

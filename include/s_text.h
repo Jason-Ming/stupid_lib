@@ -21,15 +21,15 @@
 #define CONC_(x, y) x##_##y
 
 __BEGIN_C_DECLS
-int count_words(const char* filename);
-int format_words(const char* filename, const char *separator);
-int get_line(FILE *fp, char line[], int maxline);
-ENUM_RETURN reverse(char *pstr_buf);
-ENUM_RETURN fold(char *pstr_buf_source, char *pstr_buf_temp, int buf_temp_len, int fold_num);
-unsigned long long htou(const char *str);
-long long htoi(const char *str);
-void squeeze(char s1[], const char s2[]);
-char* any(char s1[], const char s2[]);
+_S32 count_words(const _S8* filename);
+_S32 format_words(const _S8* filename, const _S8 *separator);
+_S32 get_line(FILE *fp, _S8 line[], _S32 maxline);
+ENUM_RETURN reverse(_S8 *pstr_buf);
+ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num);
+_U64 htou(const _S8 *str);
+_S64 htoi(const _S8 *str);
+_VOID squeeze(_S8 s1[], const _S8 s2[]);
+_S8* any(_S8 s1[], const _S8 s2[]);
 
 
 __END_C_DECLS
