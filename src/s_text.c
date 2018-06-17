@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "s_defines.h"
 #include "s_log.h"
@@ -258,8 +259,14 @@ ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S
 }
 
 
-_U64 htou(const _S8 *str)
+ENUM_RETURN htou(const _S8 *str, _U64 *value)
 {
+    R_ASSERT(str != NULL, RETURN_FAILURE);
+    R_ASSERT(value != NULL, RETURN_FAILURE);
+
+    /* skip white space */
+    while(isspace(*str++));
+    
     _U64 sum = 0;
     size_t len = strlen(str);
 
@@ -302,7 +309,6 @@ _U64 htou(const _S8 *str)
             perror("invalid input");
             return 0;
         }
-        
 
         sum = sum * 16 + temp;
     }
@@ -310,10 +316,18 @@ _U64 htou(const _S8 *str)
     return sum;
 }
 
-_S64 htoi(const _S8 *str)
+ENUM_RETURN htoi(const _S8 *str, _S64 *value)
 {
-    _U64 temp = htou(str);
-    return VALUE_S64_OF_ADDR(&temp);
+    R_ASSERT(str != NULL, RETURN_FAILURE);
+    R_ASSERT(value != NULL, RETURN_FAILURE);
+
+    _U64 temp;
+    ENUM_RETURN retval = htou(str, &temp);
+    R_ASSERT(retval == RETURN_SUCCESS, RETURN_FAILURE);
+
+    *value = VALUE_S64_OF_ADDR(&temp);
+     
+    return RETURN_SUCCESS;
 }
 
 _VOID squeeze(_S8 s1[], const _S8 s2[])

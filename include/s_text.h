@@ -26,8 +26,9 @@ _S32 format_words(const _S8* filename, const _S8 *separator);
 _S32 get_line(FILE *fp, _S8 line[], _S32 maxline);
 ENUM_RETURN reverse(_S8 *pstr_buf);
 ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num);
-_U64 htou(const _S8 *str);
-_S64 htoi(const _S8 *str);
+ENUM_RETURN htou(const _S8 *str, _U64 *value);
+ENUM_RETURN htoi(const _S8 *str, _S64 *value);
+
 _VOID squeeze(_S8 s1[], const _S8 s2[]);
 _S8* any(_S8 s1[], const _S8 s2[]);
 
