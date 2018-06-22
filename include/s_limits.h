@@ -61,24 +61,12 @@
 #define ULL_MAX ULLONG_MAX
 #define ULL_INVLAID ULLONG_MAX
 
-#  if __WORDSIZE == 64
-
-#define S64_MAX LONG_MAX
-#define S64_MIN LONG_MIN
-#define S64_INVALID LONG_MAX
-
-#define U64_MAX ULONG_MAX
-#define U64_INVLAID ULONG_MAX
-#  else
-
 #define S64_MAX LLONG_MAX
 #define S64_MIN LLONG_MIN
 #define S64_INVALID LLONG_MAX
 
 #define U64_MAX ULLONG_MAX
 #define U64_INVLAID ULLONG_MAX
-
-#  endif
 
 /* 
 Sign-bit：0表示正，1表示负。占1bit；
