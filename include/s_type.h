@@ -31,13 +31,8 @@ typedef unsigned long           _UL;
 typedef long long               _SLL;
 typedef unsigned long long      _ULL;
 
-#  if __WORDSIZE == 64
-typedef long                    _S64;
-typedef unsigned long           _U64;
-#else
 typedef long long               _S64;
 typedef unsigned long long      _U64;
-#endif
 
 typedef float                   _SF;
 typedef double                  _SD;
