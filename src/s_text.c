@@ -575,7 +575,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
     else
     {
         //与之前的begin不形成递增
-        if(s_expand_in_same_range(begin, c) == BOOLEAN_FALSE)
+        if(s_expand_in_same_range(end, c) == BOOLEAN_FALSE)
         {
             OUTPUT_STR_RANGE(begin, end);
             OUTPUT_STR('-');
@@ -763,5 +763,133 @@ _S8* any(_S8 s1[], const _S8 s2[])
     }
 
     return p;
+}
+
+#define MAX_CHAR 256
+
+_VOID s_escape(_S8* source, _S8* dest, size_t size)
+{
+    PRIVATE _S8 escape[MAX_CHAR] = {0};
+    escape['\\'] = '\\';
+    escape['\n'] = 'n';
+    escape['\t'] = 't';
+    escape['\a'] = 'a';
+    escape['\b'] = 'b';
+    escape['\f'] = 'f';
+    escape['\r'] = 'r';
+    escape['\v'] = 'v';
+    escape['\"'] = '"';
+    escape['\''] = '\'';
+    escape['\?'] = '?';
+
+    while(*source != '\0' && size > 2)
+    {
+        _S32 c = *source;
+        switch(c)
+        {
+            case '\\':
+            case '\a':
+            case '\b':
+            case '\n':
+            case '\t':
+            case '\f':
+            case '\r':
+            case '\v':
+            case '\"':
+            case '\'':
+            case '\?':
+            {
+                *dest++ = '\\';
+                *dest++ = escape[c];
+                size -= 2;
+                break;
+            }
+            default:
+            {
+                *dest++ = c;
+                size --;
+                break;
+            }
+        }
+        source++;
+    }
+
+    /* append \0 */
+    *dest = *source;
+}
+
+_VOID s_unescape(_S8* source, _S8* dest, size_t size)
+{
+    
+    PRIVATE _S8 unescape[MAX_CHAR] = {0};
+    /* init all s_escape charactors */
+    unescape['\\'] = '\\';
+    unescape['b'] = '\b';
+    unescape['n'] = '\n';
+    unescape['t'] = '\t';
+    unescape['a'] = '\a';
+    unescape['b'] = '\b';
+    unescape['f'] = '\f';
+    unescape['r'] = '\r';
+    unescape['v'] = '\v';
+    unescape['"'] = '\"';
+    unescape['\''] = '\'';
+    unescape['?'] = '\?';
+
+    ENUM_BOOLEAN in_escape = BOOLEAN_FALSE;
+    
+    while(*source != '\0' && size > 2)
+    {
+        _S32 c = *source;
+        printf("c = %c, in_escape = %d\n", c, in_escape);
+        
+        if(in_escape == BOOLEAN_TRUE)
+        {
+            switch(c)
+            {
+                case '\\':
+                case 'a':
+                case 'b':
+                case 'n':
+                case 't':
+                case 'f':
+                case 'r':
+                case 'v':
+                case '\"':
+                case '\'':
+                case '?':
+                {
+                    *dest++ = unescape[c];
+                    size--;
+                    break;
+                }
+                default:
+                {
+                    *dest++ = '\\';
+                    *dest++ = c;
+                    size -= 2;
+                    break;
+                }
+            }
+            in_escape = BOOLEAN_FALSE;
+        }
+        else
+        {
+            if(c == '\\')
+            {
+                in_escape = BOOLEAN_TRUE;
+               
+            }
+            else
+            {
+                *dest++ = c;
+                size--;
+            }
+        }
+        source++;
+    }
+
+    /* append \0 */
+    *dest = *source;
 }
 

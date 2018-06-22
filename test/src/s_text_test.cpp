@@ -632,4 +632,13 @@ TEST(s_expand, a_a_b_a_c_b0_9_A_Z)
     STRCMP_EQUAL(expected_s, s2);
 }
 
+TEST(s_expand, 0_9_0)
+{
+    s1 = "0-9-0";
+    expected_s = "0123456789-0";
+    retval = s_expand(s1, s2, len);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    STRCMP_EQUAL(expected_s, s2);
+}
 

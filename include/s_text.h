@@ -33,6 +33,9 @@ ENUM_RETURN s_atoi(const _S8 *str, _S32 *value);
 _VOID squeeze(_S8 s1[], const _S8 s2[]);
 _S8* any(_S8 s1[], const _S8 s2[]);
 ENUM_RETURN s_expand(const _S8 *s1, _S8 *s2, size_t size);
+_VOID s_escape(_S8* source, _S8* dest, size_t size);
+_VOID s_unescape(_S8* source, _S8* dest, size_t size);
+
 
 
 __END_C_DECLS
