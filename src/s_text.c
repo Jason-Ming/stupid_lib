@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <assert.h>
-#include <string.h>
+#include <string.h>
 #include <stdlib.h>
+
 #include <ctype.h>
 
 #include "s_defines.h"
@@ -265,10 +266,11 @@ ENUM_RETURN htou(const _S8 *str, _U64 *value)
     R_ASSERT(value != NULL, RETURN_FAILURE);
 
     /* skip white space */
-    while(isspace(*str++));
+    while(isspace(*str)) str++;
     
     _U64 sum = 0;
     size_t len = strlen(str);
+    R_LOG("len = %zd", len);
 
     if(len > 2)
     {
@@ -279,11 +281,7 @@ ENUM_RETURN htou(const _S8 *str, _U64 *value)
         }
     }
 
-    if(len > sizeof(_U64)*2)
-    {
-        perror("the string length is too large!\n");
-        return 0;
-    }
+    R_ASSERT_LOG(len <= sizeof(_U64)*2, RETURN_FAILURE, "len = %zd", len);
     
     for(size_t i = 0; i < len; i++)
     {
@@ -306,14 +304,15 @@ ENUM_RETURN htou(const _S8 *str, _U64 *value)
         }
         else
         {
-            perror("invalid input");
-            return 0;
+            R_RET_LOG(RETURN_FAILURE, "invalid char: %c", c);
         }
 
         sum = sum * 16 + temp;
     }
 
-    return sum;
+    *value = sum;
+
+    return RETURN_SUCCESS;
 }
 
 ENUM_RETURN htoi(const _S8 *str, _S64 *value)

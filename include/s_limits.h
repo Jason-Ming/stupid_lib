@@ -4,8 +4,81 @@
 
 #include "s_type.h"
 
-#define INVALID_I32 INT_MAX
-#define INVALID_U32 (~(_U32)0)
+#define S8_MAX SCHAR_MAX
+#define S8_MIN SCHAR_MIN
+#define S8_INVALID SCHAR_MAX
+
+#define UC_MAX UCHAR_MAX
+#define UC_INVLAID UCHAR_MAX
+
+#define SC_MAX SCHAR_MAX
+#define SC_MIN SCHAR_MIN
+#define SC_INVALID SCHAR_MAX
+
+#define UC_MAX UCHAR_MAX
+#define UC_INVLAID UCHAR_MAX
+
+
+#define S16_MAX SHRT_MAX
+#define S16_MIN SHRT_MIN
+#define S16_INVALID SHRT_MAX
+
+#define U16_MAX USHRT_MAX
+#define U16_INVLAID USHRT_MAX
+
+#define SS_MAX SHRT_MAX
+#define SS_MIN SHRT_MIN
+#define SS_INVALID SHRT_MAX
+
+#define US_MAX USHRT_MAX
+#define US_INVLAID USHRT_MAX
+
+#define S32_MAX INT_MAX
+#define S32_MIN INT_MIN
+#define S32_INVALID INT_MAX
+
+#define U32_MAX UINT_MAX
+#define U32_INVLAID UINT_MAX
+
+#define SI_MAX INT_MAX
+#define SI_MIN INT_MIN
+#define SI_INVALID INT_MAX
+
+#define UI_MAX UINT_MAX
+#define UI_INVLAID UINT_MAX
+
+#define SL_MAX LONG_MAX
+#define SL_MIN LONG_MIN
+#define SL_INVALID LONG_MAX
+
+#define UL_MAX ULONG_MAX
+#define UL_INVLAID ULONG_MAX
+
+#define SLL_MAX LLONG_MAX
+#define SLL_MIN LLONG_MIN
+#define SLL_INVALID LLONG_MAX
+
+#define ULL_MAX ULLONG_MAX
+#define ULL_INVLAID ULLONG_MAX
+
+#  if __WORDSIZE == 64
+
+#define S64_MAX LONG_MAX
+#define S64_MIN LONG_MIN
+#define S64_INVALID LONG_MAX
+
+#define U64_MAX ULONG_MAX
+#define U64_INVLAID ULONG_MAX
+#  else
+
+#define S64_MAX LLONG_MAX
+#define S64_MIN LLONG_MIN
+#define S64_INVALID LLONG_MAX
+
+#define U64_MAX ULLONG_MAX
+#define U64_INVLAID ULLONG_MAX
+
+#  endif
 
 /* 
 Sign-bit：0表示正，1表示负。占1bit；
