@@ -21,6 +21,7 @@ typedef struct TAG_STRU_STM_PROC
 
 typedef struct TAG_STRU_STM
 {
+    int last_state;
     int current_state;
     int start_state;
     int end_state;
@@ -186,6 +187,7 @@ ENUM_RETURN set_stm_start_state(STM p_stm, STM_STATE state)
 
     p_stm_temp->start_state = state;
     p_stm_temp->current_state = state;
+    p_stm_temp->last_state = state;
 
     return RETURN_SUCCESS;
 }
@@ -225,6 +227,14 @@ STM_STATE get_current_stm_state(STM p_stm)
     return p_stm_temp->current_state;
 }
 
+STM_STATE get_last_stm_state(STM p_stm)
+{
+    R_ASSERT(p_stm != NULL, SI_INVALID);
+
+    STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
+    return p_stm_temp->last_state;
+}
+
 ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
 {
     R_ASSERT(p_stm != NULL, RETURN_FAILURE);
@@ -240,7 +250,8 @@ ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
     R_LOG("state change from %s to %s", 
         get_stm_state_info(p_stm_temp, p_stm_temp->current_state),
         get_stm_state_info(p_stm_temp, state));
-    
+
+    p_stm_temp->last_state = p_stm_temp->current_state;
     p_stm_temp->current_state = state;
     ret_val = p_stm_temp->state_notifier();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

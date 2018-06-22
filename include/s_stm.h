@@ -28,6 +28,7 @@ ENUM_RETURN stm_run(STM p_stm);
 
 STM_STATE get_current_stm_state(STM p_stm);
 ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state);
+STM_STATE get_last_stm_state(STM p_stm);
 
 __END_C_DECLS
 
