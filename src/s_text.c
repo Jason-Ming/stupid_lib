@@ -17,6 +17,38 @@
 #define SWITCH_ENABLE 1
 #define SWITCH_DISABLE 0
 
+#define OUTPUT_STR(c, dest, size)\
+    do{\
+        R_LOG("OUTPUT_STR: %c", c);\
+        if(size > 1)\
+        {\
+            *dest++ = c;\
+            size--;\
+        }\
+    }while(0);
+
+#define OUTPUT_STR_RANGE(begin, end, dest, size) \
+    do{\
+        if(begin != '\0' && end != '\0')\
+        {\
+            R_LOG("OUTPUT_STR_RANGE: %c~%c", begin, end);\
+            for(_S8 c = begin; c <= end; c++)\
+            {\
+                OUTPUT_STR(c, dest, size);\
+            }\
+            begin = end = '\0';\
+        }\
+    }while(0);
+
+#define OUTPUT_STR_MULTI(c, num, dest, size) \
+    do{\
+        R_LOG("OUTPUT_STR_MULTI: %c, %zd", c, num);\
+        for(_S32 i = 0; i < num; i++)\
+        {\
+            OUTPUT_STR(c, dest, size);\
+        }\
+    }while(0);
+
 _S32 output_switch = SWITCH_DISABLE;
 
 PRIVATE void enable_output(void)
@@ -130,7 +162,7 @@ _S32 format_words(const _S8* filename, const _S8 *separator)
 }
 
 /* read a line _S32o line, return length */
-_S32 get_line(FILE *fp, _S8 line[], _S32 maxline)
+_S32 s_getline(FILE *fp, _S8 line[], _S32 maxline)
 {
     _S32 c;
     _S32 i = 0;
@@ -158,7 +190,7 @@ _S32 get_line(FILE *fp, _S8 line[], _S32 maxline)
     return i;
 }
 
-ENUM_RETURN reverse(_S8 *pstr_buf)
+ENUM_RETURN s_reverse(_S8 *pstr_buf)
 {
     R_ASSERT(pstr_buf != NULL, RETURN_FAILURE);
     _S32 start = 0;
@@ -176,7 +208,7 @@ ENUM_RETURN reverse(_S8 *pstr_buf)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num)
+ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num)
 {
     R_ASSERT(pstr_buf_source != NULL, RETURN_FAILURE);
     R_ASSERT(pstr_buf_temp != NULL, RETURN_FAILURE);
@@ -261,7 +293,7 @@ ENUM_RETURN fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S
 }
 
 
-ENUM_RETURN s_htou(const _S8 *str, _U64 *value)
+ENUM_RETURN s_hstrtou64(const _S8 *str, _U64 *value)
 {
     R_ASSERT(str != NULL, RETURN_FAILURE);
     R_ASSERT(value != NULL, RETURN_FAILURE);
@@ -316,13 +348,13 @@ ENUM_RETURN s_htou(const _S8 *str, _U64 *value)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_htoi(const _S8 *str, _S64 *value)
+ENUM_RETURN s_hstrtos64(const _S8 *str, _S64 *value)
 {
     R_ASSERT(str != NULL, RETURN_FAILURE);
     R_ASSERT(value != NULL, RETURN_FAILURE);
 
     _U64 temp;
-    ENUM_RETURN retval = s_htou(str, &temp);
+    ENUM_RETURN retval = s_hstrtou64(str, &temp);
     R_ASSERT(retval == RETURN_SUCCESS, RETURN_FAILURE);
 
     *value = VALUE_S64_OF_ADDR(&temp);
@@ -330,7 +362,7 @@ ENUM_RETURN s_htoi(const _S8 *str, _S64 *value)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_atoi(const _S8 *str, _S32 *value)
+ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
 {
     R_ASSERT(str != NULL, RETURN_FAILURE);
     R_ASSERT(value != NULL, RETURN_FAILURE);
@@ -373,37 +405,88 @@ ENUM_RETURN s_atoi(const _S8 *str, _S32 *value)
     
 }
 
-#define OUTPUT_STR(c)\
-    do{\
-        R_LOG("OUTPUT_STR: %c", c);\
-        if(s_expand_run_data.size > 1)\
-        {\
-            *(s_expand_run_data.s2)++ = c;\
-            (s_expand_run_data.size)--;\
-        }\
-    }while(0);
+ENUM_RETURN s_s32tostr(_S32 value, _S8 *dest, size_t size)
+{
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
 
-#define OUTPUT_STR_RANGE(begin,end) \
-    do{\
-        if(begin != '\0' && end != '\0')\
-        {\
-            R_LOG("OUTPUT_STR_RANGE: %c~%c", begin, end);\
-            for(_S8 c = begin; c <= end; c++)\
-            {\
-                OUTPUT_STR(c);\
-            }\
-            begin = end = '\0';\
-        }\
-    }while(0);
+    _S32 sign = 1;
+    _S8 *temp = dest;
 
-#define OUTPUT_STR_MULTI(c,num) \
-    do{\
-        R_LOG("OUTPUT_STR_MULTI: %c, %zd", c, num);\
-        for(_S32 i = 0; i < num; i++)\
-        {\
-            OUTPUT_STR(c);\
-        }\
-    }while(0);
+    /* record sign and make vlaue positive */
+    if((value) < 0)
+    {
+        sign = -1;
+    }
+
+    do
+    {
+        OUTPUT_STR((value % 10)*sign + '0', dest, size);
+    }while((value /= 10) != 0);
+
+    if(sign < 0)
+    {
+        OUTPUT_STR('-', dest, size);
+    }
+
+    *dest = '\0';
+
+    ENUM_RETURN ret_val = s_reverse(temp);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size)
+{
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(b >= 2 && b <= 36, RETURN_FAILURE);
+    PRIVATE _S8 digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    _S32 sign = 1;
+    _S8 *temp = dest;
+
+    /* record sign and make vlaue positive */
+    if((value) < 0)
+    {
+        sign = -1;
+    }
+
+    _S32 index = 0;
+    size_t len = 0;
+    
+    do
+    {
+        index = (value % b)*sign;
+        OUTPUT_STR( digits[index], dest, size);
+        len++;
+    }while((value /= b) != 0);
+
+    if(sign < 0)
+    {
+        OUTPUT_STR('-', dest, size);
+        len++;
+    }
+
+    
+    
+    while(len < w)
+    {
+        OUTPUT_STR(' ', dest, size);
+        len++;
+    }
+    
+    *dest = '\0';
+
+    ENUM_RETURN ret_val = s_reverse(temp);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_s32tostrb(_S32 value, _S32 b, _S8 *dest, size_t size)
+{
+    return s_s32tostrbw(value, b, 0, dest, size);
+}
 
 typedef enum TAG_ENUM_EXPAND_STATE
 {
@@ -478,7 +561,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_conc()
     if(c == '-')
     {
         //原样输出
-        OUTPUT_STR(c);
+        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
@@ -516,7 +599,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_begin()
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
         begin = end = c;
     }
     
@@ -559,11 +642,11 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
 
     if(c == '-')
     {
-        OUTPUT_STR_RANGE(begin, end);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
         
         //原样输出
-        OUTPUT_STR(c);
-        OUTPUT_STR(c);
+        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
         R_LOG("state = %d", EXPAND_STATE_CONC);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_CONC);
     }
@@ -577,8 +660,8 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
         //与之前的begin不形成递增
         if(s_expand_in_same_range(end, c) == BOOLEAN_FALSE)
         {
-            OUTPUT_STR_RANGE(begin, end);
-            OUTPUT_STR('-');
+            OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
+            OUTPUT_STR('-', s_expand_run_data.s2, s_expand_run_data.size);
             begin = end = c;
             set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
         }
@@ -614,7 +697,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_end()
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
         begin = end = c;
         set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
     }
@@ -632,11 +715,11 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_end()
     ENUM_EXPAND_STATE state = get_last_stm_state(s_expand_stm);
 
 
-    OUTPUT_STR_RANGE(begin, end);
+    OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
     
     if(state == EXPAND_STATE_RANGE_TO)
     {
-        OUTPUT_STR('-');
+        OUTPUT_STR('-', s_expand_run_data.s2, s_expand_run_data.size);
     }
     
     *(s_expand_run_data.s2)++ = '\0';
@@ -891,5 +974,22 @@ _VOID s_unescape(_S8* source, _S8* dest, size_t size)
 
     /* append \0 */
     *dest = *source;
+}
+
+ENUM_RETURN s_trim(_S8 *source)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+
+    _S32 n; 
+    for (n = strlen(source)-1; n >= 0; n--)
+    {
+        if (source[n] != ' ' && source[n] != '\t' && source[n] != '\n') 
+        {
+            break; 
+        }
+    }
+    
+    source[n+1] = '\0'; 
+    return RETURN_SUCCESS;
 }
 
