@@ -7,6 +7,25 @@
 #include <iostream>
 
 using namespace std;
+TEST_GROUP(print_types)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        //cout << "Test start ......" << endl;
+    }
+
+    void teardown()
+    {
+        //清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+};
+
+TEST(print_types, print_types)
+{
+    //print_types();
+}
 
 TEST_GROUP(s_hstrtos64)
 {
@@ -198,8 +217,6 @@ TEST(s_hstrtos64, 64bits)
     _S64 expected_result = 0x837d4e7518ef60bc;
     MEMCMP_EQUAL((_VOID*)&expected_result, (_VOID*)&result, sizeof(_S64));
 }
-
-
 
 TEST_GROUP(s_strtos32)
 {
@@ -393,6 +410,609 @@ TEST(s_strtos32, out_of_range_min)
     CHECK_EQUAL(RETURN_SUCCESS, retval);
     expected_result = 2147483647;
     CHECK_EQUAL(expected_result, result);
+}
+
+TEST_GROUP(s_strtosd)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        str = NULL;
+        retval = RETURN_FAILURE;
+        result = 0.0;
+        expected_result = 0.0;
+    }
+
+    void teardown()
+    {
+        //清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+
+    const _S8 *str;
+    ENUM_RETURN retval;
+    _SD result;
+    _SD expected_result;
+};
+
+TEST(s_strtosd, null_string)
+{
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, null_value)
+{
+    str = "0";
+
+    retval = s_strtosd(str, NULL);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, empty_str)
+{
+    str = "";
+
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, invalid_str__)
+{
+    str = "_";
+
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, invalid_str_00_plus)
+{
+    str = "00+";
+
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, invalid_str_plus_empty)
+{
+    str = "+";
+
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strtosd, invalid_str_minus_empty)
+{
+    str = "-";
+    
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+
+}
+
+TEST(s_strtosd, invalid_str_plus_q)
+{
+    str = "+q";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+
+}
+
+TEST(s_strtosd, invalid_str_q)
+{
+    str = "q";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+
+}
+
+TEST(s_strtosd, invalid_str_suffix_blank)
+{
+    str = "34 ";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+
+}
+
+TEST(s_strtosd, dot_only)
+{
+    str = " .";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+
+}
+
+TEST(s_strtosd, invalid_str_prefix_blank)
+{
+    str = "  034";
+
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 34;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero)
+{
+    str = "0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot)
+{
+    str = "0.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, dot_zero)
+{
+    str = ".0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot_zero)
+{
+    str = "0.0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_double_positive)
+{
+    str = "++0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_positive)
+{
+    str = "+0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, dot_zero_positive)
+{
+    str = "+.0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot_positive)
+{
+    str = "+0.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot_zero_positive)
+{
+    str = "+0.0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_negative)
+{
+    str = "-0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_double_negative)
+{
+    str = "--0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot_negative)
+{
+    str = "-0.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, dot_zero_negative)
+{
+    str = "-.0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, zero_dot_zero_negative)
+{
+    str = "-0.0";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x)
+{
+    str = "+10.56";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 10.56;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_dot)
+{
+    str = "+10.56.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 10.56;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e)
+{
+    str = "+10.56e";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_positive)
+{
+    str = "+10.56e+";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_negative)
+{
+    str = "+10.56e-";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_double_e)
+{
+    str = "+10.56ee";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_dot)
+{
+    str = "+10.56e.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_double_dot)
+{
+    str = "+10.56e..";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_x_dot)
+{
+    str = "+10.56e10.";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_dot_x)
+{
+    str = "+10.56e.10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_x_dot_x)
+{
+    str = "+10.56e10.10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = 0;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_positive_e_x)
+{
+    str = "+10.56-e10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = +10.56e10;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_negative_e_x)
+{
+    str = "+10.56+e10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+    //expected_result = +10.56e10;
+    //DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_positive_x)
+{
+    str = "+10.56e+10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = +10.56e+10;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_negative_x)
+{
+    str = "+10.56e-10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = +10.56e-10;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_e_x)
+{
+    str = "+10.56e10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = +10.56e10;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, positive_x_x_E_x)
+{
+    str = "+10.56E10";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = +10.56e10;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, max)
+{
+    str = "2147483647";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 2147483647;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, min)
+{
+    str = "-2147483648";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = -2147483648.0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_strtosd, out_of_range_max)
+{
+    str = "2147483648";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = 2147483648.0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+
+}
+
+TEST(s_strtosd, out_of_range_min)
+{
+    str = "-2147483649";
+    retval = s_strtosd(str, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    expected_result = -2147483649.0;
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST_GROUP(s_get_word)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        source = expected_word = next = NULL;
+        retval = RETURN_FAILURE;
+        word_len = expected_word_len = 0;
+    }
+
+    void teardown()
+    {
+        //清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+
+    const static size_t len = 1024;
+    const _S8 *source, *expected_word, *next;
+    _S8 word[len];
+    size_t word_len, expected_word_len;
+    ENUM_RETURN retval;
+};
+
+TEST(s_get_word, null_source)
+{
+    retval = s_get_word(NULL, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_get_word, null_word)
+{
+    source = "abc";
+    retval = s_get_word(source, NULL, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_get_word, null_wordlen)
+{
+    source = "abc";
+    retval = s_get_word(source, word, len, NULL, &next);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_get_word, null_next)
+{
+    source = "abc";
+    retval = s_get_word(source, word, len, &word_len, NULL);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_get_word, normal_no_word)
+{
+    source = "";
+    expected_word = "";
+    expected_word_len = 0;
+    retval = s_get_word(source, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+
+    STRCMP_EQUAL(expected_word, word);
+    CHECK_EQUAL(expected_word_len, word_len);
+    POINTERS_EQUAL(source+strlen(word), next);
+}
+
+
+TEST(s_get_word, normal_one_word)
+{
+    source = "abc";
+    expected_word = "abc";
+    expected_word_len = 3;
+    retval = s_get_word(source, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+
+    STRCMP_EQUAL(expected_word, word);
+    CHECK_EQUAL(expected_word_len, word_len);
+    POINTERS_EQUAL(source+strlen(word), next);
+
+    expected_word = "";
+    expected_word_len = 0;
+
+    retval = s_get_word(next, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+
+    STRCMP_EQUAL(expected_word, word);
+    CHECK_EQUAL(expected_word_len, word_len);
+    POINTERS_EQUAL(next+strlen(word), next);
+}
+
+TEST(s_get_word, normal_two_word)
+{
+    source = "  abc   3456 ";
+    expected_word = "abc";
+    expected_word_len = 3;
+    retval = s_get_word(source, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+
+    STRCMP_EQUAL(expected_word, word);
+    CHECK_EQUAL(expected_word_len, word_len);
+    POINTERS_EQUAL(source+ 2 + strlen(word) + 3, next);
+
+    expected_word = "3456";
+    expected_word_len = 4;
+
+    retval = s_get_word(next, word, len, &word_len, &next);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+
+    STRCMP_EQUAL(expected_word, word);
+    CHECK_EQUAL(expected_word_len, word_len);
+    POINTERS_EQUAL(source + 8 + strlen(word) + 1, next);
+
 }
 
 TEST_GROUP(s_expand)
@@ -1173,5 +1793,193 @@ TEST(s_trim, blank_newline)
     CHECK_EQUAL(RETURN_SUCCESS, retval);
     STRCMP_EQUAL(expected_s, dest);
 
+}
+
+TEST_GROUP(s_strindex)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        target = NULL;
+        source = NULL;
+        index = 0;
+        index_expected = 0;
+        retval = RETURN_FAILURE;
+    }
+
+    void teardown()
+    {
+        //清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+
+    _S32 index_expected;
+    _S32 index;
+    const _S8 *source;
+    const _S8 *target;
+    ENUM_RETURN retval;
+};
+
+TEST(s_strindex, null_string1)
+{
+    target = "abc";
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strindex, null_string2)
+{
+    source = "abc";
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strindex, null_index)
+{
+    source = "abc";
+    target = "abc";
+    retval = s_strindex(source, target, NULL);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strindex, completely_match)
+{
+    source = "abc";
+    target = "abc";
+    index_expected = 0;
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strindex, not_match)
+{
+    source = "abbc";
+    target = "abc";
+    index_expected = -1;
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strindex, one_match)
+{
+    source = "abbcabcab";
+    target = "abc";
+    index_expected = 4;
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strindex, multi_match)
+{
+    source = "abbcabcabcc";
+    target = "abc";
+    index_expected = 4;
+    retval = s_strindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST_GROUP(s_strrindex)
+{
+    void setup()
+    {
+    	//设置自己的测试准备
+        target = NULL;
+        source = NULL;
+        index = 0;
+        index_expected = 0;
+        retval = RETURN_FAILURE;
+    }
+
+    void teardown()
+    {
+        //清理测试设置
+        //cout << "Test end ......" << endl;
+    }
+
+    _S32 index_expected;
+    _S32 index;
+    const _S8 *source;
+    const _S8 *target;
+    ENUM_RETURN retval;
+};
+
+TEST(s_strrindex, null_string1)
+{
+    target = "abc";
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strrindex, null_string2)
+{
+    source = "abc";
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strrindex, null_index)
+{
+    source = "abc";
+    target = "abc";
+    retval = s_strrindex(source, target, NULL);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_strrindex, completely_match)
+{
+    source = "abc";
+    target = "abc";
+    index_expected = 0;
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strrindex, not_match)
+{
+    source = "abbc";
+    target = "abc";
+    index_expected = -1;
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strrindex, one_match)
+{
+    source = "abbcabcab";
+    target = "abc";
+    index_expected = 4;
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
+}
+
+TEST(s_strrindex, multi_match)
+{
+    source = "abbcabcabcc";
+    target = "abc";
+    index_expected = 7;
+    retval = s_strrindex(source, target, &index);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    CHECK_EQUAL(index_expected, index);
 }
 

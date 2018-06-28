@@ -190,6 +190,40 @@ _S32 s_getline(FILE *fp, _S8 line[], _S32 maxline)
     return i;
 }
 
+ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(word_buf != NULL, RETURN_FAILURE);
+    R_ASSERT(word_len != NULL, RETURN_FAILURE);
+    R_ASSERT(next != NULL, RETURN_FAILURE);
+
+    size_t len = 0;
+    
+    /* skip white space */
+    while(isspace(*source)) source++;
+    
+    while(*source != '\0')
+    {
+        if(isspace(*source))
+        {
+            break;
+        }
+
+        source++;
+        len++;
+    };
+
+    strncpy(word_buf, source - len, MIN(len, buf_size - 1));
+    word_buf[len] = '\0';
+    *word_len = len;
+    
+    while(isspace(*source)) source++;
+
+    *next = source;
+
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN s_reverse(_S8 *pstr_buf)
 {
     R_ASSERT(pstr_buf != NULL, RETURN_FAILURE);
@@ -403,6 +437,123 @@ ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
 
     return RETURN_SUCCESS;
     
+}
+
+ENUM_RETURN s_strtosd(const _S8 *str, _SD *value)
+{
+    R_ASSERT(str != NULL, RETURN_FAILURE);
+    R_ASSERT(value != NULL, RETURN_FAILURE);
+
+    /* skip white space */
+    while(isspace(*str)) str++;
+
+    _S32 sign = 1, exponent_sign = 1, exponent = 0;
+    _SD temp = 0.0, integer_part = 0.0, decimal_part = 0.0, power = 1.0;
+    size_t len = strlen(str);
+    ENUM_BOOLEAN has_dot = BOOLEAN_FALSE, 
+        has_e = BOOLEAN_FALSE,
+        has_integer_part = BOOLEAN_FALSE, 
+        has_decimal_part = BOOLEAN_FALSE,
+        has_exponent_part = BOOLEAN_FALSE,
+        has_exponent_sign_part = BOOLEAN_FALSE; 
+    
+    R_ASSERT(len > 0, RETURN_FAILURE);
+    
+    if(*str == '-')
+    {
+        sign = -1;
+        str++;
+        len--;
+    }
+    else if (*str == '+')
+    {
+        sign = 1;
+        str++;
+        len--;
+    }
+
+    R_ASSERT(len > 0, RETURN_FAILURE);
+
+    while(*str != '\0' && isdigit(*str))
+    {
+        integer_part = 10.0 * integer_part + (*str - '0');
+        str++;
+        has_integer_part = BOOLEAN_TRUE;
+    }
+
+    if(*str != '\0' && *str == '.')
+    {
+        str++;
+        has_dot = BOOLEAN_TRUE;
+    }
+
+    while(*str != '\0' && isdigit(*str))
+    {
+        decimal_part = 10.0 * decimal_part + (*str - '0');
+        power *= 10.0;
+        str++;
+        has_decimal_part = BOOLEAN_TRUE;
+    }
+
+    if(*str != '\0' && (*str == 'e' || *str == 'E'))
+    {
+        str++;
+        has_e = BOOLEAN_TRUE;
+    }
+
+    if(*str != '\0' && *str == '-')
+    {
+        exponent_sign = -1;
+        has_exponent_sign_part = BOOLEAN_TRUE;
+        str++;
+    }
+    else if (*str != '\0' && *str == '+')
+    {
+        exponent_sign = 1;
+        has_exponent_sign_part = BOOLEAN_TRUE;
+        str++;
+    }
+
+    while(*str != '\0' && isdigit(*str))
+    {
+        exponent = 10 * exponent + (*str - '0');
+        str++;
+        has_exponent_part = BOOLEAN_TRUE;
+    }
+    
+    if(*str != '\0')
+    {
+        return RETURN_FAILURE;
+    }
+        
+    if(has_dot == BOOLEAN_TRUE 
+        && has_decimal_part == BOOLEAN_FALSE 
+        && has_integer_part == BOOLEAN_FALSE)
+    {
+        return RETURN_FAILURE;
+    }
+
+    if(has_e == BOOLEAN_TRUE 
+    && has_exponent_part == BOOLEAN_FALSE)
+    {
+        return RETURN_FAILURE;
+    }
+
+    if(has_exponent_sign_part == BOOLEAN_TRUE && has_e == BOOLEAN_FALSE)
+    {
+        return RETURN_FAILURE;
+    }
+    
+    temp = (integer_part + decimal_part/power)*sign;
+    power = (exponent_sign == 1)?10.0:0.1;
+    for(_S32 i = 0; i < exponent; i++)
+    {
+        temp = power*temp;
+    }
+
+    *value = temp;
+    
+    return RETURN_SUCCESS;
 }
 
 ENUM_RETURN s_s32tostr(_S32 value, _S8 *dest, size_t size)
@@ -990,6 +1141,53 @@ ENUM_RETURN s_trim(_S8 *source)
     }
     
     source[n+1] = '\0'; 
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(target != NULL, RETURN_FAILURE);
+    R_ASSERT(index != NULL, RETURN_FAILURE);
+
+    _S32 temp = 0;
+    *index = -1;
+    size_t len = strlen(target);
+    
+    while(*source != '\0')
+    {
+        if(memcmp(source, target, len) == 0)
+        {
+            *index = temp;
+            break;
+        }
+        source++;
+        temp++;
+    }
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(target != NULL, RETURN_FAILURE);
+    R_ASSERT(index != NULL, RETURN_FAILURE);
+
+    const _S8 *temp = source + strlen(source);
+    *index = -1;
+    size_t len = strlen(target);
+    
+    while(temp >= source)
+    {
+        if(memcmp(temp, target, len) == 0)
+        {
+            *index = temp - source;
+            break;
+        }
+        temp--;
+    }
+
     return RETURN_SUCCESS;
 }
 

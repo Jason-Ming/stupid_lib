@@ -11,6 +11,9 @@ _S32 binsearch(_S32 x, _S32 v[], _S32 n);
 _S32 binsearch2(_S32 x, _S32 v[], _S32 n);
 _VOID shell_sort(_S32 a[], _S32 n);
 
+/* reverse Polish calculator */
+ENUM_RETURN s_calc_rp(const _S8 *str, _SD *result);
+
 
 __END_C_DECLS
 
