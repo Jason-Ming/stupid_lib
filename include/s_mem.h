@@ -5,10 +5,11 @@
 #include <endian.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
+#include "s_type.h"
 
 
 __BEGIN_C_DECLS
-void display_mem(void *addr, size_t size);
+void display_mem(void *addr, size_t size, ENUM_BOOLEAN bit_switch);
 void display_var(void *addr, size_t size);
 
 __END_C_DECLS
@@ -23,7 +24,7 @@ __END_C_DECLS
     do\
     {\
         printf("    "#var":\n");\
-        display_mem((void *)&var, sizeof(var));\
+        display_mem((void *)&var, sizeof(var), BOOLEAN_TRUE);\
     }while(0)
 
 #define  VALUE_S8_OF_ADDR( x )  ( *( (_S8 *) (x) ) )

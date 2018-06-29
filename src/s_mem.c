@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "s_mem.h"
 //void set_mem(void *addr, size_t size, const char *str)
 //{
 //    size_t str_len = strlen(str);
@@ -15,13 +16,19 @@
 //}
 
 
-void display_mem(void *addr, size_t size)
+void display_mem(void *addr, size_t size, ENUM_BOOLEAN bit_switch)
 {
     for(size_t i = 0; i < size; i++)
     {
         int x = ((int)*((char*)addr+ i))&(~(~0 << 8));
         printf("        %p: %02x ", (char*)addr+i, x);
 
+        if(bit_switch == BOOLEAN_FALSE)
+        {
+            printf("\n");
+            continue;
+        }
+        
         for(size_t j = 0; j < sizeof(char)*8; j++)
         {
             printf("%d", (x&(0x01 << (sizeof(char)*8 - j - 1)))?1:0);

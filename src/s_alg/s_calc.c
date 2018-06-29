@@ -19,6 +19,10 @@ typedef enum TAG_ENUM_CALC_WORD_TYPE
     CALC_WORD_TYPE_MULTIPLY,
     CALC_WORD_TYPE_DIVIDE,
     CALC_WORD_TYPE_MODULAR,
+    CALC_WORD_TYPE_SIN,
+    CALC_WORD_TYPE_COS,
+    CALC_WORD_TYPE_POW,
+    CALC_WORD_TYPE_EXP,
     CALC_WORD_TYPE_EMPTY,
     CALC_WORD_TYPE_UNKNOWN,
 }ENUM_CALC_WORD_TYPE;
@@ -80,6 +84,29 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
         }
                 
     }
+    else if(isalpha(word[0]))
+    {
+        if(0 == strcmp(word, "sin"))
+        {
+            temp_type = CALC_WORD_TYPE_SIN;
+        }
+        else if(0 == strcmp(word, "cos"))
+        {
+            temp_type = CALC_WORD_TYPE_COS;
+        }
+        else if(0 == strcmp(word, "pow"))
+        {
+            temp_type = CALC_WORD_TYPE_POW;
+        }
+        else if(0 == strcmp(word, "exp"))
+        {
+            temp_type = CALC_WORD_TYPE_EXP;
+        }
+        else
+        {
+            temp_type = CALC_WORD_TYPE_UNKNOWN;
+        }
+    }
     else
     {
         ret_val = s_strtosd(word, &temp_value);
@@ -87,8 +114,17 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
         {
             temp_type = CALC_WORD_TYPE_NUMBER;
         }
+        else
+        {
+            temp_type = CALC_WORD_TYPE_UNKNOWN;
+        }
     }
 
+    if(temp_type == CALC_WORD_TYPE_UNKNOWN)
+    {
+        printf("%s couldn't be parsed!\n", word);
+    }
+    
     *type = temp_type;
     *value = temp_value;
     
@@ -203,6 +239,44 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 break;
                 
+            case CALC_WORD_TYPE_SIN:
+                ret_val = s_calc_rp_pop(&op1);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                
+                value = sin(op1);
+                ret_val = s_calc_rp_push(value);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
+            
+            case CALC_WORD_TYPE_COS:
+                ret_val = s_calc_rp_pop(&op1);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                
+                value = cos(op1);
+                ret_val = s_calc_rp_push(value);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
+                
+            case CALC_WORD_TYPE_EXP:
+                ret_val = s_calc_rp_pop(&op1);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                
+                value = exp(op1);
+                ret_val = s_calc_rp_push(value);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
+
+            case CALC_WORD_TYPE_POW:
+                ret_val = s_calc_rp_pop(&op1);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                ret_val = s_calc_rp_pop(&op2);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                value = pow(op2, op1);
+                ret_val = s_calc_rp_push(value);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
+                
+
             case CALC_WORD_TYPE_EMPTY:
                 ret_val = s_calc_rp_pop(&value);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -214,7 +288,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 break;
                 
             default:
-                printf("unknown type: %d\n", word_type);
+                return RETURN_FAILURE;
                 break;
         }
     }

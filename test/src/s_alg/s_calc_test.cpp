@@ -126,6 +126,46 @@ TEST(s_calc_rp, expression_modular_zero)
     MEMCMP_EQUAL(&expected_result, &result, sizeof(expected_result));
 }
 
+TEST(s_calc_rp, expression_sin_normal)
+{
+    expression = "30 sin ";
+    expected_result = sin(30);
+    retval = s_calc_rp(expression, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_calc_rp, expression_cos_normal)
+{
+    expression = "30 cos ";
+    expected_result = cos(30);
+    retval = s_calc_rp(expression, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_calc_rp, expression_pow_normal)
+{
+    expression = "30 2 pow ";
+    expected_result = pow(30.0, 2);
+    retval = s_calc_rp(expression, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
+TEST(s_calc_rp, expression_exp_normal)
+{
+    expression = "2 exp ";
+    expected_result = exp(2);
+    retval = s_calc_rp(expression, &result);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    DOUBLES_EQUAL(expected_result, result, 0.1E-10);
+}
+
 TEST(s_calc_rp, expression_e_format)
 {
     expression = "-1.0e-2 100 * ";

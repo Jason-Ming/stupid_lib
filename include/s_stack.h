@@ -8,6 +8,8 @@
 typedef void* STACK;
 
 __BEGIN_C_DECLS
+
+_VOID stack_print(STACK p_stack);
 ENUM_RETURN stack_create(STACK *p_stack);
 ENUM_RETURN stack_delete(STACK *p_stack);
 ENUM_RETURN stack_push(STACK p_stack, _VOID * p_data, size_t data_size);
@@ -17,7 +19,7 @@ ENUM_RETURN stack_duplicate_top(STACK p_stack);
 ENUM_RETURN stack_swap_top2(STACK p_stack);
 ENUM_RETURN stack_clear(STACK p_stack);
 
-ENUM_RETURN stack_get_data_count(STACK p_stack, size_t *count);
+ENUM_RETURN stack_get_element_count(STACK p_stack, size_t *count);
 
 __END_C_DECLS
 
