@@ -90,7 +90,7 @@ ENUM_RETURN stack_pop(STACK p_stack, _VOID * p_data, size_t *size_out, size_t si
     *size_out = 0;
     STRU_STACK *p_stack_temp = (STRU_STACK*)p_stack;
 
-    R_FALSE_RET(p_stack_temp->data_count > 0, RETURN_SUCCESS);
+    R_ASSERT(p_stack_temp->data_count > 0, RETURN_FAILURE);
 
     STRU_STACK_DATA *p_stack_data_temp = p_stack_temp->p_data_list_head;
     
@@ -105,6 +105,39 @@ ENUM_RETURN stack_pop(STACK p_stack, _VOID * p_data, size_t *size_out, size_t si
     p_stack_temp->p_data_list_head = p_stack_data_temp->next;
     FREE(p_stack_data_temp);
     p_stack_temp->data_count--;
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN stack_get_top(STACK p_stack, _VOID * p_data, size_t *size_out, size_t size_in)
+{
+    R_ASSERT(p_stack != NULL, RETURN_FAILURE);
+    R_ASSERT(p_data != NULL, RETURN_FAILURE);
+    R_ASSERT(size_out != NULL, RETURN_FAILURE);
+
+    *size_out = 0;
+    STRU_STACK *p_stack_temp = (STRU_STACK*)p_stack;
+
+    R_FALSE_RET(p_stack_temp->data_count > 0, RETURN_SUCCESS);
+
+    STRU_STACK_DATA *p_stack_data_temp = p_stack_temp->p_data_list_head;
+    
+    R_ASSERT(p_stack_data_temp->p_data != NULL, RETURN_FAILURE);
+    
+    *size_out = MIN(size_in, p_stack_data_temp->data_size);
+    memcpy(p_data, p_stack_data_temp->p_data, *size_out);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN stack_duplicate_top(STACK p_stack)
+{
+    R_ASSERT(p_stack != NULL, RETURN_FAILURE);
+    STRU_STACK *p_stack_temp = (STRU_STACK*)p_stack;
+    R_FALSE_RET(p_stack_temp->data_count > 0, RETURN_SUCCESS);
+
+    ENUM_RETURN ret_val = stack_push(p_stack, p_stack_temp->p_data_list_head->p_data, p_stack_temp->p_data_list_head->data_size);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;
 }

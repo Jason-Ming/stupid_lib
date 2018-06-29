@@ -180,6 +180,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 }
                 else
                 {
+                    printf("devide zero!\n");
                     SET_VAR_VALUE(value, DOUBLE_INFINITY_PLUS);
                     ret_val = s_calc_rp_push(value);
                     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -192,6 +193,11 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 ret_val = s_calc_rp_pop(&op2);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                if(op1 == 0.0)
+                {
+                    printf("modular zero!\n");
+                }
+                
                 value = fmod(op2, op1);
                 ret_val = s_calc_rp_push(value);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -200,6 +206,9 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
             case CALC_WORD_TYPE_EMPTY:
                 ret_val = s_calc_rp_pop(&value);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                ret_val = s_calc_rp_pop(&value);
+                R_ASSERT(ret_val == RETURN_FAILURE, RETURN_FAILURE);
+                
                 * result = value;
                 return RETURN_SUCCESS;
                 break;
@@ -218,16 +227,19 @@ ENUM_RETURN s_calc_rp(const _S8 *str, _SD *result)
     R_ASSERT(str != NULL, RETURN_FAILURE);
     R_ASSERT(result != NULL, RETURN_FAILURE);
 
-    ENUM_RETURN ret_val = s_calc_rp_init();
+    ENUM_RETURN calc_ret, ret_val = s_calc_rp_init();
     R_ASSERT(ret_val != RETURN_FAILURE, RETURN_FAILURE);
 
-    ret_val = s_calc_rp_do(str, result);
-    R_FALSE_DO_LOG(ret_val == RETURN_SUCCESS, 
-        printf("expression error!\n"); SET_VAR_VALUE(*result, DOUBLE_NAN_PLUS),
-        "s_calc_rp_do failed!");
+    calc_ret = s_calc_rp_do(str, result);
+    if(calc_ret == RETURN_FAILURE)
+    {
+        printf("expression error!\n"); 
+        SET_VAR_VALUE(*result, DOUBLE_NAN_PLUS);
+        R_LOG("s_calc_rp_do failed!");
+    }
 
     ret_val = s_calc_rp_clear();
     R_ASSERT(ret_val != RETURN_FAILURE, RETURN_FAILURE);
-    return RETURN_SUCCESS;
+    return calc_ret;
 }
 
