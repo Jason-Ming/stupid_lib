@@ -9,11 +9,16 @@
 #include "s_mem.h"
 #include "s_limits.h"
 
-#define MAX_LEN_OF_WORD 32
+#define ERROR_PRINT(fmt, args...)\
+    printf("Error!! "fmt, ##args);
+
+#define MAX_LEN_OF_WORD 65
 
 typedef enum TAG_ENUM_CALC_WORD_TYPE
 {
     CALC_WORD_TYPE_NUMBER = 0,
+    CALC_WORD_TYPE_VAR,
+    CALC_WORD_TYPE_VAR_ASSIGN,
     CALC_WORD_TYPE_ADD,
     CALC_WORD_TYPE_SUBTRACT,
     CALC_WORD_TYPE_MULTIPLY,
@@ -27,18 +32,139 @@ typedef enum TAG_ENUM_CALC_WORD_TYPE
     CALC_WORD_TYPE_UNKNOWN,
 }ENUM_CALC_WORD_TYPE;
 
+#define VAR_NAME_LEN 33
+#define MAX_VAR 64
+typedef struct TAG_STRU_VAR
+{
+    _S8 name[VAR_NAME_LEN];
+    _SD value;
+}STRU_VAR;
+
 PRIVATE STACK s_calc_stack;
+PRIVATE STRU_VAR vars[MAX_VAR];
+PRIVATE _S32 current_idle_var_index = 0;
+PRIVATE STRU_VAR last_var;
+
+PRIVATE _S8 *s_calc_get_last_var(_VOID)
+{
+    return last_var.name;
+}
+
+PRIVATE _S32 s_calc_get_var_index(_S8 *var)
+{
+    _S32 i = 0;
+    for(; i < MAX_VAR; i++)
+    {
+        if(strcmp(var, vars[i].name) == 0)
+        {
+            return i;
+        }
+    }
+
+    return S32_INVALID;
+}
+
+PRIVATE ENUM_RETURN s_calc_save_var(_S8 *var, _SD value)
+{
+    if(current_idle_var_index >= MAX_VAR)
+    {
+        ERROR_PRINT("Too more variables! '%s'\n", var);
+        return RETURN_FAILURE;
+    }
+
+    strncpy(vars[current_idle_var_index].name, var, VAR_NAME_LEN);
+    vars[current_idle_var_index].name[VAR_NAME_LEN - 1] = '\0';
+    vars[current_idle_var_index].value = value;
+    current_idle_var_index++;
+
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN s_calc_set_var_value(_S8* var, _SD value)
+{
+    ENUM_RETURN ret_val;
+    if(strlen(var) == 0)
+    {
+        ret_val = RETURN_FAILURE;
+    }
+    
+    _S32 i = s_calc_get_var_index(var);
+    if(i == S32_INVALID)
+    {
+        ret_val = RETURN_FAILURE;
+    }
+    else
+    {
+        vars[i].value = value;
+        ret_val =  RETURN_SUCCESS;
+    }
+
+    if(ret_val == RETURN_FAILURE)
+    {
+        ERROR_PRINT("The variable should be operated was not existed!\n");
+    }
+
+    return ret_val;
+}
+
+PRIVATE ENUM_RETURN s_calc_get_var_value(_S8 *var, _SD *value)
+{
+    *value = 0.0;
+    ENUM_RETURN ret_val;
+    if(strlen(var) > VAR_NAME_LEN - 1)
+    {
+        ERROR_PRINT("The variable '%s''s length was exceeded!\n", var);
+        return RETURN_FAILURE;
+    }
+    
+    _S32 i = s_calc_get_var_index(var);
+    if(i == S32_INVALID)
+    {
+        ret_val = s_calc_save_var(var, 0.0);
+    }
+    else
+    {
+        *value = vars[i].value;
+        ret_val = RETURN_SUCCESS;
+    }
+
+    if(ret_val == RETURN_SUCCESS)
+    {
+        strncpy(last_var.name, var, VAR_NAME_LEN);
+        last_var.name[VAR_NAME_LEN - 1] = '\0';
+        last_var.value = *value;
+    }
+
+    return ret_val;
+}
+
+PRIVATE _VOID s_calc_set_var_value_to_default(_VOID)
+{
+    for(_S32 i = 0; i < MAX_VAR; i++)
+    {
+        vars[i].name[0] = '\0';
+        vars[i].value = 0.0;
+    }
+
+    last_var.name[0] = '\0';
+    last_var.value = 0.0;
+
+    current_idle_var_index = 0;
+}
 
 PRIVATE ENUM_RETURN s_calc_rp_init(_VOID)
 {
     ENUM_RETURN ret_val = stack_create(&s_calc_stack);
     R_ASSERT(ret_val != RETURN_FAILURE, RETURN_FAILURE);
 
+    s_calc_set_var_value_to_default();
+    
     return RETURN_SUCCESS;
 }
 
 PRIVATE ENUM_RETURN s_calc_rp_clear(_VOID)
 {
+    //stack_print(s_calc_stack);
     ENUM_RETURN ret_val = stack_delete(&s_calc_stack);
     R_ASSERT(ret_val != RETURN_FAILURE, RETURN_FAILURE);
 
@@ -50,7 +176,7 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
     R_ASSERT(word != NULL, RETURN_FAILURE);
     R_ASSERT(value != NULL, RETURN_FAILURE);
 
-    ENUM_RETURN ret_val = RETURN_FAILURE;
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
     ENUM_CALC_WORD_TYPE temp_type = CALC_WORD_TYPE_UNKNOWN;
     _SD temp_value = 0.0;
     
@@ -59,7 +185,7 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
     {
         temp_type = CALC_WORD_TYPE_EMPTY;
     }
-    else if(strlen(word) == 1 && !isdigit(word[0]))
+    else if(strlen(word) == 1 && !isdigit(word[0]) && !isalpha(word[0]))
     {
         switch(word[0])
         {
@@ -77,6 +203,9 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
                 break;
             case '%':
                 temp_type = CALC_WORD_TYPE_MODULAR;
+                break;
+            case '=':
+                temp_type = CALC_WORD_TYPE_VAR_ASSIGN;
                 break;
             default:
                 temp_type = CALC_WORD_TYPE_UNKNOWN;
@@ -104,7 +233,9 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
         }
         else
         {
-            temp_type = CALC_WORD_TYPE_UNKNOWN;
+            temp_type = CALC_WORD_TYPE_VAR;
+            ret_val = s_calc_get_var_value(word, &temp_value);
+            
         }
     }
     else
@@ -122,18 +253,19 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
 
     if(temp_type == CALC_WORD_TYPE_UNKNOWN)
     {
-        printf("%s couldn't be parsed!\n", word);
+        ERROR_PRINT("'%s' couldn't be parsed!\n", word);
+        ret_val = RETURN_FAILURE;
     }
     
     *type = temp_type;
     *value = temp_value;
     
-    return RETURN_SUCCESS;
+    return ret_val;
 }
 
 PRIVATE ENUM_RETURN s_calc_rp_push(_SD value)
 {
-    //printf("push: %g\n", value);
+    DEBUG_PRINT("push: %g\n", value);
     return stack_push(s_calc_stack, (_VOID*)&value, sizeof(value));
 }
 
@@ -141,7 +273,7 @@ PRIVATE ENUM_RETURN s_calc_rp_pop(_SD *value)
 {
     size_t size_out;
     ENUM_RETURN ret_val = stack_pop(s_calc_stack, (_VOID *)value, &size_out,  sizeof(*value));
-    //printf("pop: %g\n", *value);
+    DEBUG_PRINT("pop: %g\n", *value);
 
     return ret_val;
 }
@@ -160,7 +292,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
         ret_val = s_get_word(str, word, MAX_LEN_OF_WORD, &word_len, &str);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-        //printf("word: %s\n", word);
+        DEBUG_PRINT("word: %s\n", word);
         
         //analyze word type: op, number, empty, other
         ret_val = s_calc_rp_get_word_type_and_value(word, &word_type, &value);
@@ -216,7 +348,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 }
                 else
                 {
-                    printf("devide zero!\n");
+                    ERROR_PRINT("Devide zero!\n");
                     SET_VAR_VALUE(value, DOUBLE_INFINITY_PLUS);
                     ret_val = s_calc_rp_push(value);
                     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -231,7 +363,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 if(op1 == 0.0)
                 {
-                    printf("modular zero!\n");
+                    ERROR_PRINT("Modular zero!\n");
                 }
                 
                 value = fmod(op2, op1);
@@ -276,6 +408,23 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 break;
                 
+            case CALC_WORD_TYPE_VAR:
+                ret_val = s_calc_rp_push(value);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
+
+            case CALC_WORD_TYPE_VAR_ASSIGN:
+                ret_val = s_calc_rp_pop(&op1);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                ret_val = s_calc_rp_pop(&op2);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                
+                ret_val = s_calc_set_var_value(s_calc_get_last_var(), op2);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+                ret_val = s_calc_rp_push(op2);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+                break;
 
             case CALC_WORD_TYPE_EMPTY:
                 ret_val = s_calc_rp_pop(&value);
@@ -307,7 +456,7 @@ ENUM_RETURN s_calc_rp(const _S8 *str, _SD *result)
     calc_ret = s_calc_rp_do(str, result);
     if(calc_ret == RETURN_FAILURE)
     {
-        printf("expression error!\n"); 
+        ERROR_PRINT("Expression error!\n"); 
         SET_VAR_VALUE(*result, DOUBLE_NAN_PLUS);
         R_LOG("s_calc_rp_do failed!");
     }

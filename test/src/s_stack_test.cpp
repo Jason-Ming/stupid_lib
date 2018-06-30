@@ -14,7 +14,6 @@ TEST_GROUP(s_stack)
 {
     _VOID setup()
     {
-        printf("setup...\n");
     	//设置自己的测试准备
         stack = NULL;
         expected_value = 0;
@@ -29,7 +28,6 @@ TEST_GROUP(s_stack)
     _VOID teardown()
     {
         //清理测试设置
-        printf("teardown...\n");
         retval = stack_delete(&stack);
         CHECK_EQUAL(RETURN_SUCCESS, retval);
     }
@@ -111,12 +109,12 @@ TEST_GROUP(s_stack)
 
     _VOID clear(_VOID)
     {
-        stack_print(stack);
+        //stack_print(stack);
         retval = stack_clear(stack);
         CHECK_EQUAL(RETURN_SUCCESS, retval);
 
         CHECK_EQUAL(0, count());
-        stack_print(stack);
+        //stack_print(stack);
     }
     
     STACK stack;

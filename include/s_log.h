@@ -7,6 +7,13 @@
 #include "s_time.h"
 #include "s_type.h"
 
+#ifdef DEBUG_SWITCH
+#define DEBUG_PRINT(fmt, args...)\
+    printf("debuginfo: "fmt, ##args);
+#else
+#define DEBUG_PRINT(fmt, args...)
+#endif
+
 char* log_getfn(void);
 
 #define LOG_TYPE_FILE 11
