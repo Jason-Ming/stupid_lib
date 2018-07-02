@@ -24,6 +24,17 @@ __BEGIN_C_DECLS
 _S32 count_words(const _S8* filename);
 _S32 format_words(const _S8* filename, const _S8 *separator);
 _S32 s_getline(FILE *fp, _S8 line[], _S32 maxline);
+
+/**
+ * @author: Jason Ming
+ * @description: get a word from source
+ * @param source: the source string
+ * @param word_buf: the buffer to store the word
+ * @param buf_size: the size of word_buf
+ * @param word_len: the word len
+ * @param next: the pointer of the next word 
+ * @return: RETURN_SUCCESS£¬RETURN_FAILUE
+ */
 ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next);
 
 ENUM_RETURN s_reverse(_S8 *pstr_buf);

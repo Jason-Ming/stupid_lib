@@ -247,7 +247,7 @@ ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
     
     R_ASSERT(p_stm_temp->current_state != state, RETURN_FAILURE);
     
-    R_LOG("state change from %s to %s", 
+    DEBUG_PRINT("state change from %s to %s", 
         get_stm_state_info(p_stm_temp, p_stm_temp->current_state),
         get_stm_state_info(p_stm_temp, state));
 

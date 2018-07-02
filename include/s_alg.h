@@ -7,8 +7,15 @@
 
 
 __BEGIN_C_DECLS
+
+/* binsearch: find x in v[0] <= v[1] <= ... <= v[n-1] */ 
 _S32 binsearch(_S32 x, _S32 v[], _S32 n);
 _S32 binsearch2(_S32 x, _S32 v[], _S32 n);
+
+/* O(n^2) */
+_VOID insert_sort(_S32 a[], _S32 n);
+
+/* shell sort O(n^2) */
 _VOID shell_sort(_S32 a[], _S32 n);
 
 /**

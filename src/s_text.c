@@ -19,7 +19,7 @@
 
 #define OUTPUT_STR(c, dest, size)\
     do{\
-        R_LOG("OUTPUT_STR: %c", c);\
+        DEBUG_PRINT("OUTPUT_STR: %c", c);\
         if(size > 1)\
         {\
             *dest++ = c;\
@@ -31,7 +31,7 @@
     do{\
         if(begin != '\0' && end != '\0')\
         {\
-            R_LOG("OUTPUT_STR_RANGE: %c~%c", begin, end);\
+            DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", begin, end);\
             for(_S8 c = begin; c <= end; c++)\
             {\
                 OUTPUT_STR(c, dest, size);\
@@ -42,7 +42,7 @@
 
 #define OUTPUT_STR_MULTI(c, num, dest, size) \
     do{\
-        R_LOG("OUTPUT_STR_MULTI: %c, %zd", c, num);\
+        DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", c, num);\
         for(_S32 i = 0; i < num; i++)\
         {\
             OUTPUT_STR(c, dest, size);\
@@ -681,7 +681,6 @@ PRIVATE ENUM_RETURN s_expand_stm_preproc()
 
     if(s_expand_run_data.c == '\0')
     {
-        R_LOG("state = %d", EXPAND_STATE_END);
         ret_val = set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
@@ -716,7 +715,6 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_conc()
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
-        R_LOG("state = %d", EXPAND_STATE_END);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
         R_RET_LOG(RETURN_FAILURE, "unexpected char: %c", c);
     }
@@ -740,7 +738,6 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_begin()
 
     if(c == '-')
     {
-        R_LOG("state = %d", EXPAND_STATE_RANGE_TO);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_TO);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
@@ -798,7 +795,6 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
         //Ô­ÑùÊä³ö
         OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
         OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
-        R_LOG("state = %d", EXPAND_STATE_CONC);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_CONC);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
@@ -838,7 +834,6 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_end()
 
     if(c == '-')
     {
-        R_LOG("state = %d", EXPAND_STATE_RANGE_TO);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_TO);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/

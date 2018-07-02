@@ -2,15 +2,17 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "s_defines.h"
 #include "s_log.h"
 #include "s_alg.h"
 
-/* binsearch: find x in v[0] <= v[1] <= ... <= v[n-1] */ 
+
 _S32 binsearch(_S32 x, _S32 v[], _S32 n) 
-{ 
-    _S32 low, high, mid; 
+{
+    clock_t time_taken = clock();
+    _S32 low, high, mid, result = -1/* no match */; 
     low = 0; 
     high = n - 1; 
     
@@ -29,15 +31,20 @@ _S32 binsearch(_S32 x, _S32 v[], _S32 n)
         }
         else /* found match */ 
         {
-            return mid; 
+            result = mid;
+            break;
         }
-    } 
-    return -1; /* no match */ 
+    }
+    
+    time_taken = clock() - time_taken;
+    DEBUG_PRINT("binsearch took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    return result;
 } 
 
 
 _S32 binsearch2(_S32 x, _S32 v[], _S32 n) 
-{ 
+{
+    clock_t time_taken = clock();
     int low, high, mid;
     low = -1;
     high = n;
@@ -48,6 +55,10 @@ _S32 binsearch2(_S32 x, _S32 v[], _S32 n)
     else
     high = mid;
     }
+
+    time_taken = clock() - time_taken;
+    DEBUG_PRINT("binsearch2 took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    
     if (high == n || v[high] != x)
     return -1;
     else
