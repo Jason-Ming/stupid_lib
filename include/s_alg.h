@@ -18,6 +18,10 @@ _VOID insert_sort(_S32 a[], _S32 n);
 /* shell sort O(n^2) */
 _VOID shell_sort(_S32 a[], _S32 n);
 
+/* qsort: sort v[left]...v[right] into increasing order */
+_VOID quick_sort(_S32 v[], _S32 left, _S32 right);
+
+
 /**
  * @author: Jason Ming
  * @description: calculate the reverse polish expression

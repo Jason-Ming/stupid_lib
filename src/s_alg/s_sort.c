@@ -49,3 +49,42 @@ _VOID shell_sort(_S32 a[], _S32 n)
     DEBUG_PRINT("shell_sort took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
 }
 
+
+/* interchange v[i] and v[j] */
+_VOID swap(_S32 v[], _S32 i, _S32 j)
+{
+    _S32 temp;
+    temp = v[i];
+    v[i] = v[j];
+    v[j] = temp;
+}
+
+/* recursive version */
+/* quick_sort: sort v[left]...v[right] into increasing order */
+_VOID quick_sort(_S32 v[], _S32 left, _S32 right)
+{
+    _S32 i, last;
+
+    /* do nothing if array contains fewer than two elements */
+    if(left >= right)
+    {
+        return;
+    }
+
+    /* move partition elements to v[0] */
+    swap(v, left, (left + right)/2);
+
+    last = left;
+    for(i = left + 1; i <= right; i++)
+    {
+        if(v[i] < v[left])
+        {
+            swap(v, ++last, i);
+        }
+    }
+
+    swap(v, left, last);
+    quick_sort(v, left, last - 1);
+    quick_sort(v, last + 1, right);
+}
+
