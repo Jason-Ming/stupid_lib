@@ -130,6 +130,7 @@ PRIVATE ENUM_RETURN process_errors(void)
         return RETURN_FAILURE;
     }
 
+    display_success_info();
     return RETURN_SUCCESS;
 }
 
@@ -177,6 +178,6 @@ ENUM_RETURN process(int argc, char **argv)
     ret_val = process_do();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
-    return process_errors();    
+    return process_errors();
 }
 

@@ -161,33 +161,38 @@ _S32 format_words(const _S8* filename, const _S8 *separator)
     return retval;
 }
 
-/* read a line _S32o line, return length */
-_S32 s_getline(FILE *fp, _S8 line[], _S32 maxline)
+ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length)
 {
+    R_ASSERT(fp != NULL, RETURN_FAILURE);
+    R_ASSERT(buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(length != NULL, RETURN_FAILURE);
+
     _S32 c;
-    _S32 i = 0;
+    _S32 len_temp = 0;
 
     while((c = fgetc(fp)) != EOF && c != '\n')
     {
-        if(i < maxline-1)
+        if(len_temp < buffer_size-1)
         {
-            line[i] = c;
+            buffer[len_temp] = c;
         }
-        ++i;
+        ++len_temp;
     }
 
     if(c == '\n')
     {
-        if(i < (maxline-1))
+        if(len_temp < (buffer_size-1))
         {
-            line[i] = c;
+            buffer[len_temp] = c;
         }
-        ++i;
+        ++len_temp;
     }
 
-    line[(maxline - 1) > i ? i : (maxline - 1)] = '\0';
+    buffer[(buffer_size - 1) > len_temp ? len_temp : (buffer_size - 1)] = '\0';
 
-    return i;
+    *length = len_temp;
+
+    return RETURN_SUCCESS;
 }
 
 ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next)
@@ -253,7 +258,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
 
     memset(pstr_buf_temp, '\0', buf_temp_len);
 
-    printf("source: %s\nsource len: %d\ndest: %s\ndest len: %d\n",
+    DEBUG_PRINT("source: %s\nsource len: %d\ndest: %s\ndest len: %d\n",
         pstr_buf_source, len, pstr_buf_temp, buf_temp_len);
     
     _S32 pos = 0;
@@ -276,7 +281,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
                     "pos = %d, start_pos = %d",
                     buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
 
-                printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+                DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
                     "pos = %d, start_pos = %d\n",
                     buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
                 
@@ -318,7 +323,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
         "pos = %d, start_pos = %d",
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
 
-    printf("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+    DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
         "pos = %d, start_pos = %d\n",
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
     strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);

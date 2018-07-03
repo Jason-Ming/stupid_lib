@@ -23,7 +23,11 @@
 __BEGIN_C_DECLS
 _S32 count_words(const _S8* filename);
 _S32 format_words(const _S8* filename, const _S8 *separator);
-_S32 s_getline(FILE *fp, _S8 line[], _S32 maxline);
+
+
+/* read a line into line, return length */
+ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length);
+
 
 /**
  * @author: Jason Ming
@@ -37,8 +41,14 @@ _S32 s_getline(FILE *fp, _S8 line[], _S32 maxline);
  */
 ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next);
 
+/* reverses the character string s . */
 ENUM_RETURN s_reverse(_S8 *pstr_buf);
+
+/* fold long input lines into two or more shorter lines after the last
+non-blank character that occurs before the n -th column of input */
 ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num);
+
+
 ENUM_RETURN s_hstrtou64(const _S8 *str, _U64 *value);
 ENUM_RETURN s_hstrtos64(const _S8 *str, _S64 *value);
 ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value);
@@ -47,13 +57,36 @@ ENUM_RETURN s_s32tostrb(_S32 value, _S32 b, _S8 *dest, size_t size);
 ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size);
 ENUM_RETURN s_strtosd(const _S8 *str, _SD *value);
 
+/* deletes each character in the
+string s1 that matches any character in the string s2 . */
 _VOID squeeze(_S8 s1[], const _S8 s2[]);
+
+/* returns the first location in the string s1
+where any character from the string s2 occurs, or -1 if s1 contains no characters
+from s2 . (The standard library function strpbrk does the same job but returns a
+pointer to the location.) */
 _S8* any(_S8 s1[], const _S8 s2[]);
+
+/* expands shorthand notations like a-z in the
+string s1 into the equivalent complete list abc...xyz in s2 . Allow for letters of either
+case and digits, and be prepared to handle cases like a-b-c and a-z0-9 and -a-z .
+Arrange that a leading or trailing - is taken literally. */
 ENUM_RETURN s_expand(const _S8 *s1, _S8 *s2, size_t size);
+
+/* converts characters like newline and tab into
+visible escape sequences like \n and \t as it copies the string t to s . */
 _VOID s_escape(_S8* source, _S8* dest, size_t size);
+
+/* converting escape sequences into the real characters. */
 _VOID s_unescape(_S8* source, _S8* dest, size_t size);
+
+/* trim: remove trailing blanks, tabs, newlines */
 ENUM_RETURN s_trim(_S8 *source);
+
+/* strindex: return index of t in s, -1 if none */
 ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);
+
+/* returns the position of the rightmost occurrence of t in s , or -1 if there is none */
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);
 
 

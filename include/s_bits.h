@@ -17,9 +17,19 @@
 __BEGIN_C_DECLS
 
 _U64 get_bits(_U64 x, _S32 p, _S32 n);
+
+/* returns x with the n bits that begin at
+position p set to the rightmost n bits of y, leaving the other bits unchanged */
 _U64 set_bits(_U64 x, _S32 p, _S32 n, _U64 y);
+
+/* returns x with the n bits that begin at position p
+inverted (i.e., 1 changed into 0 and vice versa), leaving the others unchanged */
 _U64 invert_bits(_U64 x, _S32 p, _S32 n);
+
+/* returns the value of the integer x rotated to the right by n bit positions. */
 _U64 right_rot_bits(_U64 x, _S32 n);
+
+/* counts the number of 1-bits in its integer argument */
 _U32 bits_count(_U64 x);
 __END_C_DECLS
 

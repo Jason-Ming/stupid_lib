@@ -51,7 +51,7 @@ _VOID shell_sort(_S32 a[], _S32 n)
 
 
 /* interchange v[i] and v[j] */
-_VOID swap(_S32 v[], _S32 i, _S32 j)
+PRIVATE _VOID swap(_S32 v[], _S32 i, _S32 j)
 {
     _S32 temp;
     temp = v[i];

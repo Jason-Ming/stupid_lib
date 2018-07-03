@@ -433,11 +433,8 @@ ENUM_RETURN parse_options(int argc, char **argv)
         //i++;
     }
 
-    if(is_option_miss_to_subcmd(current_subcmd_name) == BOOLEAN_TRUE)
-    {
-        ret_val = add_current_system_error(ERROR_CODE_MISSING_OPTION, current_subcmd_name);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    }
+    ret_val = check_missing_options_of_subcmd(current_subcmd_name);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     set_argv_indicator(i);
     

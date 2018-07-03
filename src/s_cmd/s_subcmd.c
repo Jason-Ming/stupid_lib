@@ -399,30 +399,35 @@ STRU_OPTION_RUN_BLOCK *get_option_rb_by_name(const char* subcmd_name, const char
     return NULL;
 }
 
-ENUM_BOOLEAN is_option_miss_to_subcmd(const char *subcmd_name)
+ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name)
 {
-    R_ASSERT(subcmd_name != NULL, BOOLEAN_TRUE);
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
     STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
-    R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_TRUE);
-
-    STRU_OPTION_RUN_BLOCK *p_option_rb = get_option_rb_list_head_by_name(subcmd_name);
-    if(p_option_rb != NULL)
-    {
-        return BOOLEAN_FALSE;
-    }
+    R_ASSERT(p_subcmd_cb != NULL, RETURN_FAILURE);
 
     STRU_OPTION_CONTROL_BLOCK *p_option_cb = p_subcmd_cb->option_cbs;
+    STRU_OPTION_RUN_BLOCK *p_option_rb = NULL;
 
     while(p_option_cb != NULL)
     {
-        if(p_option_cb->option_type == OPTION_TYPE_MANDATORY)
+        if(p_option_cb->option_type != OPTION_TYPE_MANDATORY)
         {
-            return BOOLEAN_TRUE;
+            p_option_cb = p_option_cb->next;
+            continue;
         }
+        
+        p_option_rb = get_option_rb_by_name(subcmd_name, p_option_cb->option);
+        if(p_option_rb == NULL)
+        {
+            ret_val = add_current_system_error(ERROR_CODE_MISSING_OPTION, p_option_cb->option);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        }
+  
         p_option_cb = p_option_cb->next;
     }
 
-    return BOOLEAN_FALSE;
+    return RETURN_SUCCESS;
 }
 
 void display_subcmd_help_info(const char *subcmd_name)
@@ -551,8 +556,14 @@ ENUM_RETURN process_subcmds(void)
         }
         
         user_process_result = p->p_subcmd_cb->handler(p->option_rb);
-        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
-
+        if(user_process_result == RETURN_FAILURE)
+        {
+            ret_val = add_current_system_error(ERROR_CODE_FAIL, NULL);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            
+            R_LOG("process subcmd [%s] handler failed!\n", p->p_subcmd_cb->subcmd);
+        }
+        
         p = p->next;
     }
 

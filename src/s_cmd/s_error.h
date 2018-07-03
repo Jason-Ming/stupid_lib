@@ -4,6 +4,7 @@
 #include "s_defines.h"
 
 __BEGIN_C_DECLS
+void display_success_info(void);
 void display_error_info(void);
 ENUM_RETURN init_error_info(void);
 ENUM_BOOLEAN is_current_error_exist(void);

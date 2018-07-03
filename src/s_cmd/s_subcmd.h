@@ -21,7 +21,7 @@ ENUM_RETURN add_a_new_option_rb_to_subcmd_rb(STRU_OPTION_RUN_BLOCK *p_new);
 
 STRU_OPTION_RUN_BLOCK *get_option_rb_by_name(const char* subcmd_name, const char* option_name);
 
-ENUM_BOOLEAN is_option_miss_to_subcmd(const char *subcmd_name);
+ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name);
 
 ENUM_RETURN parse_subcmds(int argc, char **argv);
 ENUM_RETURN process_subcmds(void);
