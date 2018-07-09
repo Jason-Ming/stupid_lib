@@ -470,6 +470,8 @@ PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
 
     R_FALSE_RET_LOG(i < argc, RETURN_SUCCESS, "i = %d, argc = %d", i, argc);
 
+    R_LOG("total args: %d", argc);
+
     R_LOG("i = %d, argv = %s", i, argv[i]);
     
     /* 当前subcmd未在控制块中注册过则停止处理 */
@@ -536,8 +538,10 @@ ENUM_RETURN process_subcmds(void)
         /* 处理options失败时，直接停止处理 */
         ret_val = process_options(p->p_subcmd_cb->option_cbs, p->option_rb, &user_process_result);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        R_FALSE_RET_LOG(user_process_result == RETURN_SUCCESS, 
+        R_FALSE_RET_DO_LOG(user_process_result == RETURN_SUCCESS, 
             RETURN_SUCCESS, 
+            ret_val = add_current_system_error(ERROR_CODE_FAIL, NULL);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE),
             "process subcmd [%s] options failed!\n", 
             p->p_subcmd_cb->subcmd);
         

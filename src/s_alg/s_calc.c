@@ -429,6 +429,8 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
             case CALC_WORD_TYPE_EMPTY:
                 ret_val = s_calc_rp_pop(&value);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+                /* this pop must be failed, or the expression is error */
                 ret_val = s_calc_rp_pop(&value);
                 R_ASSERT(ret_val == RETURN_FAILURE, RETURN_FAILURE);
                 

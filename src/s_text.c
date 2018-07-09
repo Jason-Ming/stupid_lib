@@ -1191,3 +1191,23 @@ ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index)
     return RETURN_SUCCESS;
 }
 
+ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(target != NULL, RETURN_FAILURE);
+    R_ASSERT(occur != NULL, RETURN_FAILURE);
+
+    *occur = BOOLEAN_FALSE;
+    size_t len_s = strlen(source);
+    size_t len_t = strlen(target);
+
+    if(len_s < len_t)
+    {
+        return RETURN_SUCCESS;
+    }
+
+    *occur = (strcmp(source + len_s - len_t, target) == 0?BOOLEAN_TRUE:BOOLEAN_FALSE);
+    return RETURN_SUCCESS;
+}
+
+

@@ -65,6 +65,7 @@ __BEGIN_C_DECLS
 ENUM_RETURN default_option_proc_handler(STRU_ARG *arg);
 ENUM_RETURN register_user_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info);
 ENUM_RETURN add_current_user_error(int code, const char* additional_info);
+ENUM_RETURN add_current_system_error(int code, const char* additional_info);
 
 
 ENUM_RETURN register_introduction(const char *introduction);

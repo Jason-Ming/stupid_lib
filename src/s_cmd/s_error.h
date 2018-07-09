@@ -8,7 +8,7 @@ void display_success_info(void);
 void display_error_info(void);
 ENUM_RETURN init_error_info(void);
 ENUM_BOOLEAN is_current_error_exist(void);
-ENUM_RETURN add_current_system_error(int code, const char* additional_info);
+
 
 __END_C_DECLS
 

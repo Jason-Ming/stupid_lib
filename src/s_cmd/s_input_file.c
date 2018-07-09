@@ -54,6 +54,7 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
     
     while(i < argc)
     {
+        /* if an option occured, break */
         if(argv[i][0] == '-')
         {
             break;

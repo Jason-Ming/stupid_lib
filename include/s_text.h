@@ -89,7 +89,8 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);
 /* returns the position of the rightmost occurrence of t in s , or -1 if there is none */
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);
 
-
+/* if the string t occurs at the end of the string s */
+ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur);
 
 __END_C_DECLS
 

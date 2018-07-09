@@ -7,6 +7,8 @@
 #include "s_time.h"
 #include "s_type.h"
 
+#define DEBUG_SWITCH 1
+
 #ifdef DEBUG_SWITCH
 #define DEBUG_PRINT(fmt, args...)\
     printf("debuginfo: "fmt, ##args);
