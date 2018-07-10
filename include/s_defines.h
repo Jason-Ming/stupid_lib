@@ -5,6 +5,8 @@
 
     
 #define FREE(p) do{ if(p != NULL){free(p); p = NULL;}}while(0);
+#define FCLOSE(p) do{ if(p != NULL){fclose(p); p = NULL;}}while(0);
+
 #define MIN(x, y) ((x) < (y)? (x):(y))
 #define MAX(x, y) ((x) > (y)? (x):(y))
 

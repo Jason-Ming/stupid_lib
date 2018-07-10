@@ -172,23 +172,17 @@ ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length)
 
     while((c = fgetc(fp)) != EOF && c != '\n')
     {
-        if(len_temp < buffer_size-1)
-        {
-            buffer[len_temp] = c;
-        }
+        OUTPUT_STR(c, buffer, buffer_size);
         ++len_temp;
     }
 
     if(c == '\n')
     {
-        if(len_temp < (buffer_size-1))
-        {
-            buffer[len_temp] = c;
-        }
+        OUTPUT_STR(c, buffer, buffer_size);
         ++len_temp;
     }
 
-    buffer[(buffer_size - 1) > len_temp ? len_temp : (buffer_size - 1)] = '\0';
+    OUTPUT_STR('\0', buffer, buffer_size);
 
     *length = len_temp;
 
@@ -1210,4 +1204,105 @@ ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur)
     return RETURN_SUCCESS;
 }
 
+
+PRIVATE _S32 cal_space_number(_S32 offset, _S32 tab_stop)
+{
+    return tab_stop - offset % tab_stop;
+}
+
+ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(len > 0, RETURN_FAILURE);
+    R_ASSERT(tab_stop > 0, RETURN_FAILURE);
+    
+    _S32 offset = 0;
+    _S32 j = 0;
+    while(*source != '\0')
+    {
+        if(*source != ' ')
+        {
+            OUTPUT_STR(*source, dest, len);
+            if(*source == '\n' || *source == '\t')
+            {
+                offset = 0;
+            }
+            else
+            {
+                offset++;
+            }
+            source++;
+        }
+        else
+        {
+            j = cal_space_number(offset, tab_stop);
+            /* are there enough spaces to replace */
+            _S32 k = 0;
+            for(; *(source+k) == ' '; k++)
+            {
+            }
+
+            if(j <= k)
+            {
+                OUTPUT_STR('\t', dest, len);
+                offset = 0;
+                source += j;
+            }
+            else if(*(source + k) == '\t')
+            {
+                OUTPUT_STR('\t', dest, len);
+                offset = 0;
+                source += (k + 1);
+            }
+            else
+            {
+                for(_S32 l = 0; l < k; l++)
+                {
+                    OUTPUT_STR(*source, dest, len);
+                    offset++;
+                    source++;
+                }
+            }
+        }
+    };
+
+    OUTPUT_STR('\0', dest, len);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(len > 0, RETURN_FAILURE);
+    R_ASSERT(tab_stop > 0, RETURN_FAILURE);
+
+    _S32 offset = 0;
+    _S32 j = 0;
+    while(*source != '\0')
+    {
+        if(*source != '\t')
+        {
+            OUTPUT_STR(*source, dest, len);
+            (*source == '\n')?(offset = 0):(offset++);
+        }
+        else
+        {
+            j = cal_space_number(offset, tab_stop);
+            for(_S32 k = 0; k < j; k++)
+            {
+                OUTPUT_STR(' ', dest, len);
+                
+            }
+            offset = 0;
+        }
+
+        source++;
+    };
+    OUTPUT_STR('\0', dest, len);
+
+    return RETURN_SUCCESS;
+}
 

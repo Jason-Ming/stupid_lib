@@ -18,6 +18,7 @@
 typedef struct TAG_STRU_SUBCMD_CONTROL_BLOCK
 {
     char* subcmd;
+    ENUM_BOOLEAN need_input_file;
     FUNC_SUBCMD_PROC handler;
     struct TAG_STRU_OPTION_CONTROL_BLOCK *option_cbs;
     char* help_info;
@@ -118,6 +119,7 @@ PRIVATE ENUM_RETURN add_a_new_subcmd_cb_to_subcmd_cb_list(STRU_SUBCMD_CONTROL_BL
 
 PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new, 
     const char* subcmd_name, 
+    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
@@ -128,6 +130,7 @@ PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new,
 
     (*pp_new)->subcmd = NULL;
     (*pp_new)->option_cbs = NULL;
+    (*pp_new)->need_input_file = need_input_file;
     (*pp_new)->handler = handler;
     (*pp_new)->help_info = NULL;
     (*pp_new)->next = NULL;
@@ -157,12 +160,13 @@ PRIVATE void get_a_new_subcmd_cb_do_error(STRU_SUBCMD_CONTROL_BLOCK *p_new)
 
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *get_a_new_subcmd_cb(
     const char* subcmd_name, 
+    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
     ENUM_RETURN ret_val;
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, handler, help_info);
+    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, need_input_file, handler, help_info);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, NULL, get_a_new_subcmd_cb_do_error(p_new));
 
     return p_new;
@@ -183,20 +187,30 @@ ENUM_BOOLEAN is_subcmd_name_valid(const char* subcmd_name)
     return BOOLEAN_TRUE;
 }
 
+ENUM_BOOLEAN is_subcmd_need_input_files(const char *subcmd_name)
+{
+    STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
+    R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_FALSE);
+
+    return p_subcmd_cb->need_input_file;
+}
+
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,
+    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
     R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
     R_ASSERT_LOG(BOOLEAN_TRUE == is_subcmd_name_valid(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
+    R_ASSERT_LOG(need_input_file == BOOLEAN_FALSE || need_input_file == BOOLEAN_TRUE, RETURN_FAILURE, "need_input_file: %d", need_input_file);
     R_ASSERT(handler != NULL, RETURN_FAILURE);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
     R_ASSERT(is_subcmd_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
     
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    p_new = get_a_new_subcmd_cb(subcmd_name, handler, help_info);
+    p_new = get_a_new_subcmd_cb(subcmd_name, need_input_file, handler, help_info);
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val;
@@ -399,6 +413,14 @@ STRU_OPTION_RUN_BLOCK *get_option_rb_by_name(const char* subcmd_name, const char
     return NULL;
 }
 
+ENUM_BOOLEAN is_current_subcmd_option_rb_existed(_VOID)
+{
+    STRU_SUBCMD_RUN_BLOCK *p_subcmd_rb = get_current_subcmd_rb();
+    R_ASSERT(p_subcmd_rb != NULL, BOOLEAN_FALSE);
+
+    return (p_subcmd_rb->option_rb == NULL)?BOOLEAN_FALSE:BOOLEAN_TRUE;
+}
+
 ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
@@ -536,6 +558,7 @@ ENUM_RETURN process_subcmds(void)
     while(p != NULL)
     {        
         /* 处理options失败时，直接停止处理 */
+        R_ASSERT(p->p_subcmd_cb != NULL, RETURN_FAILURE);
         ret_val = process_options(p->p_subcmd_cb->option_cbs, p->option_rb, &user_process_result);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         R_FALSE_RET_DO_LOG(user_process_result == RETURN_SUCCESS, 
@@ -551,7 +574,7 @@ ENUM_RETURN process_subcmds(void)
             p->p_subcmd_cb->subcmd);
 
         //没有处理任何的option，需要检查是否有
-        if(p->option_rb == NULL && get_input_file_num() == 0)
+        if(is_subcmd_need_input_files(p->p_subcmd_cb->subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
         {
             ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, p->p_subcmd_cb->subcmd);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

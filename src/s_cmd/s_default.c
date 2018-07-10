@@ -27,6 +27,16 @@ ENUM_RETURN default_option_proc_handler(STRU_ARG *arg)
     return RETURN_SUCCESS;
 }
 
+ENUM_RETURN default_subcmd_proc_handler(STRU_OPTION_RUN_BLOCK *value)
+{
+    if(is_current_subcmd_option_rb_existed() == BOOLEAN_FALSE)
+    {
+        display_subcmd_help_info(get_current_subcmd_name());
+    }
+    
+    return RETURN_SUCCESS;
+}
+
 PRIVATE ENUM_RETURN default_option_h_proc_handler(STRU_ARG *arg)
 {
     display_subcmd_help_info(get_current_subcmd_name());
@@ -56,6 +66,7 @@ ENUM_RETURN register_default_subcmd(void)
 {
     ENUM_RETURN ret_val = register_subcmd(
         "help", 
+        BOOLEAN_FALSE,
         subcmd_help_proc, 
         "display help information");
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

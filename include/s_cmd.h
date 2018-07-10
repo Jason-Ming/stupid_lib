@@ -62,7 +62,11 @@ typedef enum TAG_ENUM_ERROR_CODE
 #define MAX_NUM_OF_USER_DEFINE_ERROR 200
 
 __BEGIN_C_DECLS
+void display_subcmd_help_info(const char *subcmd_name);
+
 ENUM_RETURN default_option_proc_handler(STRU_ARG *arg);
+ENUM_RETURN default_subcmd_proc_handler(STRU_OPTION_RUN_BLOCK *value);
+
 ENUM_RETURN register_user_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info);
 ENUM_RETURN add_current_user_error(int code, const char* additional_info);
 ENUM_RETURN add_current_system_error(int code, const char* additional_info);
@@ -78,6 +82,7 @@ const char *get_input_file_of_subcmd(const char *subcmd_name);
 
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,
+    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info);
 

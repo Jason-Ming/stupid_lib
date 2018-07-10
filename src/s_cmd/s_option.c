@@ -406,7 +406,7 @@ ENUM_RETURN parse_options(int argc, char **argv)
             {
                 R_LOG("i = %d, argv = %s", i, argv[i]);
                 
-                if(argv[i][0] == '-')
+                if(is_option_format(argv[i]) == BOOLEAN_TRUE)
                 {
                     break;
                 }

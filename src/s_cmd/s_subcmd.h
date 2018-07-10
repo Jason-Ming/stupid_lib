@@ -7,7 +7,7 @@
 #include "s_option.h"
 
 __BEGIN_C_DECLS
-void display_subcmd_help_info(const char *subcmd_name);
+
 void display_all_subcmd_help_info(void);
 
 ENUM_BOOLEAN is_subcmd_registered(const char *subcmd_name);
@@ -20,6 +20,7 @@ ENUM_RETURN add_a_new_option_cb_to_subcmd_cb(STRU_OPTION_CONTROL_BLOCK *p_new);
 ENUM_RETURN add_a_new_option_rb_to_subcmd_rb(STRU_OPTION_RUN_BLOCK *p_new);
 
 STRU_OPTION_RUN_BLOCK *get_option_rb_by_name(const char* subcmd_name, const char* option_name);
+ENUM_BOOLEAN is_current_subcmd_option_rb_existed(_VOID);
 
 ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name);
 

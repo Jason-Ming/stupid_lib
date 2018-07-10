@@ -92,6 +92,13 @@ ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);
 /* if the string t occurs at the end of the string s */
 ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur);
 
+/* replaces strings of blanks with the minimum number of tabs and blanks to achieve the same spacing. */
+ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
+
+/* replaces tabs in the input with the proper number of blanks to space to the next tab stop. */
+ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
+
+
 __END_C_DECLS
 
 #endif
