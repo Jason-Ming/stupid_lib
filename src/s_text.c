@@ -11,6 +11,8 @@
 #include "s_mem.h"
 #include "s_stm.h"
 
+#define MAX_CHAR 256
+
 #define IN 1 /* inside a word */
 #define OUT 0 /* outside a word */
 
@@ -947,53 +949,64 @@ ENUM_RETURN s_expand(const _S8 *source, _S8 *dest, size_t size)
     return RETURN_SUCCESS;
 }
 
-_VOID squeeze(_S8 s1[], const _S8 s2[])
+ENUM_RETURN s_squeeze(_S8 *source, const _S8 *target)
 {
-    _S8 s[256] = {0};
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(target != NULL, RETURN_FAILURE);
+
+    R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
+    
+    _S8 s[MAX_CHAR] = {0};
     _S32 c;
-    while((c = *s2) != '\0')
+    while((c = *target) != '\0')
     {
         s[c] = 1;
-        s2++;
+        target++;
     }
-    _S8 *p = s1;
-    while((c = *s1) != '\0')
+    _S8 *p = source;
+    while((c = *source) != '\0')
     {
         if(s[c] == 0)
         {
-            *p = *s1;
+            *p = *source;
             p++;
         }
-        s1++;
+        source++;
     }
     *p = '\0';
+
+    return RETURN_SUCCESS;
 }
 
-_S8* any(_S8 s1[], const _S8 s2[])
+ENUM_RETURN s_any(const _S8 *source, const _S8 *target, const _S8**pp_occur)
 {
-    _S8 s[256] = {0};
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(target != NULL, RETURN_FAILURE);
+    R_ASSERT(pp_occur != NULL, RETURN_FAILURE);
+    *pp_occur = NULL;
+
+    R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
+    
+    _S8 s[MAX_CHAR] = {0};
     _S32 c;
-    while((c = *s2) != '\0')
+    while((c = *target) != '\0')
     {
         s[c] = 1;
-        s2++;
+        target++;
     }
     
-    _S8 *p = NULL;
-    while((c = *s1) != '\0')
+    while((c = *source) != '\0')
     {
         if(s[c] == 1)
         {
-            p = s1;
+            *pp_occur = source;
             break;
         }
-        s1++;
+        source++;
     }
 
-    return p;
+    return RETURN_SUCCESS;
 }
-
-#define MAX_CHAR 256
 
 ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
 {

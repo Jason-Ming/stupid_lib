@@ -58,14 +58,15 @@ ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size);
 ENUM_RETURN s_strtosd(const _S8 *str, _SD *value);
 
 /* deletes each character in the
-string s1 that matches any character in the string s2 . */
-_VOID squeeze(_S8 s1[], const _S8 s2[]);
+string source that matches any character in the string target . */
+ENUM_RETURN s_squeeze(_S8 *source, const _S8 *target);
+
 
 /* returns the first location in the string s1
 where any character from the string s2 occurs, or -1 if s1 contains no characters
 from s2 . (The standard library function strpbrk does the same job but returns a
 pointer to the location.) */
-_S8* any(_S8 s1[], const _S8 s2[]);
+ENUM_RETURN s_any(const _S8 *source, const _S8 *target, const _S8**pp_occur);
 
 /* expands shorthand notations like a-z in the
 string source into the equivalent complete list abc...xyz in dest . Allow for letters of either
