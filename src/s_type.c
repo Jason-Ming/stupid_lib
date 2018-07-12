@@ -14,7 +14,7 @@ struct E {
 };
 #define _SET_LONG_DOUBLE_VALUE(ld, value) SET_LONG_DOUBLE_VALUE(ld, CONC_(value, U64), CONC_(value, L64))
 
-void print_types(void)
+void s_print_types(void)
 {
     struct T t = {0x12,0x3456789a,0xbc};
     struct E e;

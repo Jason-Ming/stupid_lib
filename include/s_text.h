@@ -68,28 +68,28 @@ pointer to the location.) */
 _S8* any(_S8 s1[], const _S8 s2[]);
 
 /* expands shorthand notations like a-z in the
-string s1 into the equivalent complete list abc...xyz in s2 . Allow for letters of either
+string source into the equivalent complete list abc...xyz in dest . Allow for letters of either
 case and digits, and be prepared to handle cases like a-b-c and a-z0-9 and -a-z .
 Arrange that a leading or trailing - is taken literally. */
-ENUM_RETURN s_expand(const _S8 *s1, _S8 *s2, size_t size);
+ENUM_RETURN s_expand(const _S8 *source, _S8 *dest, size_t size);
 
 /* converts characters like newline and tab into
-visible escape sequences like \n and \t as it copies the string t to s . */
-_VOID s_escape(_S8* source, _S8* dest, size_t size);
+visible escape sequences like \n and \t as it copies the string source to dest . */
+ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size);
 
 /* converting escape sequences into the real characters. */
-_VOID s_unescape(_S8* source, _S8* dest, size_t size);
+ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size);
 
 /* trim: remove trailing blanks, tabs, newlines */
 ENUM_RETURN s_trim(_S8 *source);
 
-/* strindex: return index of t in s, -1 if none */
+/* strindex: return index of target in source, -1 if none or target is empty */
 ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);
 
-/* returns the position of the rightmost occurrence of t in s , or -1 if there is none */
+/* returns the position of the rightmost occurrence of target in source , -1 if there is none or target is empty */
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);
 
-/* if the string t occurs at the end of the string s */
+/* if the string target occurs at the end of the string source, if target is empty, occur will be false */
 ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur);
 
 /* replaces strings of blanks with the minimum number of tabs and blanks to achieve the same spacing. */

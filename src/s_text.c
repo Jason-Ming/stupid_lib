@@ -650,8 +650,8 @@ typedef enum TAG_ENUM_EXPAND_STATE
 
 typedef struct TAG_STRU_EXPAND_STM_RUN_DATA
 {
-    const _S8 *s1;
-    _S8 *s2;
+    const _S8 *source;
+    _S8 *dest;
     size_t size;
     _S8 begin;
     _S8 end;
@@ -676,7 +676,7 @@ PRIVATE ENUM_RETURN s_expand_stm_clear_proc()
 PRIVATE ENUM_RETURN s_expand_stm_preproc()
 {
     ENUM_RETURN ret_val;
-    s_expand_run_data.c = *(s_expand_run_data.s1);
+    s_expand_run_data.c = *(s_expand_run_data.source);
 
     if(s_expand_run_data.c == '\0')
     {
@@ -691,7 +691,7 @@ PRIVATE ENUM_RETURN s_expand_stm_preproc()
 
 PRIVATE ENUM_RETURN s_expand_stm_postproc()
 {
-    (s_expand_run_data.s1)++;
+    (s_expand_run_data.source)++;
     return RETURN_SUCCESS;
 }
 
@@ -710,7 +710,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_conc()
     if(c == '-')
     {
         //原样输出
-        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
@@ -746,7 +746,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_begin()
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         begin = end = c;
     }
     
@@ -789,11 +789,11 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
 
     if(c == '-')
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         
         //原样输出
-        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
-        OUTPUT_STR(c, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_CONC);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
@@ -806,8 +806,8 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
         //与之前的begin不形成递增
         if(s_expand_in_same_range(end, c) == BOOLEAN_FALSE)
         {
-            OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
-            OUTPUT_STR('-', s_expand_run_data.s2, s_expand_run_data.size);
+            OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+            OUTPUT_STR('-', s_expand_run_data.dest, s_expand_run_data.size);
             begin = end = c;
             set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
         }
@@ -842,7 +842,7 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_end()
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         begin = end = c;
         set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
     }
@@ -860,14 +860,14 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_end()
     ENUM_EXPAND_STATE state = get_last_stm_state(s_expand_stm);
 
 
-    OUTPUT_STR_RANGE(begin, end, s_expand_run_data.s2, s_expand_run_data.size);
+    OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
     
     if(state == EXPAND_STATE_RANGE_TO)
     {
-        OUTPUT_STR('-', s_expand_run_data.s2, s_expand_run_data.size);
+        OUTPUT_STR('-', s_expand_run_data.dest, s_expand_run_data.size);
     }
     
-    *(s_expand_run_data.s2)++ = '\0';
+    *(s_expand_run_data.dest)++ = '\0';
     (s_expand_run_data.size)--;
 
     return RETURN_SUCCESS;
@@ -925,16 +925,16 @@ PRIVATE ENUM_RETURN s_expand_clear()
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_expand(const _S8 *s1, _S8 *s2, size_t size)
+ENUM_RETURN s_expand(const _S8 *source, _S8 *dest, size_t size)
 {
-    R_ASSERT(s1 != NULL, RETURN_FAILURE);
-    R_ASSERT(s2 != NULL, RETURN_FAILURE);
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val = s_expand_init();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    s_expand_run_data.s1 = s1;
-    s_expand_run_data.s2 = s2;
+    s_expand_run_data.source = source;
+    s_expand_run_data.dest = dest;
     s_expand_run_data.size = size;
     
     ret_val = stm_run(s_expand_stm);
@@ -995,8 +995,12 @@ _S8* any(_S8 s1[], const _S8 s2[])
 
 #define MAX_CHAR 256
 
-_VOID s_escape(_S8* source, _S8* dest, size_t size)
+ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
 {
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(size > 0, RETURN_FAILURE);
+    
     PRIVATE _S8 escape[MAX_CHAR] = {0};
     escape['\\'] = '\\';
     escape['\n'] = 'n';
@@ -1027,15 +1031,13 @@ _VOID s_escape(_S8* source, _S8* dest, size_t size)
             case '\'':
             case '\?':
             {
-                *dest++ = '\\';
-                *dest++ = escape[c];
-                size -= 2;
+                OUTPUT_STR('\\', dest, size);
+                OUTPUT_STR(escape[c], dest, size);
                 break;
             }
             default:
             {
-                *dest++ = c;
-                size --;
+                OUTPUT_STR(c, dest, size);
                 break;
             }
         }
@@ -1043,11 +1045,16 @@ _VOID s_escape(_S8* source, _S8* dest, size_t size)
     }
 
     /* append \0 */
-    *dest = *source;
+    OUTPUT_STR('\0', dest, size);
+
+    return RETURN_SUCCESS;
 }
 
-_VOID s_unescape(_S8* source, _S8* dest, size_t size)
+ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
 {
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(size > 0, RETURN_FAILURE);
     
     PRIVATE _S8 unescape[MAX_CHAR] = {0};
     /* init all s_escape charactors */
@@ -1066,10 +1073,10 @@ _VOID s_unescape(_S8* source, _S8* dest, size_t size)
 
     ENUM_BOOLEAN in_escape = BOOLEAN_FALSE;
     
-    while(*source != '\0' && size > 2)
+    while(*source != '\0')
     {
         _S32 c = *source;
-        printf("c = %c, in_escape = %d\n", c, in_escape);
+        DEBUG_PRINT("c = %c, in_escape = %d\n", c, in_escape);
         
         if(in_escape == BOOLEAN_TRUE)
         {
@@ -1087,15 +1094,13 @@ _VOID s_unescape(_S8* source, _S8* dest, size_t size)
                 case '\'':
                 case '?':
                 {
-                    *dest++ = unescape[c];
-                    size--;
+                    OUTPUT_STR(unescape[c], dest, size);
                     break;
                 }
                 default:
                 {
-                    *dest++ = '\\';
-                    *dest++ = c;
-                    size -= 2;
+                    OUTPUT_STR('\\', dest, size);
+                    OUTPUT_STR(c, dest, size);
                     break;
                 }
             }
@@ -1110,15 +1115,16 @@ _VOID s_unescape(_S8* source, _S8* dest, size_t size)
             }
             else
             {
-                *dest++ = c;
-                size--;
+                OUTPUT_STR(c, dest, size);
             }
         }
         source++;
     }
 
     /* append \0 */
-    *dest = *source;
+    OUTPUT_STR('\0', dest, size);
+
+    return RETURN_SUCCESS; 
 }
 
 ENUM_RETURN s_trim(_S8 *source)
@@ -1144,19 +1150,23 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
     R_ASSERT(target != NULL, RETURN_FAILURE);
     R_ASSERT(index != NULL, RETURN_FAILURE);
 
-    _S32 temp = 0;
     *index = -1;
     size_t len = strlen(target);
+    R_FALSE_RET(len > 0, RETURN_SUCCESS);
+
+    /*  source*  len = 6 */
+    /*  0123456  */
+    const _S8 *source_end = source + strlen(source);
+    const _S8 *source_start = source;
     
-    while(*source != '\0')
+    while(source <= source_end - len)
     {
         if(memcmp(source, target, len) == 0)
         {
-            *index = temp;
+            *index = source - source_start;
             break;
         }
         source++;
-        temp++;
     }
 
     return RETURN_SUCCESS;
@@ -1168,9 +1178,11 @@ ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index)
     R_ASSERT(target != NULL, RETURN_FAILURE);
     R_ASSERT(index != NULL, RETURN_FAILURE);
 
-    const _S8 *temp = source + strlen(source);
     *index = -1;
     size_t len = strlen(target);
+    R_FALSE_RET(len > 0, RETURN_SUCCESS);
+    
+    const _S8 *temp = source + strlen(source) - len;
     
     while(temp >= source)
     {
@@ -1191,9 +1203,12 @@ ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur)
     R_ASSERT(target != NULL, RETURN_FAILURE);
     R_ASSERT(occur != NULL, RETURN_FAILURE);
 
-    *occur = BOOLEAN_FALSE;
-    size_t len_s = strlen(source);
     size_t len_t = strlen(target);
+    *occur = BOOLEAN_FALSE;
+    R_FALSE_RET(len_t > 0, RETURN_SUCCESS);
+
+    size_t len_s = strlen(source);
+    
 
     if(len_s < len_t)
     {

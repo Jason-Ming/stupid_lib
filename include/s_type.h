@@ -55,7 +55,7 @@ typedef enum TAG_ENUM_BOOLEAN
 
 __BEGIN_C_DECLS
 
-void print_types(void);
+void s_print_types(void);
 __END_C_DECLS
 
 #endif
