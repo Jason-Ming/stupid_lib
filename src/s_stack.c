@@ -6,6 +6,7 @@
 #include "s_defines.h"
 #include "s_mem.h"
 #include "s_log.h"
+#include "s_alg.h"
 
 #include "s_stack.h"
 

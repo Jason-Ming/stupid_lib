@@ -11,8 +11,36 @@
 __BEGIN_C_DECLS
 void display_mem(void *addr, size_t size, ENUM_BOOLEAN bit_switch);
 void display_var(void *addr, size_t size);
+_VOID s_swap_ptr(_VOID * v[], _S32 i, _S32 j);
+_VOID s_swap_s32(_S32 v[], _S32 i, _S32 j);
+
 
 __END_C_DECLS
+
+    
+#define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
+
+#define FREE(p) do{ if(p != NULL){free(p); p = NULL;}}while(0)
+
+#define FCLOSE(p) do{ if(p != NULL){fclose(p); p = NULL;}}while(0)
+
+#define SWAP(x, y)\
+    do\
+    {\
+        _U8 * x##temp_p = (_U8 *)&x;\
+        _U8 * y##temp_p = (_U8 *)&y;\
+        size_t size##x##y = sizeof(x);\
+        _U8 x##y##temp;\
+        while(size##x##y--)\
+        {\
+            x##y##temp = *x##temp_p;\
+            *x##temp_p = *y##temp_p;\
+            *y##temp_p = x##y##temp;\
+            x##temp_p++;\
+            y##temp_p++;\
+        }\
+    }while(0)
+        
 
 #define DISPLAY_VAR_MEM_ONE_LINE(var)\
     do\

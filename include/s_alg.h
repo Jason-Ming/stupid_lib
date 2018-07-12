@@ -5,6 +5,8 @@
 #include "s_defines.h"
 #include "s_type.h"
 
+#define MIN(x, y) ((x) < (y)? (x):(y))
+#define MAX(x, y) ((x) > (y)? (x):(y))
 
 __BEGIN_C_DECLS
 
@@ -18,9 +20,13 @@ _VOID insert_sort(_S32 a[], _S32 n);
 /* shell sort O(n^2) */
 _VOID shell_sort(_S32 a[], _S32 n);
 
-/* qsort: sort v[left]...v[right] into increasing order */
-_VOID quick_sort(_S32 v[], _S32 left, _S32 right);
+/* s_qsort_s32: sort v[left]...v[right] into increasing order */
+_VOID s_qsort_s32(_S32 v[], _S32 left, _S32 right);
 
+typedef _S32(*COMPARE_FUNC) (_VOID *, _VOID *);
+/* s_qsort_ptr: sort v[left]...v[right] into increasing order 
+	*/ 
+_VOID s_qsort_ptr(_VOID * v[], _S32 left, _S32 right, COMPARE_FUNC compare);
 
 /**
  * @author: Jason Ming

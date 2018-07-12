@@ -4,6 +4,7 @@
 
 #include "s_defines.h"
 #include "s_log.h"
+#include "s_mem.h"
 #include "s_time.h"
 
 #define TIME_STRING_BUFFER_SIZE 128

@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "s_log.h"
+#include "s_mem.h"
 #include "s_cmd.h"
 #include "s_cmd_proc.h"
 #include "s_error.h"

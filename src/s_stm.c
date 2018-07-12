@@ -4,7 +4,7 @@
 
 #include "s_defines.h"
 #include "s_limits.h"
-
+#include "s_mem.h"
 #include "s_text.h"
 #include "s_cmd.h"
 #include "s_log.h"

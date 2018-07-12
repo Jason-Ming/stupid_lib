@@ -25,9 +25,11 @@ _S32 count_words(const _S8* filename);
 _S32 format_words(const _S8* filename, const _S8 *separator);
 
 
-/* read a line into line, return length */
+/* read a line into line, return length(not include '\0') */
 ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length);
 
+/* read lines into line_ptr, return read line number, this function will call malloc to alloc memory for line_ptr to store line */
+ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
 
 /**
  * @author: Jason Ming

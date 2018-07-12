@@ -5,6 +5,7 @@
 
 #include "s_log.h"
 #include "s_text.h"
+#include "s_mem.h"
 #include "s_cmd_proc.h"
 #include "s_option.h"
 #include "s_input_file.h"

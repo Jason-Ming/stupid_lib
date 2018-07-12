@@ -9,6 +9,7 @@
 #include "s_log.h"
 #include "s_text.h"
 #include "s_mem.h"
+#include "s_alg.h"
 #include "s_stm.h"
 
 #define MAX_CHAR 256
@@ -188,6 +189,33 @@ ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length)
 
     *length = len_temp;
 
+    return RETURN_SUCCESS;
+}
+
+#define MAX_LINE_LEN			1000
+
+ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr_num > 0, RETURN_FAILURE);
+    R_ASSERT(line_num != NULL, RETURN_FAILURE);
+    
+    _S8 line_buffer[MAX_LINE_LEN];
+    _S32 line_len = 0;
+    *line_num = 0;
+    
+    while(s_getline(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
+    {
+        line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
+        R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
+
+        strcpy(line_ptr[(*line_num)++], line_buffer);
+    };
+
+    /* still have lines to be read, the number of line_ptr is not enough */
+    R_ASSERT(feof(pfr), RETURN_FAILURE);
+    
     return RETURN_SUCCESS;
 }
 

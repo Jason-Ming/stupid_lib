@@ -58,3 +58,21 @@ void display_var(void *addr, size_t size)
     
     printf("\n");
 }
+
+_VOID s_swap_ptr(_VOID * v[], _S32 i, _S32 j)
+{
+	_VOID *	temp;
+
+    temp = v[i];
+    v[i] = v[j];
+    v[j] = temp;
+}
+
+_VOID s_swap_s32(_S32 v[], _S32 i, _S32 j)
+{
+    _S32 temp;
+
+    temp = v[i];
+    v[i] = v[j];
+    v[j] = temp;
+}

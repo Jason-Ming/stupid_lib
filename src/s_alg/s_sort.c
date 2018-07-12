@@ -2,6 +2,7 @@
 
 #include "s_log.h"
 #include "s_alg.h"
+#include "s_mem.h"
 
 _VOID insert_sort(_S32 a[], _S32 n)
 {
@@ -49,19 +50,9 @@ _VOID shell_sort(_S32 a[], _S32 n)
     DEBUG_PRINT("shell_sort took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
 }
 
-
-/* interchange v[i] and v[j] */
-PRIVATE _VOID swap(_S32 v[], _S32 i, _S32 j)
-{
-    _S32 temp;
-    temp = v[i];
-    v[i] = v[j];
-    v[j] = temp;
-}
-
 /* recursive version */
 /* quick_sort: sort v[left]...v[right] into increasing order */
-_VOID quick_sort(_S32 v[], _S32 left, _S32 right)
+_VOID s_qsort_s32(_S32 v[], _S32 left, _S32 right)
 {
     _S32 i, last;
 
@@ -72,19 +63,48 @@ _VOID quick_sort(_S32 v[], _S32 left, _S32 right)
     }
 
     /* move partition elements to v[0] */
-    swap(v, left, (left + right)/2);
+    s_swap_s32(v, left, (left + right)/2);
 
     last = left;
     for(i = left + 1; i <= right; i++)
     {
         if(v[i] < v[left])
         {
-            swap(v, ++last, i);
+            s_swap_s32(v, ++last, i);
         }
     }
 
-    swap(v, left, last);
-    quick_sort(v, left, last - 1);
-    quick_sort(v, last + 1, right);
+    s_swap_s32(v, left, last);
+    s_qsort_s32(v, left, last - 1);
+    s_qsort_s32(v, last + 1, right);
 }
+
+/* qsort: sort v[left]...v[right] into increasing order 
+	*/ 
+_VOID s_qsort_ptr(_VOID * v[], _S32 left, _S32 right, COMPARE_FUNC compare)
+{
+	_S32 i, last;
+
+	if (left >= right) /* do nothing if array contains */
+	{
+		return; /* fewer than two elements */
+	}
+
+	s_swap_ptr(v, left, (left + right) / 2);
+	last = left;
+
+	for (i = left + 1; i <= right; i++)
+	{
+		if (compare(v[i], v[left]) < 0)
+		{
+			s_swap_ptr(v, ++last, i);
+		}
+	}
+
+	s_swap_ptr(v, left, last);
+	s_qsort_ptr(v, left, last - 1, compare);
+	s_qsort_ptr(v, last + 1, right, compare);
+}
+
+
 
