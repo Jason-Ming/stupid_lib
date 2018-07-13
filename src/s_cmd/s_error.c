@@ -20,18 +20,18 @@ PRIVATE STRU_ERROR_INFO system_error_infos[] =
     {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE},
     {ERROR_CODE_FAIL, "Run failed", BOOLEAN_FALSE},
     {ERROR_CODE_MISSING_SUBCMD, "No input sub command", BOOLEAN_FALSE},
-    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command", BOOLEAN_TRUE},
-    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command", BOOLEAN_TRUE},
-    {ERROR_CODE_NO_INPUT_FILES, "No input files to", BOOLEAN_TRUE},
-    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to", BOOLEAN_TRUE},
-    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option", BOOLEAN_TRUE},
-    {ERROR_CODE_MISSING_OPTION, "Missing command line option", BOOLEAN_TRUE},
-    {ERROR_CODE_MISSING_ARGS, "Missing argument to", BOOLEAN_TRUE},
-    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to", BOOLEAN_TRUE},
-    {ERROR_CODE_INVALID_ARGS, "Invalid argument", BOOLEAN_TRUE},
-    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory", BOOLEAN_TRUE},
-    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File can not be created", BOOLEAN_TRUE},
-    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option", BOOLEAN_TRUE},
+    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_NO_INPUT_FILES, "No input files to '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_MISSING_OPTION, "Missing command line option '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_MISSING_ARGS, "option '%s' requires an argument", BOOLEAN_TRUE},
+    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_INVALID_ARGS, "Invalid argument '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File '%s' can not be created", BOOLEAN_TRUE},
+    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option '%s'", BOOLEAN_TRUE},
 };
 
 #define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + MAX_NUM_OF_USER_DEFINE_ERROR)
@@ -164,7 +164,7 @@ ENUM_RETURN add_current_user_error(int code, const char* additional_info)
 
 void display_success_info(void)
 {
-    printf("Successed!\n");
+    printf(GREEN"\nSuccessed!\n"NONE);
 }
 
 void display_error_info(void)
@@ -173,11 +173,15 @@ void display_error_info(void)
 
     while(p != NULL)
     {
-        printf("Error: %s", get_error_info(p->code));
+        printf(LIGHT_RED"Error"NONE": ");
 
         if(is_error_need_additional_info(p->code) == BOOLEAN_TRUE)
         {
-            printf(": %s", p->additional_info);
+            printf(get_error_info(p->code), p->additional_info);
+        }
+        else
+        {
+            printf(get_error_info(p->code));
         }
 
         printf("\n");

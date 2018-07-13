@@ -6,12 +6,13 @@
 #include "s_clinkage.h"
 #include "s_time.h"
 #include "s_type.h"
+#include "s_print.h"
 
 //#define DEBUG_SWITCH 1
 
 #ifdef DEBUG_SWITCH
 #define DEBUG_PRINT(fmt, args...)\
-    printf("debuginfo: "fmt, ##args);
+    printf(LIGHT_GRAY"debuginfo: "fmt""NONE, ##args);
 #else
 #define DEBUG_PRINT(fmt, args...)
 #endif
@@ -43,15 +44,15 @@ char* log_getfn(void);
 
 //不能用编译时间，蠢货!
 #define R_LOG(fmt, args...)\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            fmt"\n",\
+        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             ##args);\
 
 #define R_RET_LOG(value, fmt, args...)\
     do{\
-            LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-                fmt"\n",\
+            LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+                fmt"\n"NONE,\
                 get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             ##args);\
                 return value;}while(0);
@@ -59,8 +60,8 @@ char* log_getfn(void);
 #define R_FALSE_LOG(condition, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, "fmt"\n",\
+        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "FALSE("#condition")!, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             ##args);\
     }
@@ -68,8 +69,8 @@ char* log_getfn(void);
 #define R_FALSE_DO_LOG(condition, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, "fmt"\n",\
+        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "FALSE("#condition")!, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             ##args);\
         action;\
@@ -97,8 +98,8 @@ char* log_getfn(void);
 #define R_FALSE_RET_LOG(condition, value, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, return  = %ld, "fmt"\n",\
+        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "FALSE("#condition")!, return  = %ld, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value, ##args);\
         return value;\
@@ -107,8 +108,8 @@ char* log_getfn(void);
 #define R_FALSE_RET_DO_LOG(condition, value, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, return  = %ld, "fmt"\n",\
+        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "FALSE("#condition")!, return  = %ld, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value, ##args);\
         action;\
@@ -118,8 +119,8 @@ char* log_getfn(void);
 #define V_ASSERT(condition)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!\n",\
+        LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "ASSERT("#condition")!\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
         return;\
     }
@@ -127,8 +128,8 @@ char* log_getfn(void);
 #define R_ASSERT(condition, value)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!, return  = %ld.\n",\
+        LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "ASSERT("#condition")!, return  = %ld.\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value);\
         return value;\
@@ -137,8 +138,8 @@ char* log_getfn(void);
 #define R_ASSERT_DO(condition, value, action)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!, return  = %ld.\n",\
+        LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "ASSERT("#condition")!, return  = %ld.\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value);\
         action;\
@@ -148,8 +149,8 @@ char* log_getfn(void);
 #define R_ASSERT_LOG(condition, value, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
+        LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "ASSERT("#condition")!, return  = %ld, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value, ##args);\
         return value;\
@@ -158,8 +159,8 @@ char* log_getfn(void);
 #define R_ASSERT_DO_LOG(condition, value, action, fmt, args...)\
     if(!(condition))\
     {\
-        LOG_PRINT("[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!, return  = %ld, "fmt"\n",\
+        LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+            "ASSERT("#condition")!, return  = %ld, "fmt"\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value, ##args);\
         action;\

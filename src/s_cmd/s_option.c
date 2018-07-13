@@ -115,7 +115,7 @@ PRIVATE STRU_OPTION_CONTROL_BLOCK *get_a_new_option_cb(
     return p_new;
 }
 
-PRIVATE ENUM_BOOLEAN is_option_format(const char *option_name)
+ENUM_BOOLEAN is_option_format(const char *option_name)
 {
     int position = 0;
 

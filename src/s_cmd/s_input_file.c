@@ -6,6 +6,7 @@
 #include "s_cmd.h"
 #include "s_cmd_proc.h"
 
+#include "s_option.h"
 #include "s_error.h"
 #include "s_subcmd.h"
 #include "s_input_file.h"
@@ -55,7 +56,7 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
     while(i < argc)
     {
         /* if an option occured, break */
-        if(argv[i][0] == '-')
+        if(is_option_format(argv[i]) == BOOLEAN_TRUE)
         {
             break;
         }
