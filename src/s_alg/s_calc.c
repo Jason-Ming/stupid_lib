@@ -265,7 +265,7 @@ PRIVATE ENUM_RETURN s_calc_rp_get_word_type_and_value(_S8 *word, ENUM_CALC_WORD_
 
 PRIVATE ENUM_RETURN s_calc_rp_push(_SD value)
 {
-    DEBUG_PRINT("push: %g\n", value);
+    DEBUG_PRINT("push: %g", value);
     return stack_push(s_calc_stack, (_VOID*)&value, sizeof(value));
 }
 
@@ -273,7 +273,7 @@ PRIVATE ENUM_RETURN s_calc_rp_pop(_SD *value)
 {
     size_t size_out;
     ENUM_RETURN ret_val = stack_pop(s_calc_stack, (_VOID *)value, &size_out,  sizeof(*value));
-    DEBUG_PRINT("pop: %g\n", *value);
+    DEBUG_PRINT("pop: %g", *value);
 
     return ret_val;
 }
@@ -292,7 +292,7 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
         ret_val = s_get_word(str, word, MAX_LEN_OF_WORD, &word_len, &str);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-        DEBUG_PRINT("word: %s\n", word);
+        DEBUG_PRINT("word: %s", word);
         
         //analyze word type: op, number, empty, other
         ret_val = s_calc_rp_get_word_type_and_value(word, &word_type, &value);

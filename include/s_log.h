@@ -8,14 +8,7 @@
 #include "s_type.h"
 #include "s_print.h"
 
-//#define DEBUG_SWITCH 1
 
-#ifdef DEBUG_SWITCH
-#define DEBUG_PRINT(fmt, args...)\
-    printf(LIGHT_GRAY"debuginfo: "fmt""NONE, ##args);
-#else
-#define DEBUG_PRINT(fmt, args...)
-#endif
 
 char* log_getfn(void);
 
@@ -40,6 +33,15 @@ char* log_getfn(void);
 #else
 #define LOG_PRINT(fmt, args...)\
     printf(fmt, ##args);
+#endif
+
+#define DEBUG_SWITCH 1
+
+#ifdef DEBUG_SWITCH
+#define DEBUG_PRINT(fmt, args...)\
+    LOG_PRINT(LIGHT_GRAY"debuginfo: "fmt""NONE"\n", ##args);
+#else
+#define DEBUG_PRINT(fmt, args...)
 #endif
 
 //不能用编译时间，蠢货!

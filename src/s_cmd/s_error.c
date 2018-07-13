@@ -19,12 +19,12 @@ PRIVATE STRU_ERROR_INFO system_error_infos[] =
 {
     {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE},
     {ERROR_CODE_FAIL, "Run failed", BOOLEAN_FALSE},
-    {ERROR_CODE_MISSING_SUBCMD, "No input sub command", BOOLEAN_FALSE},
+    {ERROR_CODE_MISSING_SUBCMD, "Missing sub command", BOOLEAN_FALSE},
     {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command '%s'", BOOLEAN_TRUE},
     {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_NO_INPUT_FILES, "No input files to '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_NO_INPUT_FILES, "'%s' requires input file", BOOLEAN_TRUE},
     {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized command line option '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized option '%s'", BOOLEAN_TRUE},
     {ERROR_CODE_MISSING_OPTION, "Missing command line option '%s'", BOOLEAN_TRUE},
     {ERROR_CODE_MISSING_ARGS, "option '%s' requires an argument", BOOLEAN_TRUE},
     {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to '%s'", BOOLEAN_TRUE},
@@ -164,7 +164,7 @@ ENUM_RETURN add_current_user_error(int code, const char* additional_info)
 
 void display_success_info(void)
 {
-    printf(GREEN"\nSuccessed!\n"NONE);
+    printf(GREEN"Successed!\n"NONE);
 }
 
 void display_error_info(void)

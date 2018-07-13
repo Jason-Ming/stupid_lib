@@ -37,7 +37,7 @@ _S32 binsearch(_S32 x, _S32 v[], _S32 n)
     }
     
     time_taken = clock() - time_taken;
-    DEBUG_PRINT("binsearch took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    DEBUG_PRINT("binsearch took %lu clocks (%lu seconds)", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
     return result;
 } 
 
@@ -57,7 +57,7 @@ _S32 binsearch2(_S32 x, _S32 v[], _S32 n)
     }
 
     time_taken = clock() - time_taken;
-    DEBUG_PRINT("binsearch2 took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    DEBUG_PRINT("binsearch2 took %lu clocks (%lu seconds)", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
     
     if (high == n || v[high] != x)
     return -1;

@@ -21,7 +21,7 @@ _VOID insert_sort(_S32 a[], _S32 n)
     }
 
     time_taken = clock() - time_taken;
-    DEBUG_PRINT("insert_sort took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    DEBUG_PRINT("insert_sort took %lu clocks (%lu seconds)", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
 }
 
 _VOID shell_sort(_S32 a[], _S32 n)
@@ -47,7 +47,7 @@ _VOID shell_sort(_S32 a[], _S32 n)
     }
 
     time_taken = clock() - time_taken;
-    DEBUG_PRINT("shell_sort took %lu clocks (%lu seconds)\n", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
+    DEBUG_PRINT("shell_sort took %lu clocks (%lu seconds)", (_UL)time_taken, (_UL)time_taken/CLOCKS_PER_SEC);
 }
 
 /* recursive version */

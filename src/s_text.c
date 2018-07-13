@@ -282,7 +282,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
 
     memset(pstr_buf_temp, '\0', buf_temp_len);
 
-    DEBUG_PRINT("source: %s\nsource len: %d\ndest: %s\ndest len: %d\n",
+    DEBUG_PRINT("source: %s\nsource len: %d\ndest: %s\ndest len: %d",
         pstr_buf_source, len, pstr_buf_temp, buf_temp_len);
     
     _S32 pos = 0;
@@ -306,7 +306,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
                     buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
 
                 DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
-                    "pos = %d, start_pos = %d\n",
+                    "pos = %d, start_pos = %d",
                     buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
                 
                 strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
@@ -348,7 +348,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
 
     DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
-        "pos = %d, start_pos = %d\n",
+        "pos = %d, start_pos = %d",
         buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
     strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
 
@@ -1117,7 +1117,7 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
     while(*source != '\0')
     {
         _S32 c = *source;
-        DEBUG_PRINT("c = %c, in_escape = %d\n", c, in_escape);
+        DEBUG_PRINT("c = %c, in_escape = %d", c, in_escape);
         
         if(in_escape == BOOLEAN_TRUE)
         {

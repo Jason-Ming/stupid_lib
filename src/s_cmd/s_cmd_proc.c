@@ -117,15 +117,8 @@ PRIVATE ENUM_RETURN process_errors(void)
     if(is_current_error_exist() == BOOLEAN_TRUE)
     {
         display_error_info();
-        const char *subcmd = get_current_subcmd_name();
-        if(subcmd != NULL)
-        {
-            display_subcmd_help_info(subcmd);
-        }
-        else
-        {
-            display_all_subcmd_help_info();
-        }
+
+        display_current_running_subcmd_help_info();
         
         return RETURN_FAILURE;
     }
@@ -156,6 +149,8 @@ PRIVATE ENUM_RETURN parse_args(int argc, char **argv)
 
     /* 从argv[1]开始处理 */
     set_argv_indicator(1);
+    
+    R_LOG("total args: %d", argc);
     
     ret_val = parse_args_do(argc, argv);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

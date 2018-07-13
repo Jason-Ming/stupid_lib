@@ -11,35 +11,29 @@
 
 #include "s_default.h"
 
-PRIVATE ENUM_RETURN subcmd_help_proc(STRU_OPTION_RUN_BLOCK *p_option_rb)
+PRIVATE ENUM_RETURN subcmd_help_proc(_VOID)
 {
-    if(p_option_rb == NULL)
-    {
-        display_all_subcmd_help_info();
-    }
+    display_all_subcmd_help_info();
     
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN default_option_proc_handler(STRU_ARG *arg)
+ENUM_RETURN default_option_proc_handler(const char *arg)
 {
     R_LOG("Do nothing..");
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN default_subcmd_proc_handler(STRU_OPTION_RUN_BLOCK *value)
+ENUM_RETURN default_subcmd_proc_handler(_VOID)
 {
-    if(is_current_subcmd_option_rb_existed() == BOOLEAN_FALSE)
-    {
-        display_subcmd_help_info(get_current_subcmd_name());
-    }
+    display_current_running_subcmd_help_info();
     
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN default_option_h_proc_handler(STRU_ARG *arg)
+PRIVATE ENUM_RETURN default_option_h_proc_handler(const char *arg)
 {
-    display_subcmd_help_info(get_current_subcmd_name());
+    display_current_running_subcmd_help_info();
     
     return RETURN_SUCCESS;
 }

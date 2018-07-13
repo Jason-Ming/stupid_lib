@@ -19,24 +19,10 @@ typedef enum TAG_ENUM_ARG_TYPE
     ARG_TYPE_MAX,
 }ENUM_ARG_TYPE;
 
-typedef struct TAG_STRU_ARG
-{
-    char* value;
-    struct TAG_STRU_ARG *next;
-} STRU_ARG;
-
-typedef struct TAG_STRU_OPTION_RUN_BLOCK
-{
-    const char* subcmd;
-    const char* option;
-    struct TAG_STRU_ARG *arg;
-    struct TAG_STRU_OPTION_RUN_BLOCK *next;
-} STRU_OPTION_RUN_BLOCK;
-
-typedef  ENUM_RETURN (*FUNC_SUBCMD_PROC)(STRU_OPTION_RUN_BLOCK *option_rb);
+typedef  ENUM_RETURN (*FUNC_SUBCMD_PROC)(_VOID);
 
 /* check and save options */
-typedef  ENUM_RETURN (*FUNC_OPTION_PROC)(STRU_ARG *arg);
+typedef  ENUM_RETURN (*FUNC_OPTION_PROC)(const char *arg);
 
 typedef enum TAG_ENUM_ERROR_CODE
 {
@@ -62,10 +48,10 @@ typedef enum TAG_ENUM_ERROR_CODE
 #define MAX_NUM_OF_USER_DEFINE_ERROR 200
 
 __BEGIN_C_DECLS
-void display_subcmd_help_info(const char *subcmd_name);
+void debug_print_subcmd(void);
 
-ENUM_RETURN default_option_proc_handler(STRU_ARG *arg);
-ENUM_RETURN default_subcmd_proc_handler(STRU_OPTION_RUN_BLOCK *value);
+ENUM_RETURN default_option_proc_handler(const char *arg);
+ENUM_RETURN default_subcmd_proc_handler(_VOID);
 
 ENUM_RETURN register_user_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info);
 ENUM_RETURN add_current_user_error(int code, const char* additional_info);
@@ -95,9 +81,6 @@ ENUM_RETURN register_option(
     FUNC_OPTION_PROC handler, 
     ENUM_BOOLEAN finish_handle,
     const char* help_info);
-
-const char* get_option_first_arg_value(STRU_OPTION_RUN_BLOCK *p, const char *option_name);
-STRU_ARG * get_option_arg_list(STRU_OPTION_RUN_BLOCK *p, const char *option_name);
 
 ENUM_RETURN process(int argc, char **argv);
 __END_C_DECLS
