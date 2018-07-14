@@ -9,7 +9,7 @@
 
 
 __BEGIN_C_DECLS
-void display_mem(void *addr, size_t size, ENUM_BOOLEAN bit_switch);
+void display_mem(void *addr, size_t size, ENUM_BOOLEAN whether_display_bits);
 void display_var(void *addr, size_t size);
 _VOID s_swap_ptr(_VOID * v[], _S32 i, _S32 j);
 _VOID s_swap_s32(_S32 v[], _S32 i, _S32 j);

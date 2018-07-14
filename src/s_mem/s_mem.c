@@ -16,14 +16,14 @@
 //}
 
 
-void display_mem(void *addr, size_t size, ENUM_BOOLEAN bit_switch)
+void display_mem(void *addr, size_t size, ENUM_BOOLEAN whether_display_bits)
 {
     for(size_t i = 0; i < size; i++)
     {
         int x = ((int)*((char*)addr+ i))&(~(~0 << 8));
         printf("        %p: %02x ", (char*)addr+i, x);
 
-        if(bit_switch == BOOLEAN_FALSE)
+        if(whether_display_bits == BOOLEAN_FALSE)
         {
             printf("\n");
             continue;

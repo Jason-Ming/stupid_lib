@@ -49,14 +49,14 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
     /* do noting when there is any error */
-    R_FALSE_RET_LOG(BOOLEAN_FALSE == is_current_error_exist(), RETURN_SUCCESS,"");
+    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS,"");
  
     while(i < argc)
     {
         R_LOG("i = %d, argv = %s", i, argv[i]);
    
         /* if an option occured, break */
-        if(is_option_format(argv[i]) == BOOLEAN_TRUE)
+        if(whether_string_is_in_option_format(argv[i]) == BOOLEAN_TRUE)
         {
             break;
         }

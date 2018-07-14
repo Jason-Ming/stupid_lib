@@ -12,7 +12,7 @@ typedef struct TAG_STRU_ERROR_INFO
 {
     int code;
     const char* info;
-    ENUM_BOOLEAN need_addtional_info;
+    ENUM_BOOLEAN whether_error_need_addtional_info;
 }STRU_ERROR_INFO;
 
 PRIVATE STRU_ERROR_INFO system_error_infos[] = 
@@ -55,14 +55,14 @@ PRIVATE STRU_CURRENT_ERROR_INFO *get_current_error_list_head(void)
     return p_current_error_list_head;
 }
 
-PRIVATE ENUM_BOOLEAN is_error_code_valid(int code)
+PRIVATE ENUM_BOOLEAN whether_error_code_is_valid(int code)
 {
     return (code >= 0 && code < MAX_NUM_OF_ERROR_INFO)?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 
-PRIVATE ENUM_BOOLEAN is_error_code_registered(int code)
+PRIVATE ENUM_BOOLEAN whether_error_code_has_been_registered(int code)
 {
-    R_FALSE_RET(is_error_code_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
+    R_FALSE_RET(whether_error_code_is_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
     
     R_FALSE_RET(error_info_array[code].code != INVALID_ERROR_CODE, BOOLEAN_FALSE);
 
@@ -71,14 +71,14 @@ PRIVATE ENUM_BOOLEAN is_error_code_registered(int code)
 
 PRIVATE const char * get_error_info(int code)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, NULL);
+    R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, NULL);
     return error_info_array[code].info;
 }
 
-PRIVATE ENUM_BOOLEAN is_error_need_additional_info(int code)
+PRIVATE ENUM_BOOLEAN whether_error_needs_additional_info(int code)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
-    return error_info_array[code].need_addtional_info;
+    R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
+    return error_info_array[code].whether_error_need_addtional_info;
 }
 
 PRIVATE void debug_print_current_error(STRU_CURRENT_ERROR_INFO *p)
@@ -86,7 +86,7 @@ PRIVATE void debug_print_current_error(STRU_CURRENT_ERROR_INFO *p)
     R_LOG("code: %d, info: %s, additional_info: %s", p->code, get_error_info(p->code), p->additional_info);
 }
 
-ENUM_BOOLEAN is_current_error_exist(void)
+ENUM_BOOLEAN whether_any_error_exists(void)
 {
     return (p_current_error_list_head == NULL)?BOOLEAN_FALSE:BOOLEAN_TRUE;
 }
@@ -129,13 +129,13 @@ PRIVATE ENUM_RETURN add_node_to_current_error_list(STRU_CURRENT_ERROR_INFO *p_ne
 
 ENUM_RETURN add_current_system_error(int code, const char* additional_info)
 {    
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
-    R_ASSERT_LOG(is_error_code_registered(code) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
+    R_ASSERT_LOG(whether_error_code_has_been_registered(code) == BOOLEAN_TRUE, RETURN_FAILURE,
         "the error code: %d is not registered", code);
 
     STRU_CURRENT_ERROR_INFO *p_new = NULL;
 
-    if(error_info_array[code].need_addtional_info == BOOLEAN_TRUE)
+    if(error_info_array[code].whether_error_need_addtional_info == BOOLEAN_TRUE)
     {
         R_ASSERT(additional_info != NULL, RETURN_FAILURE);
     }
@@ -175,7 +175,7 @@ void display_error_info(void)
     {
         printf(LIGHT_RED"Error"NONE": ");
 
-        if(is_error_need_additional_info(p->code) == BOOLEAN_TRUE)
+        if(whether_error_needs_additional_info(p->code) == BOOLEAN_TRUE)
         {
             printf(get_error_info(p->code), p->additional_info);
         }
@@ -192,16 +192,16 @@ void display_error_info(void)
 
 PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
 {
-    R_ASSERT(is_error_code_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
+    R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
 
-    R_ASSERT_LOG(is_error_code_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_error_code_has_been_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
         "the error code: %d is already registered", code);
 
     R_LOG("code: %d, info: %s, need_additional_info: %d", code, info, need_additional_info);
     
     error_info_array[code].code = code;
     error_info_array[code].info = info;
-    error_info_array[code].need_addtional_info = need_additional_info;
+    error_info_array[code].whether_error_need_addtional_info = need_additional_info;
     
     return RETURN_SUCCESS;
 }
@@ -217,14 +217,14 @@ ENUM_RETURN init_error_info(void)
     {
         error_info_array[i].code = INVALID_ERROR_CODE;
         error_info_array[i].info = NULL;
-        error_info_array[i].need_addtional_info = BOOLEAN_FALSE;
+        error_info_array[i].whether_error_need_addtional_info = BOOLEAN_FALSE;
     }
 
     for(int i = 0; i < SIZE_OF_ARRAY(system_error_infos); i++)
     {
         ENUM_RETURN ret_val;
         ret_val = register_error_info(system_error_infos[i].code, 
-            system_error_infos[i].info, system_error_infos[i].need_addtional_info);
+            system_error_infos[i].info, system_error_infos[i].whether_error_need_addtional_info);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 

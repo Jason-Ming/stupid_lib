@@ -9,7 +9,7 @@ __BEGIN_C_DECLS
 _S8* get_date_string(_VOID);
 _S8* get_time_string(_VOID);
 _S8* get_time_stamp(_VOID);
-ENUM_BOOLEAN is_leapyear(_U32 year);
+ENUM_BOOLEAN whether_year_is_leapyear(_U32 year);
 
 /* day_of_year: set day of year from month & day */
 ENUM_RETURN day_of_year(_S32 year, _S32 month, _S32 day, _S32 *yearday);

@@ -53,7 +53,7 @@ char* get_time_stamp(void)
     return time_string_buf;
 }
 
-ENUM_BOOLEAN is_leapyear(_U32 year)
+ENUM_BOOLEAN whether_year_is_leapyear(_U32 year)
 {
     return ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)? BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
@@ -78,7 +78,7 @@ ENUM_RETURN day_of_year(_S32 year, _S32 month, _S32 day, _S32 *yearday)
     R_ASSERT(yearday != NULL, RETURN_FAILURE);
     R_ASSERT(year >= 1752 && month >= 1 && month <= 12 && day >= 1, RETURN_FAILURE);
     
-	leap = is_leapyear(year);
+	leap = whether_year_is_leapyear(year);
 
     R_ASSERT(day <= daytab[leap][month], RETURN_FAILURE);
     
@@ -101,7 +101,7 @@ ENUM_RETURN month_day(_S32 year, _S32 yearday, _S32 * pmonth, _S32 * pday)
     R_ASSERT(year >= 1752 && yearday >= 1, RETURN_FAILURE);
 
     _S32 i, leap;
-	leap = is_leapyear(year);
+	leap = whether_year_is_leapyear(year);
 
     R_ASSERT((leap == BOOLEAN_FALSE && yearday <= 365) || (leap == BOOLEAN_TRUE && yearday <= 366), RETURN_FAILURE);
     

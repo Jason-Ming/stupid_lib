@@ -10,7 +10,7 @@ __BEGIN_C_DECLS
 void display_current_running_subcmd_help_info(_VOID);
 void display_all_subcmd_help_info(void);
 
-ENUM_BOOLEAN is_subcmd_registered(const char *subcmd_name);
+ENUM_BOOLEAN whether_subcmd_has_been_registered(const char *subcmd_name);
 
 const char *get_current_running_subcmd_name(void);
 

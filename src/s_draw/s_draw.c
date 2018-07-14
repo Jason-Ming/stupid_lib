@@ -43,14 +43,14 @@ PRIVATE void save_row_and_col(int row, int col)
     table_col = col;
 }
 
-ENUM_BOOLEAN check_row_and_col(int row, int col)
+ENUM_BOOLEAN whether_row_and_col_are_valid(int row, int col)
 {
     return ((row >= 0 && row < table_row) && (col >= 0 && col < table_col))?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 
 PRIVATE STRU_PRINT_UNIT * get_table_unit_ptr(int row, int col)
 {
-    R_ASSERT(check_row_and_col(row, col) == BOOLEAN_TRUE, NULL);
+    R_ASSERT(whether_row_and_col_are_valid(row, col) == BOOLEAN_TRUE, NULL);
     R_ASSERT(pTable != NULL, NULL);
 
     return &(pTable[row * table_col + col]);
@@ -58,7 +58,7 @@ PRIVATE STRU_PRINT_UNIT * get_table_unit_ptr(int row, int col)
 
 PRIVATE ENUM_RETURN set_print_table_value(int row, int col, ENUM_PRINT_TYPE value_type, int val_num, const char* val_info)
 {
-    R_ASSERT(check_row_and_col(row, col) == BOOLEAN_TRUE, RETURN_FAILURE);
+    R_ASSERT(whether_row_and_col_are_valid(row, col) == BOOLEAN_TRUE, RETURN_FAILURE);
     R_ASSERT(value_type >= PRINT_TYPE_NO && value_type <= PRINT_TYPE_COL_LABEL, RETURN_FAILURE);
     
     STRU_PRINT_UNIT *p = get_table_unit_ptr(row, col);

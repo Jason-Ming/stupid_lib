@@ -168,7 +168,7 @@ PRIVATE STRU_SUBCMD_CONTROL_BLOCK *get_a_new_subcmd_cb(
     return p_new;
 }
 
-PRIVATE ENUM_BOOLEAN is_subcmd_name_valid(const char* subcmd_name)
+PRIVATE ENUM_BOOLEAN whether_subcmd_name_is_valid(const char* subcmd_name)
 {
     int position = 0;
 
@@ -183,7 +183,7 @@ PRIVATE ENUM_BOOLEAN is_subcmd_name_valid(const char* subcmd_name)
     return BOOLEAN_TRUE;
 }
 
-ENUM_BOOLEAN is_subcmd_need_input_files(const char *subcmd_name)
+ENUM_BOOLEAN whether_subcmd_needs_input_files(const char *subcmd_name)
 {
     STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
     R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_FALSE);
@@ -198,12 +198,12 @@ ENUM_RETURN register_subcmd(
     const char* help_info)
 {
     R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
-    R_ASSERT_LOG(BOOLEAN_TRUE == is_subcmd_name_valid(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
+    R_ASSERT_LOG(BOOLEAN_TRUE == whether_subcmd_name_is_valid(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
     R_ASSERT_LOG(need_input_file == BOOLEAN_FALSE || need_input_file == BOOLEAN_TRUE, RETURN_FAILURE, "need_input_file: %d", need_input_file);
     R_ASSERT(handler != NULL, RETURN_FAILURE);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
-    R_ASSERT(is_subcmd_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
+    R_ASSERT(whether_subcmd_has_been_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
     
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_subcmd_cb(subcmd_name, need_input_file, handler, help_info);
@@ -247,7 +247,7 @@ ENUM_RETURN add_a_new_option_cb_to_subcmd_cb(STRU_OPTION_CONTROL_BLOCK *p_new)
     return RETURN_SUCCESS;
 }
 
-ENUM_BOOLEAN is_subcmd_registered(const char *subcmd_name)
+ENUM_BOOLEAN whether_subcmd_has_been_registered(const char *subcmd_name)
 {
     R_FALSE_RET_LOG(subcmd_name != NULL, BOOLEAN_FALSE, "subcmd_name: %s", subcmd_name);
     
@@ -352,7 +352,7 @@ PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
     R_LOG("i = %d, argv = %s", i, argv[i]);
     
     /* 当前subcmd未在控制块中注册过则停止处理 */
-    if(is_subcmd_registered(argv[i]) == BOOLEAN_FALSE)
+    if(whether_subcmd_has_been_registered(argv[i]) == BOOLEAN_FALSE)
     {
         ret_val = add_current_system_error(ERROR_CODE_UNKONWN_SUBCMD, argv[i]);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -415,13 +415,13 @@ ENUM_RETURN process_subcmds(void)
         "subcmd [%s] options process failed!\n", 
         p->subcmd);
     
-    R_FALSE_RET_LOG(is_option_h_processed() == BOOLEAN_FALSE, 
+    R_FALSE_RET_LOG(whether_option_h_has_been_processed() == BOOLEAN_FALSE, 
         RETURN_SUCCESS, 
         "subcmd [%s] option -h is processed, return!\n", 
         p->subcmd);
 
     //没有处理任何的option，需要检查是否有
-    if(is_subcmd_need_input_files(p->subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
+    if(whether_subcmd_needs_input_files(p->subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
     {
         ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, p->subcmd);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

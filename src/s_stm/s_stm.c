@@ -89,7 +89,7 @@ ENUM_RETURN stm_delete(STM *p_stm)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_BOOLEAN is_stm_state_valid(STRU_STM *p_stm, STM_STATE state)
+PRIVATE ENUM_BOOLEAN whether_stm_state_is_valid(STRU_STM *p_stm, STM_STATE state)
 {
     R_ASSERT(p_stm != NULL, BOOLEAN_FALSE);
     return (p_stm->state_num > state && 0 <= state)? BOOLEAN_TRUE:BOOLEAN_FALSE;
@@ -102,7 +102,7 @@ ENUM_RETURN add_stm_state_handler(STM p_stm, STM_STATE state, STM_PROC handler, 
     R_ASSERT(info != NULL, RETURN_FAILURE);
 
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
-    R_ASSERT_LOG(is_stm_state_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_stm_state_is_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
         "state = %d", state);
 
     STRU_STM_PROC *handlers = p_stm_temp->state_handlers;
@@ -182,7 +182,7 @@ ENUM_RETURN set_stm_start_state(STM p_stm, STM_STATE state)
     R_ASSERT(p_stm != NULL, RETURN_FAILURE);
 
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
-    R_ASSERT_LOG(is_stm_state_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_stm_state_is_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
         "state = %d", state);
 
     p_stm_temp->start_state = state;
@@ -197,7 +197,7 @@ ENUM_RETURN set_stm_end_state(STM p_stm, STM_STATE state)
     R_ASSERT(p_stm != NULL, RETURN_FAILURE);
 
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
-    R_ASSERT_LOG(is_stm_state_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_stm_state_is_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
         "state = %d", state);
 
     p_stm_temp->end_state = state;
@@ -207,14 +207,14 @@ ENUM_RETURN set_stm_end_state(STM p_stm, STM_STATE state)
 
 PRIVATE const char* get_stm_state_info(STRU_STM *p_stm, STM_STATE state)
 {
-    R_ASSERT(is_stm_state_valid(p_stm, state) == BOOLEAN_TRUE, NULL);
+    R_ASSERT(whether_stm_state_is_valid(p_stm, state) == BOOLEAN_TRUE, NULL);
 
     return p_stm->state_handlers[state].info;
 }
 
 PRIVATE STM_PROC get_stm_state_handler(STRU_STM *p_stm, STM_STATE state)
 {
-    R_ASSERT(is_stm_state_valid(p_stm, state) == BOOLEAN_TRUE, NULL);
+    R_ASSERT(whether_stm_state_is_valid(p_stm, state) == BOOLEAN_TRUE, NULL);
 
     return p_stm->state_handlers[state].handler;
 }
@@ -242,7 +242,7 @@ ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
-    R_ASSERT_LOG(is_stm_state_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_stm_state_is_valid(p_stm_temp, state) == BOOLEAN_TRUE, RETURN_FAILURE,
         "state = %d", state);
     
     R_ASSERT(p_stm_temp->current_state != state, RETURN_FAILURE);
@@ -259,7 +259,7 @@ ENUM_RETURN set_current_stm_state(STM p_stm, STM_STATE state)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_BOOLEAN is_stm_ready(STRU_STM *p_stm)
+PRIVATE ENUM_BOOLEAN whether_stm_is_ready(STRU_STM *p_stm)
 {
     R_ASSERT(p_stm != NULL, BOOLEAN_FALSE);
     R_ASSERT_LOG(p_stm->current_state != SI_INVALID 
@@ -296,7 +296,7 @@ ENUM_RETURN stm_run(STM p_stm)
     STRU_STM *p_stm_temp = (STRU_STM*)p_stm;
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
-    R_ASSERT(is_stm_ready(p_stm_temp) == BOOLEAN_TRUE, RETURN_FAILURE);
+    R_ASSERT(whether_stm_is_ready(p_stm_temp) == BOOLEAN_TRUE, RETURN_FAILURE);
     
     ret_val = p_stm_temp->prepare_handler();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

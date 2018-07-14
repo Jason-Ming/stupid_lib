@@ -20,6 +20,38 @@
 #define CONC(x, y) x##y
 #define CONC_(x, y) x##_##y
 
+#define OUTPUT_STR(c, dest, size)\
+    do{\
+        DEBUG_PRINT("OUTPUT_STR: %c", c);\
+        if(size > 1)\
+        {\
+            *dest++ = c;\
+            size--;\
+        }\
+    }while(0);
+
+#define OUTPUT_STR_RANGE(begin, end, dest, size) \
+    do{\
+        if(begin != '\0' && end != '\0')\
+        {\
+            DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", begin, end);\
+            for(_S8 c = begin; c <= end; c++)\
+            {\
+                OUTPUT_STR(c, dest, size);\
+            }\
+            begin = end = '\0';\
+        }\
+    }while(0);
+
+#define OUTPUT_STR_MULTI(c, num, dest, size) \
+    do{\
+        DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", c, num);\
+        for(_S32 i = 0; i < num; i++)\
+        {\
+            OUTPUT_STR(c, dest, size);\
+        }\
+    }while(0);
+
 __BEGIN_C_DECLS
 _S32 count_words(const _S8* filename);
 _S32 format_words(const _S8* filename, const _S8 *separator);
@@ -93,7 +125,7 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);
 
 /* if the string target occurs at the end of the string source, if target is empty, occur will be false */
-ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *occur);
+ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *whether_target_occur);
 
 /* replaces strings of blanks with the minimum number of tabs and blanks to achieve the same spacing. */
 ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
@@ -101,6 +133,8 @@ ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
 /* replaces tabs in the input with the proper number of blanks to space to the next tab stop. */
 ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
 
+/* whether the charator between begin and end in the same range: 0~9, a~z, A~Z */
+ENUM_BOOLEAN s_range(_S8 begin, _S8 end);
 
 __END_C_DECLS
 

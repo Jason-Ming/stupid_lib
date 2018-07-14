@@ -9,7 +9,7 @@ PRIVATE FILE *logfp = NULL;
 #define MAX_LENGTH_OF_LOG_FILE_NAME 128
 PRIVATE char log_file_name[MAX_LENGTH_OF_LOG_FILE_NAME] = {'\0'};
 
-ENUM_BOOLEAN log_isready(void)
+ENUM_BOOLEAN whether_log_is_ready(void)
 {
     if(logfp == NULL)
     {
@@ -51,12 +51,5 @@ char* log_getfn(void)
         
         return log_file_name;
     }
-}
-
-
-
-void f(void)
-{
-    R_LOG("format= %d.\n", 5);
 }
 

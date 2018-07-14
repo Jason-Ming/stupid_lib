@@ -7,7 +7,7 @@ __BEGIN_C_DECLS
 void display_success_info(void);
 void display_error_info(void);
 ENUM_RETURN init_error_info(void);
-ENUM_BOOLEAN is_current_error_exist(void);
+ENUM_BOOLEAN whether_any_error_exists(void);
 
 
 __END_C_DECLS
