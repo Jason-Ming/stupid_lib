@@ -30,15 +30,13 @@ PRIVATE ENUM_RETURN add_input_file(const char *file)
     return RETURN_SUCCESS;
 }
 
-int get_input_file_num(void)
+int get_current_running_subcmd_input_file_num(_VOID)
 {
     return num_of_input_files;
 }
 
-const char *get_input_file_of_subcmd(const char *subcmd_name)
+const char *get_input_file_of_current_running_subcmd(_VOID)
 {
-    R_ASSERT(subcmd_name != NULL, NULL);
-
     return input_files[0];
 }
 

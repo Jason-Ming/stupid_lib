@@ -7,6 +7,8 @@
 
 #define MIN(x, y) ((x) < (y)? (x):(y))
 #define MAX(x, y) ((x) > (y)? (x):(y))
+#define CELS2FAHR(x) ((x)*(9.0/5.0)+32.0)
+#define FAHR2CELS(x) ((5.0 / 9.0)*((x)-32))
 
 __BEGIN_C_DECLS
 

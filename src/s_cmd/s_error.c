@@ -5,33 +5,44 @@
 #include "s_log.h"
 #include "s_mem.h"
 #include "s_cmd.h"
+#include "s_subcmd.h"
 #include "s_cmd_proc.h"
 #include "s_error.h"
+
+#define MAX_LEN_OF_TIP_STRING 64
+typedef enum TAG_ENUM_ERROR_TIP
+{
+    ERROR_TIP_OPTION = 0,
+    ERROR_TIP_SUBCMD,
+    ERROR_TIP_NULL,
+}ENUM_ERROR_TIP;
 
 typedef struct TAG_STRU_ERROR_INFO
 {
     int code;
     const char* info;
     ENUM_BOOLEAN whether_error_need_addtional_info;
+    ENUM_ERROR_TIP tip;
 }STRU_ERROR_INFO;
 
 PRIVATE STRU_ERROR_INFO system_error_infos[] = 
 {
-    {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE},
-    {ERROR_CODE_FAIL, "Run failed", BOOLEAN_FALSE},
-    {ERROR_CODE_MISSING_SUBCMD, "Missing sub command", BOOLEAN_FALSE},
-    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_NO_INPUT_FILES, "'%s' requires input file", BOOLEAN_TRUE},
-    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized option '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_MISSING_OPTION, "Missing command line option '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_MISSING_ARGS, "option '%s' requires an argument", BOOLEAN_TRUE},
-    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_INVALID_ARGS, "Invalid argument '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory '%s'", BOOLEAN_TRUE},
-    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File '%s' can not be created", BOOLEAN_TRUE},
-    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option '%s'", BOOLEAN_TRUE},
+    {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_OPTION_PROC_FAIL, "option process failed", BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_SUBCMD_PROC_FAIL, "Run failed", BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_MISSING_SUBCMD, "Missing sub command", BOOLEAN_FALSE, ERROR_TIP_SUBCMD},
+    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command '%s'", BOOLEAN_TRUE, ERROR_TIP_SUBCMD},
+    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
+    {ERROR_CODE_NO_INPUT_FILES, "'%s' requires input file", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
+    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_MISSING_OPTION, "Missing command line option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_MISSING_ARGS, "option '%s' requires an argument", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_INVALID_ARGS, "Invalid argument '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
+    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File '%s' can not be created", BOOLEAN_TRUE, ERROR_TIP_NULL},
+    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
 };
 
 #define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + MAX_NUM_OF_USER_DEFINE_ERROR)
@@ -73,6 +84,33 @@ PRIVATE const char * get_error_info(int code)
 {
     R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, NULL);
     return error_info_array[code].info;
+}
+
+PRIVATE const char * get_error_tip(int code)
+{
+    R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, NULL);
+
+    PRIVATE _S8 tip_string[MAX_LEN_OF_TIP_STRING] = {'\0'};
+    
+    switch(error_info_array[code].tip)
+    {
+        case ERROR_TIP_SUBCMD:
+        {
+            sprintf(tip_string, ", see '%s help'", get_bin_name());
+            break;
+        }
+        case ERROR_TIP_OPTION:
+        {
+            sprintf(tip_string, ", see '%s %s -h'", get_bin_name(), get_current_running_subcmd_name());
+            break;
+        }
+        default:
+        {
+            tip_string[0] = '\0';
+            break;
+        }
+    }
+    return tip_string;
 }
 
 PRIVATE ENUM_BOOLEAN whether_error_needs_additional_info(int code)
@@ -181,34 +219,39 @@ void display_error_info(void)
         }
         else
         {
-            printf(get_error_info(p->code));
+            printf(get_error_info(p->code), "");
         }
 
+        printf("%s", get_error_tip(p->code));
+        
         printf("\n");
         
         p = p->next;
     }    
 }
 
-PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
+PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info, ENUM_ERROR_TIP tip)
 {
     R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
 
     R_ASSERT_LOG(whether_error_code_has_been_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
         "the error code: %d is already registered", code);
 
-    R_LOG("code: %d, info: %s, need_additional_info: %d", code, info, need_additional_info);
+    R_LOG("code: %d, info: %s, need_additional_info: %d, tip: %d", code, info, need_additional_info, tip);
     
     error_info_array[code].code = code;
     error_info_array[code].info = info;
     error_info_array[code].whether_error_need_addtional_info = need_additional_info;
+    error_info_array[code].tip = tip;
     
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN register_user_error_info(int code, const char * info, ENUM_BOOLEAN need_additional_info)
+ENUM_RETURN register_user_error_info(
+    int code, const char * info, 
+    ENUM_BOOLEAN need_additional_info)
 {
-    return register_error_info(code, info, need_additional_info);
+    return register_error_info(code, info, need_additional_info, ERROR_TIP_NULL);
 }
 
 ENUM_RETURN init_error_info(void)
@@ -223,8 +266,11 @@ ENUM_RETURN init_error_info(void)
     for(int i = 0; i < SIZE_OF_ARRAY(system_error_infos); i++)
     {
         ENUM_RETURN ret_val;
-        ret_val = register_error_info(system_error_infos[i].code, 
-            system_error_infos[i].info, system_error_infos[i].whether_error_need_addtional_info);
+        ret_val = register_error_info(
+            system_error_infos[i].code, 
+            system_error_infos[i].info, 
+            system_error_infos[i].whether_error_need_addtional_info,
+            system_error_infos[i].tip);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 

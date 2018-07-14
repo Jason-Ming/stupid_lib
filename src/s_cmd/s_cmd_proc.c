@@ -103,9 +103,9 @@ PRIVATE ENUM_RETURN process_do(void)
 {
     ENUM_RETURN ret_val;
 
-    /* do noting when there is any error */
-    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS, "");
-    
+    ret_val = process_options();
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+   
     ret_val = process_subcmds();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
@@ -117,9 +117,6 @@ PRIVATE ENUM_RETURN process_errors(void)
     if(whether_any_error_exists() == BOOLEAN_TRUE)
     {
         display_error_info();
-
-        display_current_running_subcmd_help_info();
-        
         return RETURN_FAILURE;
     }
 

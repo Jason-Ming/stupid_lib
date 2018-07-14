@@ -17,10 +17,9 @@
 
 PRIVATE void debug_print_option_cb(STRU_OPTION_CONTROL_BLOCK *p)
 {
-    R_LOG("%s = %s, %s = %s, %s = %d, %s = %d, %s = %d, %s = %d, %s = %s, %s = %p, %s = %s\n", 
+    R_LOG("%s = %s, %s = %s, %s = %d, %s = %d, %s = %d, %s = %s, %s = %p, %s = %s\n", 
         "subcmd", p->subcmd,
         "option", p->option,
-        "need_input_file", p->need_input_file,
         "is_running", p->is_running,
         "option type", p->option_type,
         "arg type", p->arg_type,
@@ -56,7 +55,6 @@ PRIVATE ENUM_RETURN get_a_new_option_cb_do(STRU_OPTION_CONTROL_BLOCK **pp_new,
 
     (*pp_new)->subcmd = NULL;
     (*pp_new)->option = NULL;
-    (*pp_new)->need_input_file = need_input_file;
     (*pp_new)->is_running = BOOLEAN_FALSE;
     (*pp_new)->option_type = option_type;
     (*pp_new)->arg_type = arg_type;
@@ -128,7 +126,11 @@ ENUM_BOOLEAN whether_string_is_in_option_format(const char *option_name)
     
     while(option_name[position] != '\0')
     {
-        R_FALSE_RET(IS_ALPHABET(option_name[position]) == BOOLEAN_TRUE, BOOLEAN_FALSE);
+        if(IS_ALPHABET(option_name[position]) == BOOLEAN_FALSE)
+        {
+            break;
+        }
+        
         position++;
     }
 
@@ -174,7 +176,7 @@ PRIVATE ENUM_BOOLEAN whether_option_has_been_registered(const char* subcmd_name,
     return get_option_cb_by_name(subcmd_name, option_name) == NULL?BOOLEAN_FALSE:BOOLEAN_TRUE;
 }
 
-ENUM_RETURN set_current_running_option(const char* subcmd_name, const char* option_name)
+PRIVATE ENUM_RETURN set_current_running_option(const char* subcmd_name, const char* option_name)
 {
     STRU_OPTION_CONTROL_BLOCK *p = get_option_cb_by_name(subcmd_name, option_name);
     R_ASSERT(p != NULL, RETURN_FAILURE);
@@ -183,7 +185,7 @@ ENUM_RETURN set_current_running_option(const char* subcmd_name, const char* opti
     return RETURN_SUCCESS;
 }
 
-STRU_OPTION_CONTROL_BLOCK *get_current_running_option_cb(const char* subcmd_name, const char* option_name)
+PRIVATE STRU_OPTION_CONTROL_BLOCK *get_current_running_option_cb(const char* subcmd_name, const char* option_name)
 {
     STRU_OPTION_CONTROL_BLOCK *p = get_option_cb_by_name(subcmd_name, option_name);
     R_ASSERT(p != NULL, NULL);
@@ -193,7 +195,24 @@ STRU_OPTION_CONTROL_BLOCK *get_current_running_option_cb(const char* subcmd_name
     return p;
 }
 
-ENUM_RETURN get_current_running_option_arg_type(const char* subcmd_name, const char* option_name, ENUM_ARG_TYPE *arg_type)
+_S32 get_current_running_option_number(const char* subcmd_name)
+{
+    _S32 num = 0;
+    STRU_OPTION_CONTROL_BLOCK *p = get_option_cb_list_head(subcmd_name);
+
+    while(p != NULL)
+    {
+        if(p->is_running == BOOLEAN_TRUE)
+        {
+            num++;
+        }
+        p = p->next;
+    }
+
+    return num;
+}
+
+PRIVATE ENUM_RETURN get_current_running_option_arg_type(const char* subcmd_name, const char* option_name, ENUM_ARG_TYPE *arg_type)
 {
     R_ASSERT(arg_type != NULL, RETURN_FAILURE);
     STRU_OPTION_CONTROL_BLOCK *p = get_current_running_option_cb(subcmd_name, option_name);
@@ -204,7 +223,7 @@ ENUM_RETURN get_current_running_option_arg_type(const char* subcmd_name, const c
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN add_arg_to_current_running_option(const char* subcmd_name, const char* option_name, const char *arg)
+PRIVATE ENUM_RETURN add_arg_to_current_running_option(const char* subcmd_name, const char* option_name, const char *arg)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     if(arg == NULL)
@@ -223,14 +242,6 @@ ENUM_RETURN add_arg_to_current_running_option(const char* subcmd_name, const cha
     strcpy(p->arg_value, arg);
 
     return RETURN_SUCCESS;
-}
-
-ENUM_BOOLEAN whether_option_needs_input_files(const char *subcmd_name, const char *option_name)
-{
-    STRU_OPTION_CONTROL_BLOCK *p_option_cb = get_option_cb_by_name(subcmd_name, option_name);
-    R_ASSERT(p_option_cb != NULL, BOOLEAN_FALSE);
-
-    return p_option_cb->need_input_file;
 }
 
 ENUM_RETURN register_option(
@@ -411,40 +422,41 @@ PRIVATE void display_ignored_options(
 }
 
 /* 处理保存的选项及值 处理任意一个option失败，则立即返回失败 */
-ENUM_RETURN process_options(
-    STRU_OPTION_CONTROL_BLOCK *p_option_cb, 
-    ENUM_RETURN * user_process_result)
+ENUM_RETURN process_options(_VOID    )
 {
-    R_ASSERT(user_process_result != NULL, RETURN_FAILURE);
-    *user_process_result = RETURN_SUCCESS;
+    /* do noting when there is any error */
+    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS, "");
+
+    ENUM_RETURN user_process_result = RETURN_SUCCESS;
     ENUM_RETURN ret_val = RETURN_SUCCESS;
+
+    STRU_OPTION_CONTROL_BLOCK *p_option_cb = get_option_cb_list_head(get_current_running_subcmd_name());
+    R_ASSERT(p_option_cb != NULL, RETURN_FAILURE);
 
     while(p_option_cb != NULL)
     {
         /* 当前option没有输入 */
-        R_FALSE_DO_LOG(p_option_cb->is_running == BOOLEAN_TRUE, p_option_cb = p_option_cb->next; continue, "option [%s] is not input", p_option_cb->option);
+        R_FALSE_DO_LOG(p_option_cb->is_running == BOOLEAN_TRUE, 
+            p_option_cb = p_option_cb->next; continue, 
+            "option [%s] is not input", 
+            p_option_cb->option);
 
-        *user_process_result = p_option_cb->handler(p_option_cb->arg_value);
-        R_FALSE_RET_LOG(*user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "option [%s] handler process failed!\n", p_option_cb->option);
-
-        if(whether_option_needs_input_files(p_option_cb->subcmd, p_option_cb->option) == BOOLEAN_TRUE && get_input_file_num() == 0)
+        user_process_result = p_option_cb->handler(p_option_cb->arg_value);
+        if(user_process_result == RETURN_FAILURE)
         {
-            ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, p_option_cb->option);
+            ret_val = add_current_system_error(ERROR_CODE_OPTION_PROC_FAIL, NULL);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            *user_process_result = RETURN_FAILURE;
-        }
+            
+            R_LOG("option [%s] handler process failed!\n", p_option_cb->option);
 
-        if(whether_option_needs_input_files(p_option_cb->subcmd, p_option_cb->option) == BOOLEAN_FALSE && get_input_file_num() > 0)
-        {
-            ret_val = add_current_system_error(ERROR_CODE_UNEXPECTED_INPUT_FILES, p_option_cb->option);
-            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-            *user_process_result = RETURN_FAILURE;
+            return RETURN_SUCCESS;
         }
-        
-        R_FALSE_RET_LOG(*user_process_result == RETURN_SUCCESS, RETURN_SUCCESS, "option [%s] miss input file!\n", p_option_cb->option);
 
         /* 成功处理一个option之后，判断是否停止处理 */
-        R_FALSE_DO_LOG(p_option_cb->finish_handle == BOOLEAN_FALSE, p_option_cb = p_option_cb->next;break, "option [%s] will return!", p_option_cb->option);
+        R_FALSE_DO_LOG(p_option_cb->finish_handle == BOOLEAN_FALSE, 
+            p_option_cb = p_option_cb->next;break, 
+            "option [%s] will return!", 
+            p_option_cb->option);
 
         p_option_cb = p_option_cb->next;
     }

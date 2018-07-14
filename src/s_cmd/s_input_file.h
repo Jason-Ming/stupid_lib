@@ -7,7 +7,7 @@
 
 __BEGIN_C_DECLS
 ENUM_RETURN parse_input_files(int argc, char **argv);
-int get_input_file_num(void);
+int get_current_running_subcmd_input_file_num(void);
 
 __END_C_DECLS
 

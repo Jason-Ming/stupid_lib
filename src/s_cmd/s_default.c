@@ -26,8 +26,12 @@ ENUM_RETURN default_option_proc_handler(const char *arg)
 
 ENUM_RETURN default_subcmd_proc_handler(_VOID)
 {
-    display_current_running_subcmd_help_info();
-    
+    if(get_current_running_option_number(get_current_running_subcmd_name()) == 0)
+    {
+        printf(YELLOW"This is the default sub command handler, did you miss any option?\n");
+        printf("See '%s %s -h'.\n"NONE, get_bin_name(), get_current_running_subcmd_name());
+    }
+
     return RETURN_SUCCESS;
 }
 

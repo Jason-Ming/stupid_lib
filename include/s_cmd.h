@@ -27,7 +27,8 @@ typedef  ENUM_RETURN (*FUNC_OPTION_PROC)(const char *arg);
 typedef enum TAG_ENUM_ERROR_CODE
 {
     ERROR_CODE_SUCCESS = 0,
-    ERROR_CODE_FAIL,
+    ERROR_CODE_SUBCMD_PROC_FAIL,
+    ERROR_CODE_OPTION_PROC_FAIL,
     ERROR_CODE_MISSING_SUBCMD,
     ERROR_CODE_UNKONWN_SUBCMD,
     ERROR_CODE_REPETITIVE_SUBCMD,
@@ -64,7 +65,7 @@ ENUM_RETURN register_usage(const char *usage);
 
 const char *get_bin_name(void);
 
-const char *get_input_file_of_subcmd(const char *subcmd_name);
+const char *get_input_file_of_current_running_subcmd(_VOID);
 
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,

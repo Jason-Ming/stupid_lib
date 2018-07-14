@@ -19,7 +19,6 @@
 typedef struct TAG_STRU_SUBCMD_CONTROL_BLOCK
 {
     char* subcmd;
-    ENUM_BOOLEAN need_input_file;
     ENUM_BOOLEAN is_running;
     FUNC_SUBCMD_PROC handler;
     struct TAG_STRU_OPTION_CONTROL_BLOCK *option_cbs;
@@ -73,9 +72,8 @@ STRU_OPTION_CONTROL_BLOCK *get_option_cb_list_head(const char *subcmd_name)
 
 PRIVATE void debug_print_subcmd_cb(STRU_SUBCMD_CONTROL_BLOCK *p)
 {
-    R_LOG("%s = %s, %s = %d, %s = %d, %s = %p, %s = %s\n", 
+    R_LOG("%s = %s, %s = %d, %s = %p, %s = %s\n", 
         "subcmd", p->subcmd,
-        "need_input_file", p->need_input_file,
         "is_running", p->is_running,
         "handler", p->handler,
         "help_info", p->help_info);
@@ -125,7 +123,6 @@ PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new,
 
     (*pp_new)->subcmd = NULL;
     (*pp_new)->option_cbs = NULL;
-    (*pp_new)->need_input_file = need_input_file;
     (*pp_new)->is_running = BOOLEAN_FALSE;
     (*pp_new)->handler = handler;
     (*pp_new)->help_info = NULL;
@@ -181,14 +178,6 @@ PRIVATE ENUM_BOOLEAN whether_subcmd_name_is_valid(const char* subcmd_name)
     R_ASSERT(position > 0, BOOLEAN_FALSE);
     
     return BOOLEAN_TRUE;
-}
-
-ENUM_BOOLEAN whether_subcmd_needs_input_files(const char *subcmd_name)
-{
-    STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
-    R_ASSERT(p_subcmd_cb != NULL, BOOLEAN_FALSE);
-
-    return p_subcmd_cb->need_input_file;
 }
 
 ENUM_RETURN register_subcmd(
@@ -292,6 +281,12 @@ ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name)
 
     while(p_option_cb != NULL)
     {
+        /* if -h is input, return success */
+        if(strcmp(p_option_cb->option, "-h")==0)
+        {
+            break;
+        }
+        
         if(p_option_cb->option_type != OPTION_TYPE_MANDATORY)
         {
             p_option_cb = p_option_cb->next;
@@ -398,40 +393,21 @@ ENUM_RETURN parse_subcmds(int argc, char **argv)
 /* 处理保存的选项及值 */
 ENUM_RETURN process_subcmds(void)
 {
-    ENUM_RETURN user_process_result = RETURN_SUCCESS;
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+
+    /* do noting when there is any error */
+    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS, "");
+
+    R_FALSE_RET_LOG(whether_option_h_has_been_processed() == BOOLEAN_FALSE, 
+        RETURN_SUCCESS, 
+        "option -h is processed, return!\n");
 
     STRU_SUBCMD_CONTROL_BLOCK *p = get_current_running_subcmd_cb();
     R_ASSERT(p != NULL, RETURN_FAILURE);
-    
-    ENUM_RETURN ret_val = RETURN_SUCCESS;
 
-    /* 处理options失败时，直接停止处理 */
-    ret_val = process_options(p->option_cbs, &user_process_result);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    R_FALSE_RET_DO_LOG(user_process_result == RETURN_SUCCESS, 
-        RETURN_SUCCESS, 
-        ret_val = add_current_system_error(ERROR_CODE_FAIL, NULL);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE),
-        "subcmd [%s] options process failed!\n", 
-        p->subcmd);
-    
-    R_FALSE_RET_LOG(whether_option_h_has_been_processed() == BOOLEAN_FALSE, 
-        RETURN_SUCCESS, 
-        "subcmd [%s] option -h is processed, return!\n", 
-        p->subcmd);
-
-    //没有处理任何的option，需要检查是否有
-    if(whether_subcmd_needs_input_files(p->subcmd) == BOOLEAN_TRUE && get_input_file_num() == 0)
+    if(p->handler() == RETURN_FAILURE)
     {
-        ret_val = add_current_system_error(ERROR_CODE_NO_INPUT_FILES, p->subcmd);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        return RETURN_SUCCESS;
-    }
-    
-    user_process_result = p->handler();
-    if(user_process_result == RETURN_FAILURE)
-    {
-        ret_val = add_current_system_error(ERROR_CODE_FAIL, NULL);
+        ret_val = add_current_system_error(ERROR_CODE_SUBCMD_PROC_FAIL, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
         R_LOG("subcmd [%s] handler process failed!\n", p->subcmd);
@@ -439,5 +415,4 @@ ENUM_RETURN process_subcmds(void)
 
     return RETURN_SUCCESS;
 }
-
 
