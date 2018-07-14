@@ -112,7 +112,6 @@ PRIVATE ENUM_RETURN add_a_new_subcmd_cb_to_subcmd_cb_list(STRU_SUBCMD_CONTROL_BL
 
 PRIVATE ENUM_RETURN get_a_new_subcmd_cb_do(STRU_SUBCMD_CONTROL_BLOCK **pp_new, 
     const char* subcmd_name, 
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
@@ -153,13 +152,12 @@ PRIVATE void get_a_new_subcmd_cb_do_error(STRU_SUBCMD_CONTROL_BLOCK *p_new)
 
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *get_a_new_subcmd_cb(
     const char* subcmd_name, 
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
     ENUM_RETURN ret_val;
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, need_input_file, handler, help_info);
+    ret_val = get_a_new_subcmd_cb_do(&p_new, subcmd_name, handler, help_info);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, NULL, get_a_new_subcmd_cb_do_error(p_new));
 
     return p_new;
@@ -182,20 +180,18 @@ PRIVATE ENUM_BOOLEAN whether_subcmd_name_is_valid(const char* subcmd_name)
 
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info)
 {
     R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_subcmd_name_is_valid(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
-    R_ASSERT_LOG(need_input_file == BOOLEAN_FALSE || need_input_file == BOOLEAN_TRUE, RETURN_FAILURE, "need_input_file: %d", need_input_file);
-    R_ASSERT(handler != NULL, RETURN_FAILURE);
+   R_ASSERT(handler != NULL, RETURN_FAILURE);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
     R_ASSERT(whether_subcmd_has_been_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
     
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
-    p_new = get_a_new_subcmd_cb(subcmd_name, need_input_file, handler, help_info);
+    p_new = get_a_new_subcmd_cb(subcmd_name, handler, help_info);
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val;

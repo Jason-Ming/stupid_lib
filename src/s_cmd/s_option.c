@@ -41,7 +41,6 @@ void debug_print_option_cb_list(STRU_OPTION_CONTROL_BLOCK *p)
 PRIVATE ENUM_RETURN get_a_new_option_cb_do(STRU_OPTION_CONTROL_BLOCK **pp_new, 
     const char* subcmd_name,
     const char* option_name, 
-    ENUM_BOOLEAN need_input_file,
     ENUM_OPTION_TYPE option_type,
     ENUM_ARG_TYPE arg_type,
     FUNC_OPTION_PROC handler, 
@@ -94,7 +93,6 @@ PRIVATE void get_a_new_option_cb_do_error(STRU_OPTION_CONTROL_BLOCK *p_new)
 PRIVATE STRU_OPTION_CONTROL_BLOCK *get_a_new_option_cb(
     const char* subcmd_name,
     const char* option_name, 
-    ENUM_BOOLEAN need_input_file,
     ENUM_OPTION_TYPE option_type,
     ENUM_ARG_TYPE arg_type,
     FUNC_OPTION_PROC handler, 
@@ -106,7 +104,6 @@ PRIVATE STRU_OPTION_CONTROL_BLOCK *get_a_new_option_cb(
     ret_val = get_a_new_option_cb_do(&p_new, 
         subcmd_name, 
         option_name, 
-        need_input_file,
         option_type, 
         arg_type, 
         handler, 
@@ -247,7 +244,6 @@ PRIVATE ENUM_RETURN add_arg_to_current_running_option(const char* subcmd_name, c
 ENUM_RETURN register_option(
     const char* subcmd_name,
     const char* option_name,
-    ENUM_BOOLEAN need_input_file,
     ENUM_OPTION_TYPE option_type,
     ENUM_ARG_TYPE arg_type,
     FUNC_OPTION_PROC handler, 
@@ -257,7 +253,6 @@ ENUM_RETURN register_option(
     R_ASSERT(option_name != NULL, RETURN_FAILURE);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_subcmd_has_been_registered(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_option_name_is_valid(option_name), RETURN_FAILURE, "option: %s", option_name);
-    R_ASSERT_LOG(need_input_file == BOOLEAN_FALSE || need_input_file == BOOLEAN_TRUE, RETURN_FAILURE, "need_input_file: %d", need_input_file);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_option_type_is_valid(option_type), RETURN_FAILURE, "option_type: %d", option_type);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_arg_type_is_valid(arg_type), RETURN_FAILURE, "arg_type: %d", arg_type);
     R_ASSERT(handler != NULL, RETURN_FAILURE);
@@ -269,7 +264,6 @@ ENUM_RETURN register_option(
     STRU_OPTION_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_option_cb(subcmd_name, 
         option_name, 
-        need_input_file,
         option_type, 
         arg_type, 
         handler, 

@@ -69,14 +69,12 @@ const char *get_input_file_of_current_running_subcmd(_VOID);
 
 ENUM_RETURN register_subcmd(
     const char* subcmd_name,
-    ENUM_BOOLEAN need_input_file,
     FUNC_SUBCMD_PROC handler, 
     const char* help_info);
 
 ENUM_RETURN register_option(
     const char* subcmd_name,
     const char* option_name,
-    ENUM_BOOLEAN need_input_file,
     ENUM_OPTION_TYPE option_type,
     ENUM_ARG_TYPE arg_type,
     FUNC_OPTION_PROC handler, 
