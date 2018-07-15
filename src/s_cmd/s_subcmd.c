@@ -60,7 +60,7 @@ STRU_OPTION_CONTROL_BLOCK *get_option_cb_list_head(const char *subcmd_name)
     STRU_SUBCMD_CONTROL_BLOCK *p_subcmd_cb = get_subcmd_cb_by_name(subcmd_name);
     if(p_subcmd_cb == NULL)
     {
-        ret_val = add_current_system_error(ERROR_CODE_UNKONWN_SUBCMD, subcmd_name);
+        ret_val = generate_system_error(ERROR_CODE_UNKONWN_SUBCMD, subcmd_name);
         R_ASSERT(ret_val == RETURN_SUCCESS, NULL);
         return NULL;
     }
@@ -72,7 +72,7 @@ STRU_OPTION_CONTROL_BLOCK *get_option_cb_list_head(const char *subcmd_name)
 
 PRIVATE void debug_print_subcmd_cb(STRU_SUBCMD_CONTROL_BLOCK *p)
 {
-    R_LOG("%s = %s, %s = %d, %s = %p, %s = %s\n", 
+    printf("%s = %s, %s = %d, %s = %p, %s = %s\n", 
         "subcmd", p->subcmd,
         "is_running", p->is_running,
         "handler", p->handler,
@@ -81,7 +81,7 @@ PRIVATE void debug_print_subcmd_cb(STRU_SUBCMD_CONTROL_BLOCK *p)
     debug_print_option_cb_list(p->option_cbs);
 }
 
-void debug_print_subcmd(void)
+_VOID debug_print_all_subcmds_and_its_options(_VOID)
 {
     STRU_SUBCMD_CONTROL_BLOCK *p = get_subcmd_cb_list_head();
 
@@ -185,10 +185,15 @@ ENUM_RETURN register_subcmd(
 {
     R_ASSERT(subcmd_name != NULL, RETURN_FAILURE);
     R_ASSERT_LOG(BOOLEAN_TRUE == whether_subcmd_name_is_valid(subcmd_name), RETURN_FAILURE, "subcmd: %s", subcmd_name);
-   R_ASSERT(handler != NULL, RETURN_FAILURE);
+    R_ASSERT(handler != NULL, RETURN_FAILURE);
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
     R_ASSERT(whether_subcmd_has_been_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
+
+    R_LOG("%s = %s, %s = %p, %s = %s\n", 
+        "subcmd", subcmd_name,
+        "handler", handler,
+        "help_info", help_info);
     
     STRU_SUBCMD_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_subcmd_cb(subcmd_name, handler, help_info);
@@ -201,8 +206,6 @@ ENUM_RETURN register_subcmd(
     /* 为每个subcmd注册默认的选项 */
     ret_val = register_default_option(subcmd_name);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
-    debug_print_subcmd_cb(p_new);
 
     return RETURN_SUCCESS;
 }
@@ -291,7 +294,7 @@ ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name)
         
         if(p_option_cb->is_running == BOOLEAN_FALSE)
         {
-            ret_val = add_current_system_error(ERROR_CODE_MISSING_OPTION, p_option_cb->option);
+            ret_val = generate_system_error(ERROR_CODE_MISSING_OPTION, p_option_cb->option);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
   
@@ -345,7 +348,7 @@ PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
     /* 当前subcmd未在控制块中注册过则停止处理 */
     if(whether_subcmd_has_been_registered(argv[i]) == BOOLEAN_FALSE)
     {
-        ret_val = add_current_system_error(ERROR_CODE_UNKONWN_SUBCMD, argv[i]);
+        ret_val = generate_system_error(ERROR_CODE_UNKONWN_SUBCMD, argv[i]);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         return RETURN_SUCCESS;
     }
@@ -353,7 +356,7 @@ PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
     /* 重复输入subcmd则停止处理 */
     if(get_current_running_subcmd_cb() != NULL)
     {
-        ret_val = add_current_system_error(ERROR_CODE_REPETITIVE_SUBCMD, argv[i]);
+        ret_val = generate_system_error(ERROR_CODE_REPETITIVE_SUBCMD, argv[i]);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         return RETURN_SUCCESS;
     }
@@ -379,7 +382,7 @@ ENUM_RETURN parse_subcmds(int argc, char **argv)
 
     if(get_current_running_subcmd_cb() == NULL)
     {
-        ret_val = add_current_system_error(ERROR_CODE_MISSING_SUBCMD, NULL);
+        ret_val = generate_system_error(ERROR_CODE_MISSING_SUBCMD, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
@@ -403,7 +406,7 @@ ENUM_RETURN process_subcmds(void)
 
     if(p->handler() == RETURN_FAILURE)
     {
-        ret_val = add_current_system_error(ERROR_CODE_SUBCMD_PROC_FAIL, NULL);
+        ret_val = generate_system_error(ERROR_CODE_SUBCMD_PROC_FAIL, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
         R_LOG("subcmd [%s] handler process failed!\n", p->subcmd);

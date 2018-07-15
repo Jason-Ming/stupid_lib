@@ -45,25 +45,25 @@ PRIVATE STRU_ERROR_INFO system_error_infos[] =
     {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
 };
 
-#define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + MAX_NUM_OF_USER_DEFINE_ERROR)
+#define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + USER_DEFINE_ERROR_CODE_MAX)
 
 #define INVALID_ERROR_CODE (-1)
 
 PRIVATE STRU_ERROR_INFO error_info_array[MAX_NUM_OF_ERROR_INFO];
 
-typedef struct TAG_STRU_CURRENT_ERROR_INFO
+typedef struct TAG_STRU_GENERATED_ERROR_INFO
 {
     int code;
     char* additional_info;
-    struct TAG_STRU_CURRENT_ERROR_INFO *next;
-}STRU_CURRENT_ERROR_INFO;
+    struct TAG_STRU_GENERATED_ERROR_INFO *next;
+}STRU_GENERATED_ERROR_INFO;
 
-PRIVATE STRU_CURRENT_ERROR_INFO *p_current_error_list_head = NULL;
-PRIVATE STRU_CURRENT_ERROR_INFO *p_current_error_list_tail = NULL;
+PRIVATE STRU_GENERATED_ERROR_INFO *p_generated_error_list_head = NULL;
+PRIVATE STRU_GENERATED_ERROR_INFO *p_generated_error_list_tail = NULL;
 
-PRIVATE STRU_CURRENT_ERROR_INFO *get_current_error_list_head(void)
+PRIVATE STRU_GENERATED_ERROR_INFO *get_generated_error_list_head(void)
 {
-    return p_current_error_list_head;
+    return p_generated_error_list_head;
 }
 
 PRIVATE ENUM_BOOLEAN whether_error_code_is_valid(int code)
@@ -71,7 +71,7 @@ PRIVATE ENUM_BOOLEAN whether_error_code_is_valid(int code)
     return (code >= 0 && code < MAX_NUM_OF_ERROR_INFO)?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 
-PRIVATE ENUM_BOOLEAN whether_error_code_has_been_registered(int code)
+PRIVATE ENUM_BOOLEAN whether_error_has_been_registered(int code)
 {
     R_FALSE_RET(whether_error_code_is_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
     
@@ -119,22 +119,34 @@ PRIVATE ENUM_BOOLEAN whether_error_needs_additional_info(int code)
     return error_info_array[code].whether_error_need_addtional_info;
 }
 
-PRIVATE void debug_print_current_error(STRU_CURRENT_ERROR_INFO *p)
+PRIVATE void debug_print_generated_error(STRU_GENERATED_ERROR_INFO *p)
 {
     R_LOG("code: %d, info: %s, additional_info: %s", p->code, get_error_info(p->code), p->additional_info);
 }
 
-ENUM_BOOLEAN whether_any_error_exists(void)
+_VOID debug_print_errors(_VOID)
 {
-    return (p_current_error_list_head == NULL)?BOOLEAN_FALSE:BOOLEAN_TRUE;
+    for(int i = 0; i < SIZE_OF_ARRAY(error_info_array); i++)
+    {
+        printf("code: %d, info: %s, need_additional_info: %d, tip: %d\n", 
+            error_info_array[i].code, 
+            error_info_array[i].info, 
+            error_info_array[i].whether_error_need_addtional_info,
+            error_info_array[i].tip);
+    }
 }
 
-PRIVATE ENUM_RETURN get_a_new_error_node(STRU_CURRENT_ERROR_INFO **pp_new, 
+ENUM_BOOLEAN whether_any_error_exists(void)
+{
+    return (p_generated_error_list_head == NULL)?BOOLEAN_FALSE:BOOLEAN_TRUE;
+}
+
+PRIVATE ENUM_RETURN get_a_new_generated_error_node(STRU_GENERATED_ERROR_INFO **pp_new, 
     int code, const char* additional_info)
 {
     R_ASSERT(pp_new != NULL, RETURN_FAILURE);
     
-    *pp_new = (STRU_CURRENT_ERROR_INFO*)malloc(sizeof(STRU_CURRENT_ERROR_INFO));
+    *pp_new = (STRU_GENERATED_ERROR_INFO*)malloc(sizeof(STRU_GENERATED_ERROR_INFO));
     R_ASSERT(*pp_new != NULL, RETURN_FAILURE);
 
     (*pp_new)->code = code;
@@ -148,30 +160,30 @@ PRIVATE ENUM_RETURN get_a_new_error_node(STRU_CURRENT_ERROR_INFO **pp_new,
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN add_node_to_current_error_list(STRU_CURRENT_ERROR_INFO *p_new)
+PRIVATE ENUM_RETURN add_node_to_generated_error_list(STRU_GENERATED_ERROR_INFO *p_new)
 {
     R_ASSERT(p_new != NULL, RETURN_FAILURE);
 
-    if(p_current_error_list_tail == NULL)
+    if(p_generated_error_list_tail == NULL)
     {
-        p_current_error_list_head = p_current_error_list_tail = p_new;
+        p_generated_error_list_head = p_generated_error_list_tail = p_new;
     }
     else
     {
-        p_current_error_list_tail->next = p_new;
-        p_current_error_list_tail = p_new;
+        p_generated_error_list_tail->next = p_new;
+        p_generated_error_list_tail = p_new;
     }
     
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN add_current_system_error(int code, const char* additional_info)
+ENUM_RETURN generate_system_error(int code, const char* additional_info)
 {    
     R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
-    R_ASSERT_LOG(whether_error_code_has_been_registered(code) == BOOLEAN_TRUE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_error_has_been_registered(code) == BOOLEAN_TRUE, RETURN_FAILURE,
         "the error code: %d is not registered", code);
 
-    STRU_CURRENT_ERROR_INFO *p_new = NULL;
+    STRU_GENERATED_ERROR_INFO *p_new = NULL;
 
     if(error_info_array[code].whether_error_need_addtional_info == BOOLEAN_TRUE)
     {
@@ -184,20 +196,20 @@ ENUM_RETURN add_current_system_error(int code, const char* additional_info)
     }
     
     ENUM_RETURN ret_val;
-    ret_val = get_a_new_error_node(&p_new, code, additional_info);
+    ret_val = get_a_new_generated_error_node(&p_new, code, additional_info);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_node_to_current_error_list(p_new);
+    ret_val = add_node_to_generated_error_list(p_new);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    debug_print_current_error(p_new);
+    debug_print_generated_error(p_new);
     
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN add_current_user_error(int code, const char* additional_info)
+ENUM_RETURN generate_user_error(int code, const char* additional_info)
 {
-    return add_current_system_error(code, additional_info);
+    return generate_system_error(code + ERROR_CODE_MAX, additional_info);
 }
 
 void display_success_info(void)
@@ -205,9 +217,9 @@ void display_success_info(void)
     printf(GREEN"Successed!\n"NONE);
 }
 
-void display_error_info(void)
+void display_generated_error_info(void)
 {
-    STRU_CURRENT_ERROR_INFO *p = get_current_error_list_head();
+    STRU_GENERATED_ERROR_INFO *p = get_generated_error_list_head();
 
     while(p != NULL)
     {
@@ -234,7 +246,7 @@ PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEA
 {
     R_ASSERT(whether_error_code_is_valid(code) == BOOLEAN_TRUE, RETURN_FAILURE);
 
-    R_ASSERT_LOG(whether_error_code_has_been_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
+    R_ASSERT_LOG(whether_error_has_been_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
         "the error code: %d is already registered", code);
 
     R_LOG("code: %d, info: %s, need_additional_info: %d, tip: %d", code, info, need_additional_info, tip);
@@ -251,7 +263,9 @@ ENUM_RETURN register_user_error_info(
     int code, const char * info, 
     ENUM_BOOLEAN need_additional_info)
 {
-    return register_error_info(code, info, need_additional_info, ERROR_TIP_NULL);
+    R_ASSERT_LOG(whether_initializtion_has_been_finished(), RETURN_FAILURE, 
+        "must call 'prepare' first!");
+    return register_error_info(code + ERROR_CODE_MAX, info, need_additional_info, ERROR_TIP_NULL);
 }
 
 ENUM_RETURN init_error_info(void)

@@ -19,6 +19,8 @@ PRIVATE char *p_introduction = NULL;
 
 PRIVATE int argv_indicator = 0;
 
+PRIVATE ENUM_BOOLEAN g_whether_initializtion_has_been_finished = BOOLEAN_FALSE;
+
 int get_argv_indicator(void)
 {
     return argv_indicator;
@@ -84,17 +86,31 @@ PRIVATE ENUM_RETURN register_default_data(void)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN prepare(const char * bin_name)
+_VOID finish_initializtion(_VOID)
 {
-    save_bin_name(bin_name);
+    g_whether_initializtion_has_been_finished = BOOLEAN_TRUE;
+}
 
+ENUM_BOOLEAN whether_initializtion_has_been_finished(_VOID)
+{
+    return g_whether_initializtion_has_been_finished;
+}
+
+ENUM_RETURN prepare(const char * bin_name, const char *introduction)
+{
     ENUM_RETURN ret_val = RETURN_SUCCESS;
+    save_bin_name(bin_name);
+    
+    register_introduction(introduction);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = init_error_info();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     ret_val = register_default_data();
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    finish_initializtion();
 
     return RETURN_SUCCESS;
 }
@@ -116,7 +132,7 @@ PRIVATE ENUM_RETURN process_errors(void)
 {
     if(whether_any_error_exists() == BOOLEAN_TRUE)
     {
-        display_error_info();
+        display_generated_error_info();
         return RETURN_FAILURE;
     }
 
@@ -160,9 +176,6 @@ ENUM_RETURN process(int argc, char **argv)
     R_ASSERT(argc >= 1 && argv[0] != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-
-    ret_val = prepare(argv[0]);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     ret_val = parse_args(argc, argv);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

@@ -17,7 +17,7 @@
 
 PRIVATE void debug_print_option_cb(STRU_OPTION_CONTROL_BLOCK *p)
 {
-    R_LOG("%s = %s, %s = %s, %s = %d, %s = %d, %s = %d, %s = %s, %s = %p, %s = %s\n", 
+    printf("%s = %s, %s = %s, %s = %d, %s = %d, %s = %d, %s = %s, %s = %p, %s = %d, %s = %s\n", 
         "subcmd", p->subcmd,
         "option", p->option,
         "is_running", p->is_running,
@@ -25,6 +25,7 @@ PRIVATE void debug_print_option_cb(STRU_OPTION_CONTROL_BLOCK *p)
         "arg type", p->arg_type,
         "arg value", p->arg_value,
         "handler", p->handler,
+        "finish_handle", p->finish_handle,
         "help_info", p->help_info);
 }
 
@@ -225,7 +226,7 @@ PRIVATE ENUM_RETURN add_arg_to_current_running_option(const char* subcmd_name, c
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     if(arg == NULL)
     {
-        ret_val = add_current_system_error(ERROR_CODE_MISSING_ARGS, option_name);
+        ret_val = generate_system_error(ERROR_CODE_MISSING_ARGS, option_name);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         return RETURN_SUCCESS;
     }
@@ -260,7 +261,16 @@ ENUM_RETURN register_option(
     R_ASSERT(help_info != NULL, RETURN_FAILURE);
 
     R_ASSERT(whether_option_has_been_registered(subcmd_name, option_name) == BOOLEAN_FALSE, RETURN_FAILURE);
-    
+
+    R_LOG("%s = %s, %s = %s, %s = %d, %s = %d, %s = %p, %s = %d, %s = %s\n", 
+        "subcmd", subcmd_name,
+        "option", option_name,
+        "option type", option_type,
+        "arg type", arg_type,
+        "handler", handler,
+        "finish_handle", finish_handle,
+        "help_info", help_info);
+        
     STRU_OPTION_CONTROL_BLOCK *p_new = NULL;
     p_new = get_a_new_option_cb(subcmd_name, 
         option_name, 
@@ -275,8 +285,6 @@ ENUM_RETURN register_option(
     ret_val = add_a_new_option_cb_to_subcmd_cb(p_new);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
-    debug_print_option_cb(p_new);
-
     return RETURN_SUCCESS;
 }
 
@@ -335,7 +343,7 @@ ENUM_RETURN parse_options(int argc, char **argv)
         // 当前option是否在控制块中注册过
         if(BOOLEAN_FALSE == whether_option_has_been_registered(current_subcmd_name, option_name))
         {
-            ret_val = add_current_system_error(ERROR_CODE_UNKONWN_OPTION, option_name);
+            ret_val = generate_system_error(ERROR_CODE_UNKONWN_OPTION, option_name);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
             break;   
@@ -344,7 +352,7 @@ ENUM_RETURN parse_options(int argc, char **argv)
         /* 当前option已经处理过 */
         if(get_current_running_option_cb(current_subcmd_name, option_name) != NULL)
         {
-            ret_val = add_current_system_error(ERROR_CODE_REPETITIVE_OPTION, option_name);
+            ret_val = generate_system_error(ERROR_CODE_REPETITIVE_OPTION, option_name);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
             break;
@@ -438,7 +446,7 @@ ENUM_RETURN process_options(_VOID    )
         user_process_result = p_option_cb->handler(p_option_cb->arg_value);
         if(user_process_result == RETURN_FAILURE)
         {
-            ret_val = add_current_system_error(ERROR_CODE_OPTION_PROC_FAIL, NULL);
+            ret_val = generate_system_error(ERROR_CODE_OPTION_PROC_FAIL, NULL);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
             R_LOG("option [%s] handler process failed!\n", p_option_cb->option);

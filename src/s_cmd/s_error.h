@@ -5,7 +5,7 @@
 
 __BEGIN_C_DECLS
 void display_success_info(void);
-void display_error_info(void);
+void display_generated_error_info(void);
 ENUM_RETURN init_error_info(void);
 ENUM_BOOLEAN whether_any_error_exists(void);
 

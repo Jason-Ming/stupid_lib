@@ -6,8 +6,8 @@
 #include "s_type.h"
 
 //将一个字母转换为大写
-#define UPPERCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0×20) : (c) )
-#define LOWERCASE( c ) ( ((c) >= 'A' && (c) <= 'Z') ? ((c) + 0×20) : (c) )
+#define UPPERCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c) )
+#define LOWERCASE( c ) ( ((c) >= 'A' && (c) <= 'Z') ? ((c) + 0x20) : (c) )
 
 //判断字符是不是10进值的数字
 #define IS_DEC( c ) ((c) >= '0' && (c) <= '9')
@@ -135,6 +135,91 @@ ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop);
 
 /* whether the charator between begin and end in the same range: 0~9, a~z, A~Z */
 ENUM_BOOLEAN s_range(_S8 begin, _S8 end);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case insensitive
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 < s2)，0(s1 == s2), 1(s1 > s2)
+ */
+_S32 strcasecmp(const _S8*s1, const _S8*s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case insensitive
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 > s2)，0(s1 == s2), 1(s1 < s2)
+ */
+_S32 strcasecmp_r(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case sensitive
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 > s2)，0(s1 == s2), 1(s1 < s2)
+ */
+_S32 strcmp_r(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case sensitive, directory order(makes comparisons only on
+       letters, numbers and blanks)
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 < s2)，0(s1 == s2), 1(s1 > s2)
+ */
+_S32 dircmp(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case sensitive, directory order(makes comparisons only on
+       letters, numbers and blanks)
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 > s2)，0(s1 == s2), 1(s1 < s2)
+ */
+_S32 dircmp_r(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case insensitive, directory order(makes comparisons only on
+       letters, numbers and blanks)
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 < s2)，0(s1 == s2), 1(s1 > s2)
+ */
+_S32 dircasecmp(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 to s2, case insensitive, directory order(makes comparisons only on
+       letters, numbers and blanks)
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 > s2)，0(s1 == s2), 1(s1 < s2)
+ */
+_S32 dircasecmp_r(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 and s2 numerically, the string will be converted to float by 'atof'
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 < s2)，0(s1 == s2), 1(s1 > s2), 
+ */
+_S32 numcmp(const _S8 * s1, const _S8 * s2);
+
+/**
+ * @author: Jason Ming
+ * @description: compare s1 and s2 numerically, the string will be converted to float by 'atof'
+ * @param s1: pointer to string
+ * @param s2: pointer to string
+ * @return: -1(s1 > s2)，0(s1 == s2), 1(s1 < s2)
+ */
+_S32 numcmp_r(const _S8 * s1, const _S8 * s2);
 
 __END_C_DECLS
 
