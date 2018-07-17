@@ -236,7 +236,7 @@ PRIVATE ENUM_DCL_TOKEN parse_word(_S8 *string)
     return token_temp;
 }
 
-ENUM_RETURN get_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token)
+ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token)
 {
     R_ASSERT(statement != NULL, RETURN_FAILURE);
     R_ASSERT(token_buffer != NULL, RETURN_FAILURE);
@@ -289,7 +289,7 @@ ENUM_RETURN get_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, s
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN get_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len)
+ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len)
 {
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
     R_ASSERT(statement_buffer != NULL, RETURN_FAILURE);
@@ -345,7 +345,7 @@ ENUM_RETURN get_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN parse_statement(_S8 *statement)
+ENUM_RETURN s_cparse_statement(_S8 *statement)
 {
     return RETURN_SUCCESS;
 }

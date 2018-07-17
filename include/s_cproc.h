@@ -46,16 +46,18 @@ ENUM_BOOLEAN is_keyword(_S8 *string);
 ENUM_BOOLEAN is_identifier(_S8 *string);
 
 /* delete comment from source file, and store new content to another file */
-ENUM_RETURN s_delcmnt(FILE *pfr, FILE *pfw);
+ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw);
 
+/*  */
+ENUM_RETURN s_cchk_pair(FILE *pfr);
 
 /* be sure the content in file does not contain any comment¡¢macro and had been checked pairing match */
-ENUM_RETURN get_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len);
+ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len);
 
-/* make sure you get the statement from 'get_statement' */
-ENUM_RETURN get_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token);
+/* make sure you get the statement from 's_cget_statement' */
+ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token);
 
-/* make sure you get the statement from 'get_statement', and at present, this function could parse declaration only */
-ENUM_RETURN parse_statement(_S8 *statement);
+/* make sure you get the statement from 's_cget_statement', and at present, this function could parse declaration only */
+ENUM_RETURN s_cparse_statement(_S8 *statement);
 __END_C_DECLS
 #endif

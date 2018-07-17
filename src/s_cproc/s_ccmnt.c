@@ -275,7 +275,7 @@ PRIVATE ENUM_RETURN del_stm_proc_intermediate(FILE *pfr, FILE *pfw, int c)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_delcmnt(FILE *pfr, FILE *pfw)
+ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw)
 {
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
     R_ASSERT(pfw != NULL, RETURN_FAILURE);
