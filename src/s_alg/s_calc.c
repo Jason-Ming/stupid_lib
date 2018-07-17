@@ -34,16 +34,16 @@ typedef enum TAG_ENUM_CALC_WORD_TYPE
 
 #define VAR_NAME_LEN 33
 #define MAX_VAR 64
-typedef struct TAG_STRU_VAR
+typedef struct TAG_STRU_CALC_VAR
 {
     _S8 name[VAR_NAME_LEN];
     _SD value;
-}STRU_VAR;
+}STRU_CALC_VAR;
 
 PRIVATE STACK s_calc_stack;
-PRIVATE STRU_VAR vars[MAX_VAR];
+PRIVATE STRU_CALC_VAR vars[MAX_VAR];
 PRIVATE _S32 current_idle_var_index = 0;
-PRIVATE STRU_VAR last_var;
+PRIVATE STRU_CALC_VAR last_var;
 
 PRIVATE _S8 *s_calc_get_last_var(_VOID)
 {

@@ -78,7 +78,7 @@ PRIVATE _S32 process_words(const _S8* filename, const _S8 *separator)
             {
                 if(output_switch == SWITCH_ENABLE)
                 {
-                    fputs(separator, fpw);
+                    fprintf(fpw, "%s", separator);
                 }
             }
             
@@ -132,7 +132,7 @@ _S32 format_words(const _S8* filename, const _S8 *separator)
     return retval;
 }
 
-ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length)
+ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length)
 {
     R_ASSERT(fp != NULL, RETURN_FAILURE);
     R_ASSERT(buffer != NULL, RETURN_FAILURE);
@@ -170,7 +170,7 @@ ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *
     R_ASSERT(line_num != NULL, RETURN_FAILURE);
     
     _S8 line_buffer[MAX_LINE_LEN];
-    _S32 line_len = 0;
+    size_t line_len = 0;
     *line_num = 0;
     
     while(s_getline(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)

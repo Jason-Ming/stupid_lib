@@ -218,9 +218,9 @@ PRIVATE ENUM_RETURN draw_hitogram_table(FILE *fpw)
     {
         for(int j = 0; j < table_col; j++)
         {
-            fputs(get_table_unit_ptr(i, j)->print_string, fpw);
+            fprintf(fpw, "%s", get_table_unit_ptr(i, j)->print_string);
         }
-        fputs("\n", fpw);
+        fprintf(fpw, "\n");
     }
 
     return RETURN_SUCCESS;

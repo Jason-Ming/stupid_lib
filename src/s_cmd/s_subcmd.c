@@ -281,7 +281,7 @@ ENUM_RETURN check_missing_options_of_subcmd(const char *subcmd_name)
     while(p_option_cb != NULL)
     {
         /* if -h is input, return success */
-        if(strcmp(p_option_cb->option, "-h")==0)
+        if(strcmp(p_option_cb->option, "-h") == 0 && p_option_cb->is_running == BOOLEAN_TRUE)
         {
             break;
         }

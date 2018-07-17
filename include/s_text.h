@@ -1,6 +1,7 @@
 #ifndef __S_TEXT_H__
 #define __S_TEXT_H__
 
+#include <ctype.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
 #include "s_type.h"
@@ -17,38 +18,45 @@
 
 #define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
 
+#define IS_DIR(c) ((IS_ALPHABET(c) || IS_DEC(c) || c == ' ')?BOOLEAN_TRUE:BOOLEAN_FALSE)
+
 #define CONC(x, y) x##y
 #define CONC_(x, y) x##_##y
 
 #define OUTPUT_STR(c, dest, size)\
     do{\
-        DEBUG_PRINT("OUTPUT_STR: %c", c);\
+        _S8 ___c_ = c;\
+        DEBUG_PRINT("OUTPUT_STR: %c", ___c_);\
         if(size > 1)\
         {\
-            *dest++ = c;\
+            *dest++ = ___c_;\
             size--;\
+        }else\
+        {\
+            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
         }\
     }while(0);
 
 #define OUTPUT_STR_RANGE(begin, end, dest, size) \
     do{\
-        if(begin != '\0' && end != '\0')\
+        _S8 ___b = begin, ___e = end;\
+        if(___b != '\0' && ___e != '\0')\
         {\
-            DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", begin, end);\
-            for(_S8 c = begin; c <= end; c++)\
+            DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", ___b, ___e);\
+            for(_S8 ___c = ___b; ___c <= ___e; ___c++)\
             {\
-                OUTPUT_STR(c, dest, size);\
+                OUTPUT_STR(___c, dest, size);\
             }\
-            begin = end = '\0';\
         }\
     }while(0);
 
 #define OUTPUT_STR_MULTI(c, num, dest, size) \
     do{\
-        DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", c, num);\
+        _S8 ___c = c;\
+        DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", ___c, num);\
         for(_S32 i = 0; i < num; i++)\
         {\
-            OUTPUT_STR(c, dest, size);\
+            OUTPUT_STR(___c, dest, size);\
         }\
     }while(0);
 
@@ -58,7 +66,8 @@ _S32 format_words(const _S8* filename, const _S8 *separator);
 
 
 /* read a line into line, return length(not include '\0') */
-ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], _S32 buffer_size, _S32 *length);
+ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length);
+
 
 /* read lines into line_ptr, return read line number, this function will call malloc to alloc memory for line_ptr to store line */
 ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);

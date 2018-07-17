@@ -35,7 +35,7 @@ char* log_getfn(void);
     printf(fmt, ##args);
 #endif
 
-//#define DEBUG_SWITCH 1
+#define DEBUG_SWITCH 1
 
 #ifdef DEBUG_SWITCH
 #define DEBUG_PRINT(fmt, args...)\
@@ -117,7 +117,13 @@ char* log_getfn(void);
         action;\
         return value;\
     }
-        
+
+#define S_ASSERT(fmt, args...)\
+    LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+        "ASSERT! "fmt"\n"NONE,\
+        get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+        ##args);
+
 #define V_ASSERT(condition)\
     if(!(condition))\
     {\
