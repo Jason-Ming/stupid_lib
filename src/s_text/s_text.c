@@ -14,155 +14,180 @@
 
 #define MAX_CHAR 256
 
-#define IN 1 /* inside a word */
-#define OUT 0 /* outside a word */
+#define MAX_LINE_LEN			1000
+PRIVATE ENUM_BOOLEAN word_separators[MAX_CHAR] = {BOOLEAN_FALSE};
+PRIVATE ENUM_BOOLEAN whether_word_separators_have_been_set = BOOLEAN_FALSE;
 
-#define SWITCH_ENABLE 1
-#define SWITCH_DISABLE 0
-
-_S32 output_switch = SWITCH_DISABLE;
-
-PRIVATE void enable_output(void)
+void s_set_separators(_S8 *separators)
 {
-    output_switch = SWITCH_ENABLE;
-}
-
-PRIVATE void disable_output(void)
-{
-    output_switch = SWITCH_DISABLE;
-}
-
-/* count lines, words, and _S8actors in input */
-PRIVATE _S32 process_words(const _S8* filename, const _S8 *separator)
-{
-    assert(filename != NULL);
-    assert((separator != NULL && output_switch == SWITCH_ENABLE) 
-        || (separator == NULL && output_switch == SWITCH_DISABLE));
-    
-    FILE* fpr = NULL;
-    fpr = fopen(filename, "r");
-	assert(fpr != NULL);
-    FILE *fpw = NULL;
-    _S8 *filename_ouput = NULL;
-
-
-    if(output_switch == SWITCH_ENABLE)
+    whether_word_separators_have_been_set = BOOLEAN_TRUE;
+    for(_S32 i = 0; i < MAX_CHAR; i++)
     {
-
-        filename_ouput = malloc(strlen(filename) + strlen(".output") + 1);
-        assert(filename_ouput != NULL);
-        filename_ouput[0] = '\0';
-        strcat(filename_ouput, filename);
-        strcat(filename_ouput, ".output");
-        fpw = fopen(filename_ouput, "w");
-        assert(fpw != NULL);
+        word_separators[i] = BOOLEAN_FALSE;
     }
     
-    _S32 c, nl, nw, nc, state;
-
-    state = OUT;
-    nl = nw = nc = 0;
-
-    while((c = fgetc(fpr)) != EOF)
+    if(separators == NULL || strlen(separators) == 0)
     {
-        ++nc;
+        word_separators['\n'] = BOOLEAN_TRUE;
+        word_separators['\t'] = BOOLEAN_TRUE;
+        word_separators[' '] = BOOLEAN_TRUE;
+        word_separators['\v'] = BOOLEAN_TRUE;
+        word_separators['\f'] = BOOLEAN_TRUE;
 
-        if(c == '\n')
-        {
-            ++nl;
-        }
-
-        if(c == ' ' || c == '\n' || c == '\t' || c == '\v' || c == '\f')
-        {
-            if(state == IN)
-            {
-                if(output_switch == SWITCH_ENABLE)
-                {
-                    fprintf(fpw, "%s", separator);
-                }
-            }
-            
-            state = OUT;
-        }
-        else 
-        {
-            if(state == OUT)
-            {
-                state = IN;
-                ++nw;
-            }
-            if(output_switch == SWITCH_ENABLE)
-            {
-                fputc(c, fpw);
-            }
-        }
+        return;
     }
-
-    //pr_S32f("%d, %d, %d\n", nl, nw, nc);
-	fclose(fpr);
-    if(output_switch == SWITCH_ENABLE)
-    {
-        fclose(fpw);
-    }
-
-    return nw;
-}
-_S32 count_words(const _S8* filename)
-{
-    _S32 retval;
-    assert(filename != NULL);
-    disable_output();
-
-    retval = process_words(filename, NULL);
-
-    return retval;
-}
-
-_S32 format_words(const _S8* filename, const _S8 *separator)
-{
-    _S32 retval;
-    assert(filename != NULL);
-    assert(separator != NULL);
-
-    enable_output();
     
-    retval = process_words(filename, separator);
-
-    disable_output();
-    return retval;
+    while(*separators != '\0')
+    {
+        word_separators[(_U8)(*separators++)] = BOOLEAN_TRUE;
+    }
+    
 }
 
-ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length)
+PRIVATE ENUM_BOOLEAN is_separator(_S8 c)
 {
-    R_ASSERT(fp != NULL, RETURN_FAILURE);
-    R_ASSERT(buffer != NULL, RETURN_FAILURE);
-    R_ASSERT(length != NULL, RETURN_FAILURE);
+    return (whether_word_separators_have_been_set?
+        word_separators[(_U8)c]:
+        ('\n' == c || '\t' == c || ' ' == c || '\v' == c || '\f' == c));
+}
 
-    _S32 c;
-    _S32 len_temp = 0;
+ENUM_RETURN s_count_word_f(FILE *pfr, size_t *word_num)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(word_num != NULL, RETURN_FAILURE);
+    *word_num = 0;
+    _S8 c;
+    ENUM_BOOLEAN in_word = BOOLEAN_FALSE;
 
-    while((c = fgetc(fp)) != EOF && c != '\n')
+    while((c = fgetc(pfr)) != EOF)
     {
-        OUTPUT_STR(c, buffer, buffer_size);
-        ++len_temp;
+        if(is_separator(c))
+        {
+            in_word = BOOLEAN_FALSE;
+            continue;
+        }
+
+        if(in_word == BOOLEAN_FALSE)
+        {
+            (*word_num)++;
+            in_word = BOOLEAN_TRUE;
+        }
     }
-
-    if(c == '\n')
-    {
-        OUTPUT_STR(c, buffer, buffer_size);
-        ++len_temp;
-    }
-
-    OUTPUT_STR('\0', buffer, buffer_size);
-
-    *length = len_temp;
 
     return RETURN_SUCCESS;
 }
 
-#define MAX_LINE_LEN			1000
+ENUM_RETURN s_count_word_s(const _S8 *source, size_t *word_num)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(word_num != NULL, RETURN_FAILURE);
+    *word_num = 0;
+    _S8 c;
+    ENUM_BOOLEAN in_word = BOOLEAN_FALSE;
+    
+    while((c = *source++) != '\0')
+    {
+        if(is_separator(c))
+        {
+            in_word = BOOLEAN_FALSE;
+            continue;
+        }
 
-ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num)
+        if(in_word == BOOLEAN_FALSE)
+        {
+            (*word_num)++;
+            in_word = BOOLEAN_TRUE;
+        }
+    }
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word_len)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(word_buf != NULL, RETURN_FAILURE);
+    R_ASSERT(buf_size > 0, RETURN_FAILURE);
+    R_ASSERT(word_len != NULL, RETURN_FAILURE);
+
+    size_t len = buf_size;
+    _S8 c;
+    ENUM_BOOLEAN in_word = BOOLEAN_FALSE;
+    
+    /* skip white space */
+    while((c = fgetc(pfr)) != EOF)
+    {
+        if(is_separator(c))
+        {
+            if(in_word == BOOLEAN_FALSE)
+            {
+                continue;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            in_word = BOOLEAN_TRUE;
+            OUTPUT_STR(c, word_buf, buf_size);
+        }
+    } 
+
+    OUTPUT_END(word_buf, buf_size);
+    *word_len = len - buf_size - 1;
+    
+    while((c = fgetc(pfr)) != EOF)
+    {
+        if(is_separator(c))
+        {
+            continue;
+        }
+        else
+        {
+            R_ASSERT(0 == fseek(pfr, -1, SEEK_CUR), RETURN_FAILURE);
+            break;
+        }
+    }
+    
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_get_word_s(const _S8 **source, _S8 *word_buf, size_t buf_size, size_t *word_len)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(*source != NULL, RETURN_FAILURE);
+    R_ASSERT(word_buf != NULL, RETURN_FAILURE);
+    R_ASSERT(buf_size > 0, RETURN_FAILURE);
+    R_ASSERT(word_len != NULL, RETURN_FAILURE);
+
+    size_t len = 0;
+
+    /* skip white space */
+    while(is_separator(**source)) (*source)++;
+    
+    while(**source != '\0')
+    {
+        if(is_separator(**source))
+        {
+            break;
+        }
+
+        (*source)++;
+        len++;
+    };
+
+    strncpy(word_buf, *source - len, MIN(len, buf_size - 1));
+    word_buf[len] = '\0';
+    *word_len = len;
+    
+    while(is_separator(**source)) (*source)++;
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_getlines_f(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num)
 {
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
     R_ASSERT(line_ptr != NULL, RETURN_FAILURE);
@@ -173,7 +198,7 @@ ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *
     size_t line_len = 0;
     *line_num = 0;
     
-    while(s_getline(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
+    while(s_getline_f(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
     {
         line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
         R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
@@ -187,37 +212,86 @@ ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next)
+ENUM_RETURN s_getlines_s(const _S8 **source, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num)
 {
     R_ASSERT(source != NULL, RETURN_FAILURE);
-    R_ASSERT(word_buf != NULL, RETURN_FAILURE);
-    R_ASSERT(word_len != NULL, RETURN_FAILURE);
-    R_ASSERT(next != NULL, RETURN_FAILURE);
-
-    size_t len = 0;
+    R_ASSERT(*source != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr_num > 0, RETURN_FAILURE);
+    R_ASSERT(line_num != NULL, RETURN_FAILURE);
     
-    /* skip white space */
-    while(isspace(*source)) source++;
+    _S8 line_buffer[MAX_LINE_LEN];
+    size_t line_len = 0;
+    *line_num = 0;
     
-    while(*source != '\0')
+    while(s_getline_s(source, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
     {
-        if(isspace(*source))
-        {
-            break;
-        }
+        line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
+        R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
 
-        source++;
-        len++;
+        strcpy(line_ptr[(*line_num)++], line_buffer);
     };
 
-    strncpy(word_buf, source - len, MIN(len, buf_size - 1));
-    word_buf[len] = '\0';
-    *word_len = len;
+    /* still have lines to be read, the number of line_ptr is not enough */
+    R_ASSERT(*source == '\0', RETURN_FAILURE);
     
-    while(isspace(*source)) source++;
+    return RETURN_SUCCESS;
+}
 
-    *next = source;
+ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length)
+{
+    R_ASSERT(fp != NULL, RETURN_FAILURE);
+    R_ASSERT(buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(length != NULL, RETURN_FAILURE);
 
+    _S8 c;
+    size_t len_temp = buffer_size;
+
+    while((c = fgetc(fp)) != EOF && c != '\n')
+    {
+        OUTPUT_STR(c, buffer, buffer_size);
+    }
+
+    if(c == '\n')
+    {
+        OUTPUT_STR(c, buffer, buffer_size);
+    }
+
+    OUTPUT_END(buffer, buffer_size);
+
+    *length = len_temp - buffer_size - 1;
+    
+    return RETURN_SUCCESS;
+}
+
+
+ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, size_t *length)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(*source != NULL, RETURN_FAILURE);
+    R_ASSERT(buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(buffer_size > 0, RETURN_FAILURE);
+    R_ASSERT(length != NULL, RETURN_FAILURE);
+
+    _S8 c;
+    size_t len_temp = buffer_size;
+
+    while((c = **source) != '\0' && c != '\n')
+    {
+        OUTPUT_STR(c, buffer, buffer_size);
+        (*source)++;
+    }
+
+    if(c == '\n')
+    {
+        OUTPUT_STR(c, buffer, buffer_size);
+        (*source)++;
+    }
+
+    OUTPUT_END(buffer, buffer_size);
+
+    *length = len_temp - buffer_size - 1;
+    
     return RETURN_SUCCESS;
 }
 
@@ -599,9 +673,8 @@ ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size)
         sign = -1;
     }
 
-    _S32 index = 0;
-    size_t len = 0;
-    
+    _S32 index = 0;    
+    _S32 len = 0;
     do
     {
         index = (value % b)*sign;
@@ -615,8 +688,6 @@ ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size)
         len++;
     }
 
-    
-    
     while(len < w)
     {
         OUTPUT_STR(' ', dest, size);
@@ -644,16 +715,16 @@ ENUM_RETURN s_squeeze(_S8 *source, const _S8 *target)
     R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
     
     _S8 s[MAX_CHAR] = {0};
-    _S32 c;
+    _S8 c;
     while((c = *target) != '\0')
     {
-        s[c] = 1;
+        s[(_U8)c] = 1;
         target++;
     }
     _S8 *p = source;
     while((c = *source) != '\0')
     {
-        if(s[c] == 0)
+        if(s[(_U8)c] == 0)
         {
             *p = *source;
             p++;
@@ -675,16 +746,16 @@ ENUM_RETURN s_any(const _S8 *source, const _S8 *target, const _S8**pp_occur)
     R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
     
     _S8 s[MAX_CHAR] = {0};
-    _S32 c;
+    _S8 c;
     while((c = *target) != '\0')
     {
-        s[c] = 1;
+        s[(_U8)c] = 1;
         target++;
     }
     
     while((c = *source) != '\0')
     {
-        if(s[c] == 1)
+        if(s[(_U8)c] == 1)
         {
             *pp_occur = source;
             break;
@@ -716,7 +787,7 @@ ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
 
     while(*source != '\0' && size > 2)
     {
-        _S32 c = *source;
+        _S8 c = *source;
         switch(c)
         {
             case '\\':
@@ -732,7 +803,7 @@ ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
             case '\?':
             {
                 OUTPUT_STR('\\', dest, size);
-                OUTPUT_STR(escape[c], dest, size);
+                OUTPUT_STR(escape[(_U8)c], dest, size);
                 break;
             }
             default:
@@ -745,7 +816,7 @@ ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
     }
 
     /* append \0 */
-    OUTPUT_STR('\0', dest, size);
+    OUTPUT_END(dest, size);
 
     return RETURN_SUCCESS;
 }
@@ -775,7 +846,7 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
     
     while(*source != '\0')
     {
-        _S32 c = *source;
+        _S8 c = *source;
         DEBUG_PRINT("c = %c, in_escape = %d", c, in_escape);
         
         if(in_escape == BOOLEAN_TRUE)
@@ -794,7 +865,7 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
                 case '\'':
                 case '?':
                 {
-                    OUTPUT_STR(unescape[c], dest, size);
+                    OUTPUT_STR(unescape[(_U8)c], dest, size);
                     break;
                 }
                 default:
@@ -822,7 +893,7 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
     }
 
     /* append \0 */
-    OUTPUT_STR('\0', dest, size);
+    OUTPUT_END(dest, size);
 
     return RETURN_SUCCESS; 
 }
@@ -838,6 +909,32 @@ ENUM_RETURN s_trim(_S8 *source)
         {
             break; 
         }
+    }
+    
+    source[n+1] = '\0'; 
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_trim_nl(_S8 *source)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    ENUM_BOOLEAN has_nl = BOOLEAN_FALSE;
+    _S32 n; 
+    for (n = strlen(source)-1; n >= 0; n--)
+    {
+        if(source[n] == '\n')
+        {
+            has_nl = BOOLEAN_TRUE;
+        }
+        
+        if (source[n] != ' ' && source[n] != '\t' && source[n] != '\n') 
+        {
+            break; 
+        }
+    }
+    if(has_nl && n >= 0)
+    {
+        source[++n] = '\n';
     }
     
     source[n+1] = '\0'; 
@@ -982,7 +1079,7 @@ ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
         }
     };
 
-    OUTPUT_STR('\0', dest, len);
+    OUTPUT_END(dest, len);
 
     return RETURN_SUCCESS;
 }
@@ -1016,7 +1113,7 @@ ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
 
         source++;
     };
-    OUTPUT_STR('\0', dest, len);
+    OUTPUT_END(dest, len);
 
     return RETURN_SUCCESS;
 }
@@ -1065,7 +1162,7 @@ PRIVATE _S32	table_case[MAX_CHAR] =
 
 _S32 strcasecmp(const _S8*s1, const _S8*s2)
 {
-    for(; table_case[(_S32)*s1] == table_case[(_S32)*s2]; ++s1, ++s2)
+    for(; table_case[(_U8)*s1] == table_case[(_U8)*s2]; ++s1, ++s2)
     {
         if(*s1 == '\0')
         {
@@ -1073,7 +1170,7 @@ _S32 strcasecmp(const _S8*s1, const _S8*s2)
         }
     }
 
-    return ((table_case[(_S32)*s1] <table_case[(_S32)*s2])? (-1): (+1));
+    return ((table_case[(_U8)*s1] <table_case[(_U8)*s2])? (-1): (+1));
 }
 
 _S32 strcasecmp_r(const _S8 * s1, const _S8 * s2)
@@ -1098,13 +1195,13 @@ _S32 dircmp(const _S8 * s1, const _S8 * s2)
 {
     for(; ; ++s1, ++s2)
     {
-        if(!table_dir[(_S32)*s1])
+        if(!table_dir[(_U8)*s1])
         {
             ++s1;
             continue;
         }
 
-        if(!table_dir[(_S32)*s2])
+        if(!table_dir[(_U8)*s2])
         {
             ++s2;
             continue;
@@ -1134,19 +1231,19 @@ _S32 dircasecmp(const _S8 * s1, const _S8 * s2)
 {
     for(; ; ++s1, ++s2)
     {
-        if(!table_dir[(_S32)*s1])
+        if(!table_dir[(_U8)*s1])
         {
             ++s1;
             continue;
         }
 
-        if(!table_dir[(_S32)*s2])
+        if(!table_dir[(_U8)*s2])
         {
             ++s2;
             continue;
         }
         
-        if(table_case[(_S32)*s1] != table_case[(_S32)*s2])
+        if(table_case[(_U8)*s1] != table_case[(_U8)*s2])
         {
             break;
         }
@@ -1157,7 +1254,7 @@ _S32 dircasecmp(const _S8 * s1, const _S8 * s2)
         }
     }
 
-    return ((table_case[(_S32)*s1] <table_case[(_S32)*s2])? (-1): (+1));
+    return ((table_case[(_U8)*s1] <table_case[(_U8)*s2])? (-1): (+1));
 }
 
 _S32 dircasecmp_r(const _S8 * s1, const _S8 * s2)

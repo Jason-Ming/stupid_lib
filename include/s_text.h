@@ -23,6 +23,7 @@
 #define CONC(x, y) x##y
 #define CONC_(x, y) x##_##y
 
+/* c can not be '\0', if you output '\0', please use OUTPUT_END */
 #define OUTPUT_STR(c, dest, size)\
     do{\
         _S8 ___c_ = c;\
@@ -30,6 +31,19 @@
         if(size > 1)\
         {\
             *dest++ = ___c_;\
+            size--;\
+        }else\
+        {\
+            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
+        }\
+    }while(0);
+
+#define OUTPUT_END(dest, size)\
+    do{\
+        DEBUG_PRINT("OUTPUT_END");\
+        if(size > 0)\
+        {\
+            *dest++ = '\0';\
             size--;\
         }else\
         {\
@@ -61,28 +75,60 @@
     }while(0);
 
 __BEGIN_C_DECLS
-_S32 count_words(const _S8* filename);
-_S32 format_words(const _S8* filename, const _S8 *separator);
 
+/* set separaors, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
+   the words are separeted by '\n', ' ', '\t', '\v' and '\f', this operation can influnce these functions: 
+   s_count_word_f, s_count_word_s, s_get_word_f, s_get_word_s */
+void s_set_separators(_S8 *separators);
 
-/* read a line into line, return length(not include '\0') */
-ENUM_RETURN s_getline(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length);
+/* count word in file, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
+   the words are separeted by '\n', ' ', '\t', '\v' and '\f' */
+ENUM_RETURN s_count_word_f(FILE *pfr, size_t *word_num);
 
-
-/* read lines into line_ptr, return read line number, this function will call malloc to alloc memory for line_ptr to store line */
-ENUM_RETURN s_getlines(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
+/* count word in string, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
+   the words are separeted by '\n', ' ', '\t', '\v' and '\f' */
+ENUM_RETURN s_count_word_s(const _S8 *source, size_t *word_num);
 
 /**
  * @author: Jason Ming
- * @description: get a word from source
- * @param source: the source string
+ * @description: get a word from file, word are separated by charactors in 'separators', 
+        if 'separators' is NULL or empty, the words are separeted by '\n', ' ', '\t', '\v' and '\f'.
+ * @param pfr: the pointer to file, after processing, source point to the next word or 'EOF'
  * @param word_buf: the buffer to store the word
  * @param buf_size: the size of word_buf
  * @param word_len: the word len
- * @param next: the pointer of the next word 
+ * @param separators: string which included the separators
  * @return: RETURN_SUCCESS£¬RETURN_FAILUE
  */
-ENUM_RETURN s_get_word(const _S8 *source, _S8 *word_buf, size_t buf_size, size_t *word_len, const _S8 **next);
+ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word_len);
+
+/**
+ * @author: Jason Ming
+ * @description: get a word from source, word are separated by charactors in 'separators', 
+        if 'separators' is NULL or empty, the words are separeted by '\n', ' ', '\t', '\v' and '\f'.
+ * @param source: the pointer'pointer to source string, after processing, source point to the next word or '\0'
+ * @param word_buf: the buffer to store the word
+ * @param buf_size: the size of word_buf
+ * @param word_len: the word len
+ * @param separators: string which included the separators
+ * @return: RETURN_SUCCESS£¬RETURN_FAILUE
+ */
+ENUM_RETURN s_get_word_s(const _S8 **source, _S8 *word_buf, size_t buf_size, size_t *word_len);
+
+
+/* read a line into buffer, return length(not include '\0'), fp point to next line or EOF */
+ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length);
+
+/* read a line into buffer, return length(not include '\0'), source point to next line or '\0' */
+ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, size_t *length);
+
+/* read lines into line_ptr, return read line number, this function will call malloc to alloc memory 
+   for line_ptr to store line, pfr point to EOF */
+ENUM_RETURN s_getlines_f(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
+
+/* read lines into line_ptr, return read line number, this function will call malloc to alloc memory 
+   for line_ptr to store line, source point to '\0' */
+ENUM_RETURN s_getlines_s(const _S8 **source, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
 
 /* reverses the character string s . */
 ENUM_RETURN s_reverse(_S8 *pstr_buf);
@@ -124,8 +170,11 @@ ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size);
 /* converting escape sequences into the real characters. */
 ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size);
 
-/* trim: remove trailing blanks, tabs, newlines */
+/* trim: remove all trailing blanks, tabs, newlines */
 ENUM_RETURN s_trim(_S8 *source);
+
+/* trim: remove trailing blanks, tabs, after removement, if the string only contains newlines, clear the string */
+ENUM_RETURN s_trim_nl(_S8 *source);
 
 /* strindex: return index of target in source, -1 if none or target is empty */
 ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);

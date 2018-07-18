@@ -23,6 +23,6 @@ TEST_GROUP(TYPE)
 
 TEST(TYPE, test0)
 {
-    s_print_types();
+    //s_print_types();
 }
 

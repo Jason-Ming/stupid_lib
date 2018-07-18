@@ -285,11 +285,12 @@ PRIVATE ENUM_RETURN s_calc_rp_do(const _S8 * str, _SD * result)
     ENUM_CALC_WORD_TYPE word_type;
     _SD value, op1, op2;
     ENUM_RETURN ret_val;
+    s_set_separators(NULL);
     
     for(;;)
     {
         //get a word
-        ret_val = s_get_word(str, word, MAX_LEN_OF_WORD, &word_len, &str);
+        ret_val = s_get_word_s(&str, word, MAX_LEN_OF_WORD, &word_len);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
         DEBUG_PRINT("word: %s", word);

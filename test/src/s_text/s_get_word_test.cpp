@@ -10,14 +10,15 @@ using namespace std;
 
 
 
-TEST_GROUP(s_get_word)
+TEST_GROUP(s_get_word_s)
 {
     void setup()
     {
     	//设置自己的测试准备
-        source = expected_word = next = NULL;
+        source = source_temp = expected_word = next = NULL;
         retval = RETURN_FAILURE;
         word_len = expected_word_len = 0;
+        s_set_separators(NULL);
     }
 
     void teardown()
@@ -27,106 +28,111 @@ TEST_GROUP(s_get_word)
     }
 
     const static size_t len = 1024;
-    const _S8 *source, *expected_word, *next;
+    const _S8 *source, *source_temp, *expected_word, *next;
     _S8 word[len];
     size_t word_len, expected_word_len;
     ENUM_RETURN retval;
 };
 
-TEST(s_get_word, null_source)
+TEST(s_get_word_s, null_source1)
 {
-    retval = s_get_word(NULL, word, len, &word_len, &next);
+    retval = s_get_word_s(NULL, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_FAILURE, retval);
 }
 
-TEST(s_get_word, null_word)
+TEST(s_get_word_s, null_source2)
 {
-    source = "abc";
-    retval = s_get_word(source, NULL, len, &word_len, &next);
+    retval = s_get_word_s(&source, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_FAILURE, retval);
 }
 
-TEST(s_get_word, null_wordlen)
-{
-    source = "abc";
-    retval = s_get_word(source, word, len, NULL, &next);
-
-    CHECK_EQUAL(RETURN_FAILURE, retval);
-}
-
-TEST(s_get_word, null_next)
+TEST(s_get_word_s, null_word)
 {
     source = "abc";
-    retval = s_get_word(source, word, len, &word_len, NULL);
+    retval = s_get_word_s(&source, NULL, len, &word_len);
 
     CHECK_EQUAL(RETURN_FAILURE, retval);
 }
 
-TEST(s_get_word, normal_no_word)
+TEST(s_get_word_s, null_wordlen)
+{
+    source = "abc";
+    retval = s_get_word_s(&source, word, len, NULL);
+
+    CHECK_EQUAL(RETURN_FAILURE, retval);
+}
+
+TEST(s_get_word_s, normal_no_word)
 {
     source = "";
+    source_temp = source;
     expected_word = "";
     expected_word_len = 0;
-    retval = s_get_word(source, word, len, &word_len, &next);
+    retval = s_get_word_s(&source_temp, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_SUCCESS, retval);
 
     STRCMP_EQUAL(expected_word, word);
     CHECK_EQUAL(expected_word_len, word_len);
-    POINTERS_EQUAL(source+strlen(word), next);
+    POINTERS_EQUAL(source+strlen(word), source_temp);
 }
 
 
-TEST(s_get_word, normal_one_word)
+TEST(s_get_word_s, normal_one_word)
 {
     source = "abc";
+    source_temp = source;
     expected_word = "abc";
     expected_word_len = 3;
-    retval = s_get_word(source, word, len, &word_len, &next);
+    retval = s_get_word_s(&source_temp, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_SUCCESS, retval);
 
     STRCMP_EQUAL(expected_word, word);
     CHECK_EQUAL(expected_word_len, word_len);
-    POINTERS_EQUAL(source+strlen(word), next);
+    POINTERS_EQUAL(source+strlen(word), source_temp);
+
+    source = source_temp;
 
     expected_word = "";
     expected_word_len = 0;
 
-    retval = s_get_word(next, word, len, &word_len, &next);
+    retval = s_get_word_s(&source_temp, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_SUCCESS, retval);
 
     STRCMP_EQUAL(expected_word, word);
     CHECK_EQUAL(expected_word_len, word_len);
-    POINTERS_EQUAL(next+strlen(word), next);
+    POINTERS_EQUAL(source+strlen(word), source_temp);
 }
 
-TEST(s_get_word, normal_two_word)
+TEST(s_get_word_s, normal_two_word)
 {
     source = "  abc   3456 ";
+    source_temp = source;
     expected_word = "abc";
     expected_word_len = 3;
-    retval = s_get_word(source, word, len, &word_len, &next);
+    retval = s_get_word_s(&source_temp, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_SUCCESS, retval);
 
     STRCMP_EQUAL(expected_word, word);
     CHECK_EQUAL(expected_word_len, word_len);
-    POINTERS_EQUAL(source+ 2 + strlen(word) + 3, next);
+    POINTERS_EQUAL(source+ 2 + strlen(word) + 3, source_temp);
 
     expected_word = "3456";
     expected_word_len = 4;
+    source = source_temp;
 
-    retval = s_get_word(next, word, len, &word_len, &next);
+    retval = s_get_word_s(&source_temp, word, len, &word_len);
 
     CHECK_EQUAL(RETURN_SUCCESS, retval);
 
     STRCMP_EQUAL(expected_word, word);
     CHECK_EQUAL(expected_word_len, word_len);
-    POINTERS_EQUAL(source + 8 + strlen(word) + 1, next);
+    POINTERS_EQUAL(source + strlen(word) + 1, source_temp);
 
 }
 

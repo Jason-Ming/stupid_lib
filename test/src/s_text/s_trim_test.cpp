@@ -42,6 +42,16 @@ TEST(s_trim, null_string1)
     CHECK_EQUAL(RETURN_FAILURE, retval);
 }
 
+TEST(s_trim, no_blank_empty)
+{
+    expected_s = "";
+    dest[0] = '\0';
+    retval = s_trim(dest);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    STRCMP_EQUAL(expected_s, dest);
+}
+
 TEST(s_trim, no_blank)
 {
     expected_s = "abc";

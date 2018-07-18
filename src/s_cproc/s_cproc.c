@@ -263,9 +263,9 @@ ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size
 
     if(token_temp != DCL_TOKEN_INVALID)
     {
-        OUTPUT_STR('\0', token_buffer, buffer_size);
+        OUTPUT_END(token_buffer, buffer_size);
         *token = token_temp;
-        *len = strlen(temp);
+        *len = 1;
         *next_token = statement;
         return RETURN_SUCCESS;
     }
@@ -277,7 +277,7 @@ ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size
     
     DEBUG_PRINT("%c\n", *statement);
     
-    OUTPUT_STR('\0', token_buffer, buffer_size);
+    OUTPUT_END(token_buffer, buffer_size);
 
     DEBUG_PRINT("%s\n", temp);
 
@@ -339,7 +339,7 @@ ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_s
         
     }
 
-    OUTPUT_STR('\0', statement_buffer, buffer_size);
+    OUTPUT_END(statement_buffer, buffer_size);
 
     *len = strlen(temp);
     return RETURN_SUCCESS;

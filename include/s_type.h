@@ -52,7 +52,6 @@ typedef enum TAG_ENUM_BOOLEAN
     BOOLEAN_FALSE = 0,
 }ENUM_BOOLEAN;
 
-
 __BEGIN_C_DECLS
 
 void s_print_types(void);

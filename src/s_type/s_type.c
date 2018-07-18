@@ -190,6 +190,11 @@ void s_print_types(void)
     printf("Size of void*                  sizeof(void*)       %20zd    %18zX\n", sizeof(void*), sizeof(void*));        //x86 4   x64 8   
     
     printf("Size of size_t                 sizeof(size_t)      %20zd    %18zX\n", sizeof(size_t), sizeof(size_t));       //x86 4   x64 8   
-	
+
+//    for(_S8 i = S8_MIN; i < S8_MAX; i ++)
+//    {
+//        _S32 d = i;
+//        printf("%d %d %d %d\n", i, d, (_U8)i, VALUE_U8_OF_ADDR(&i));
+//    }
 }
 

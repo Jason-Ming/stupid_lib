@@ -35,7 +35,7 @@ char* log_getfn(void);
     printf(fmt, ##args);
 #endif
 
-#define DEBUG_SWITCH 1
+//#define DEBUG_SWITCH 1
 
 #ifdef DEBUG_SWITCH
 #define DEBUG_PRINT(fmt, args...)\
