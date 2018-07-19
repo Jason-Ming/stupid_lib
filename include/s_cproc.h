@@ -48,8 +48,9 @@ ENUM_BOOLEAN is_identifier(_S8 *string);
 /* delete comment from source file, and store new content to another file */
 ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw);
 
-/*  */
-ENUM_RETURN s_cchk_pair(FILE *pfr);
+/* check a C program for rudimentary syntax errors like unbalanced parentheses, brackets and braces. 
+   If check is passed, check_result is 1 */
+ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result);
 
 /* be sure the content in file does not contain any comment¡¢macro and had been checked pairing match */
 ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len);

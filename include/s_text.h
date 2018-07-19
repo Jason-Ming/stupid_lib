@@ -173,7 +173,8 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size);
 /* trim: remove all trailing blanks, tabs, newlines */
 ENUM_RETURN s_trim(_S8 *source);
 
-/* trim: remove trailing blanks, tabs, after removement, if the string only contains newlines, clear the string */
+/* trim: remove trailing all blanks, tabs and at most one newline, 
+   after removement, if the string only contains newlines, clear the string */
 ENUM_RETURN s_trim_nl(_S8 *source);
 
 /* strindex: return index of target in source, -1 if none or target is empty */

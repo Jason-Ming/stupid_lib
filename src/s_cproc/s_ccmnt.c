@@ -7,121 +7,107 @@
 #include "s_cmd.h"
 #include "s_log.h"
 #include "s_cproc.h"
+#include "s_stm.h"
+#include "s_mem.h"
 
-typedef enum TAG_ENUM_DELCOM_STM
+typedef enum TAG_ENUM_DEL_CMNT_STM
 {
-    DELCOM_STM_NORMAL = 0,
-    DELCOM_STM_STRING_DOUBLE_QUOTE,
-    DELCOM_STM_STRING_SINGLE_QUOTE,
-    DELCOM_STM_ONELINE_COMMENT,
-    DELCOM_STM_PAIR_COMMENT,
-    DELCOM_STM_INTERMEDIATE,
-    DELCOM_STM_MAX,
-}ENUM_DELCOM_STM;
+    DEL_CMNT_STM_NORMAL = 0,
+    DEL_CMNT_STM_STRING_DOUBLE_QUOTE,
+    DEL_CMNT_STM_STRING_SINGLE_QUOTE,
+    DEL_CMNT_STM_ONELINE_COMMENT,
+    DEL_CMNT_STM_PAIR_COMMENT,
+    DEL_CMNT_STM_INTERMEDIATE,
+    DEL_CMNT_STM_END,
+    DEL_CMNT_STM_MAX,
+}ENUM_DEL_CMNT_STM;
 
-PRIVATE ENUM_DELCOM_STM delcom_stm_state = DELCOM_STM_NORMAL;
-
-typedef ENUM_RETURN (*DELCOM_STM_PROC)(FILE *pfr, FILE *pfw, int c);
-typedef struct TAG_STRU_DELCOM_STM_PROC
+typedef struct TAG_STRU_DEL_CMNT_STM_PROC
 {
-    ENUM_DELCOM_STM state;
-    DELCOM_STM_PROC handler;
+    STM_STATE state;
+    STM_PROC handler;
     const char *info;
-}STRU_DELCOM_STM_PROC;
+}STRU_DEL_CMNT_STM_PROC;
 
-PRIVATE ENUM_RETURN del_stm_proc_normal(FILE *pfr, FILE *pfw, int c);
-PRIVATE ENUM_RETURN del_stm_proc_string_double_quote(FILE *pfr, FILE *pfw, int c);
-PRIVATE ENUM_RETURN del_stm_proc_string_single_quote(FILE *pfr, FILE *pfw, int c);
-PRIVATE ENUM_RETURN del_stm_proc_oneline_comment(FILE *pfr, FILE *pfw, int c);
-PRIVATE ENUM_RETURN del_stm_proc_pair_comment(FILE *pfr, FILE *pfw, int c);
-PRIVATE ENUM_RETURN del_stm_proc_intermediate(FILE *pfr, FILE *pfw, int c);
-
-
-PRIVATE STRU_DELCOM_STM_PROC delcom_stm_proc[DELCOM_STM_MAX] = 
+typedef struct TAG_STRU_DEL_CMNT_STM_RUN_DATA
 {
-    {DELCOM_STM_NORMAL, del_stm_proc_normal, "normal"},
-    {DELCOM_STM_STRING_DOUBLE_QUOTE, del_stm_proc_string_double_quote, "string double quote"},
-    {DELCOM_STM_STRING_SINGLE_QUOTE, del_stm_proc_string_single_quote, "string single quote"},
-    {DELCOM_STM_ONELINE_COMMENT, del_stm_proc_oneline_comment, "oneline comment"},
-    {DELCOM_STM_PAIR_COMMENT, del_stm_proc_pair_comment, "pair comment"},
-    {DELCOM_STM_INTERMEDIATE, del_stm_proc_intermediate, "intermediate"},
-};
+    FILE *pfr;
+    FILE *pfw;
+    int c;
+    ENUM_BOOLEAN whether_any_error_exists;
+}STRU_DEL_CMNT_STM_RUN_DATA;
 
-PRIVATE ENUM_BOOLEAN whether_delcom_stm_state_is_valid(int arg)
+
+PRIVATE STM stm = NULL;
+PRIVATE STRU_DEL_CMNT_STM_RUN_DATA run_data;
+
+PRIVATE ENUM_RETURN del_cmnt_stm_prepare_proc()
 {
-    R_FALSE_RET(arg >= DELCOM_STM_NORMAL && arg < DELCOM_STM_MAX, BOOLEAN_FALSE);
-
-    return BOOLEAN_TRUE;
+    return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN delcom_stm_init(void)
+PRIVATE ENUM_RETURN del_cmnt_stm_clear_proc()
 {
-    for(int i = 0; i < DELCOM_STM_MAX; i++)
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN del_cmnt_stm_preproc()
+{
+    ENUM_RETURN ret_val;
+    
+    run_data.c = fgetc(run_data.pfr);
+
+    if(run_data.c == EOF)
     {
-        R_ASSERT_LOG(delcom_stm_proc[i].state == i, 
-            RETURN_FAILURE, 
-            "i = %d, state = %d", 
-            i, delcom_stm_proc[i].state);
+        ret_val = set_current_stm_state(stm, DEL_CMNT_STM_END);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
     return RETURN_SUCCESS;
 }
 
-PRIVATE const char* get_delcom_stm_string(ENUM_DELCOM_STM state)
+PRIVATE ENUM_RETURN del_cmnt_stm_postproc(_VOID)
 {
-    R_ASSERT(whether_delcom_stm_state_is_valid(state) == BOOLEAN_TRUE, NULL);
-
-    return delcom_stm_proc[(state)].info;
+    return RETURN_SUCCESS;
 }
 
-PRIVATE DELCOM_STM_PROC get_delcom_stm_proc(ENUM_DELCOM_STM state)
+PRIVATE ENUM_RETURN del_cmnt_stm_state_notifier(_VOID)
 {
-    R_ASSERT(whether_delcom_stm_state_is_valid(state) == BOOLEAN_TRUE, NULL);
-
-    return delcom_stm_proc[(state)].handler;
+    return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_DELCOM_STM get_current_stm_state(void)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_normal(_VOID)
 {
-    return delcom_stm_state;
-}
-
-PRIVATE void set_current_stm_state(ENUM_DELCOM_STM arg)
-{
-    V_ASSERT(arg >= DELCOM_STM_NORMAL && arg < DELCOM_STM_MAX);
-    R_LOG("state change from %s to %s", 
-        get_delcom_stm_string(delcom_stm_state),
-        get_delcom_stm_string(arg));
-    
-    delcom_stm_state = arg;
-}
-
-PRIVATE ENUM_RETURN del_stm_proc_normal(FILE *pfr, FILE *pfw, int c)
-{
-
+    ENUM_RETURN ret_val;
+    _S8 c = run_data.c;
     switch (c)
     {
         case '"'://this is a test comment
         {/* this is a test comment */
-            fputc(c, pfw);
-            set_current_stm_state(DELCOM_STM_STRING_DOUBLE_QUOTE);
+            fputc(c, run_data.pfw);
+
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_STRING_DOUBLE_QUOTE);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         case '/':
         {
-            set_current_stm_state(DELCOM_STM_INTERMEDIATE);
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_INTERMEDIATE);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         case '\'':
         {
-            fputc(c, pfw);
-            set_current_stm_state(DELCOM_STM_STRING_SINGLE_QUOTE);
+            fputc(c, run_data.pfw);
+            
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_STRING_SINGLE_QUOTE);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         case '\n':
         default:
         {
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             break;
         }
     }
@@ -129,18 +115,21 @@ PRIVATE ENUM_RETURN del_stm_proc_normal(FILE *pfr, FILE *pfw, int c)
     return RETURN_SUCCESS;
 }
 //this is a test comment
-PRIVATE ENUM_RETURN del_stm_proc_string_double_quote(FILE *pfr, FILE *pfw, int c)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_string_double_quote(_VOID)
 {
     static ENUM_BOOLEAN whether_backslash_occured = BOOLEAN_FALSE;
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    _S8 c = run_data.c;
     
     switch (c)
     {
         case '"'://a line comment
         {
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             if(whether_backslash_occured == BOOLEAN_FALSE)
             {
-                set_current_stm_state(DELCOM_STM_NORMAL);
+                ret_val = set_current_stm_state(stm, DEL_CMNT_STM_NORMAL);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
 
             whether_backslash_occured = BOOLEAN_FALSE;
@@ -149,14 +138,14 @@ PRIVATE ENUM_RETURN del_stm_proc_string_double_quote(FILE *pfr, FILE *pfw, int c
         case '\\':
         {
             whether_backslash_occured = BOOLEAN_TRUE;
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             break;
         }
         case '\n':
         default:
         {
             whether_backslash_occured = BOOLEAN_FALSE;
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             break;
         }
     }
@@ -164,18 +153,20 @@ PRIVATE ENUM_RETURN del_stm_proc_string_double_quote(FILE *pfr, FILE *pfw, int c
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN del_stm_proc_string_single_quote(FILE *pfr, FILE *pfw, int c)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_string_single_quote(_VOID)
 {
     static ENUM_BOOLEAN whether_backslash_occured = BOOLEAN_FALSE;
-    
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    _S8 c = run_data.c;
     switch (c)
     {
         case '\''://a line comment
         {
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             if(whether_backslash_occured == BOOLEAN_FALSE)
             {
-                set_current_stm_state(DELCOM_STM_NORMAL);
+                ret_val = set_current_stm_state(stm, DEL_CMNT_STM_NORMAL);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
 
             whether_backslash_occured = BOOLEAN_FALSE;
@@ -184,14 +175,14 @@ PRIVATE ENUM_RETURN del_stm_proc_string_single_quote(FILE *pfr, FILE *pfw, int c
         case '\\':
         {
             whether_backslash_occured = BOOLEAN_TRUE;
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             break;
         }
         case '\n':
         default:
         {
             whether_backslash_occured = BOOLEAN_FALSE;
-            fputc(c, pfw);
+            fputc(c, run_data.pfw);
             break;
         }
     }
@@ -199,14 +190,17 @@ PRIVATE ENUM_RETURN del_stm_proc_string_single_quote(FILE *pfr, FILE *pfw, int c
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN del_stm_proc_oneline_comment(FILE *pfr, FILE *pfw, int c)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_oneline_comment(_VOID)
 {
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    _S8 c = run_data.c;
     switch (c)
     {
         case '\n':
         {
-            fputc(c, pfw);
-            set_current_stm_state(DELCOM_STM_NORMAL);
+            fputc(c, run_data.pfw);
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_NORMAL);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         default:
@@ -218,9 +212,11 @@ PRIVATE ENUM_RETURN del_stm_proc_oneline_comment(FILE *pfr, FILE *pfw, int c)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN del_stm_proc_pair_comment(FILE *pfr, FILE *pfw, int c)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_pair_comment(_VOID)
 {
     static ENUM_BOOLEAN whether_star_occured = BOOLEAN_FALSE;
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    _S8 c = run_data.c;
     switch (c)
     {
         case '*':
@@ -232,7 +228,8 @@ PRIVATE ENUM_RETURN del_stm_proc_pair_comment(FILE *pfr, FILE *pfw, int c)
         {
             if(whether_star_occured == BOOLEAN_TRUE)
             {
-                set_current_stm_state(DELCOM_STM_NORMAL);
+                ret_val = set_current_stm_state(stm, DEL_CMNT_STM_NORMAL);
+                R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
             whether_star_occured = BOOLEAN_FALSE;
             break;
@@ -248,30 +245,100 @@ PRIVATE ENUM_RETURN del_stm_proc_pair_comment(FILE *pfr, FILE *pfw, int c)
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN del_stm_proc_intermediate(FILE *pfr, FILE *pfw, int c)
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_intermediate(_VOID)
 {
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    _S8 c = run_data.c;
     switch (c)
     {
         case '*':
         {
-            set_current_stm_state(DELCOM_STM_PAIR_COMMENT);
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_PAIR_COMMENT);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         case '/':
         {
-            set_current_stm_state(DELCOM_STM_ONELINE_COMMENT);
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_ONELINE_COMMENT);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
         case '\n':
         default:
         {
-            fputc('/', pfw);
-            fputc(c, pfw);
-            set_current_stm_state(DELCOM_STM_NORMAL);
+            fputc('/', run_data.pfw);
+            fputc(c, run_data.pfw);
+            ret_val = set_current_stm_state(stm, DEL_CMNT_STM_NORMAL);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
         }
     }
 
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN del_cmnt_stm_proc_end(_VOID)
+{
+    return RETURN_SUCCESS;
+}
+
+PRIVATE STRU_DEL_CMNT_STM_PROC del_cmnt_stm_proc[DEL_CMNT_STM_MAX] = 
+{
+    {DEL_CMNT_STM_NORMAL, del_cmnt_stm_proc_normal, "normal"},
+    {DEL_CMNT_STM_STRING_DOUBLE_QUOTE, del_cmnt_stm_proc_string_double_quote, "string double quote"},
+    {DEL_CMNT_STM_STRING_SINGLE_QUOTE, del_cmnt_stm_proc_string_single_quote, "string single quote"},
+    {DEL_CMNT_STM_ONELINE_COMMENT, del_cmnt_stm_proc_oneline_comment, "oneline comment"},
+    {DEL_CMNT_STM_PAIR_COMMENT, del_cmnt_stm_proc_pair_comment, "pair comment"},
+    {DEL_CMNT_STM_INTERMEDIATE, del_cmnt_stm_proc_intermediate, "intermediate"},
+    {DEL_CMNT_STM_END, del_cmnt_stm_proc_end, "end"},
+};
+
+PRIVATE ENUM_RETURN del_cmnt_stm_init(FILE *pfr, FILE *pfw)
+{
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    ret_val = stm_create(&stm, DEL_CMNT_STM_MAX);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = set_stm_start_state(stm, DEL_CMNT_STM_NORMAL);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = set_stm_end_state(stm, DEL_CMNT_STM_END);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = add_stm_prepare_handler(stm, del_cmnt_stm_prepare_proc);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = add_stm_clear_handler(stm, del_cmnt_stm_clear_proc);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = add_stm_preproc_handler(stm, del_cmnt_stm_preproc);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = add_stm_postproc_handler(stm, del_cmnt_stm_postproc);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = add_stm_state_notifier(stm, del_cmnt_stm_state_notifier);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    for(int i = 0; i < SIZE_OF_ARRAY(del_cmnt_stm_proc); i++)
+    {
+        ret_val = add_stm_state_handler(
+            stm, 
+            del_cmnt_stm_proc[i].state, 
+            del_cmnt_stm_proc[i].handler, 
+            del_cmnt_stm_proc[i].info);
+        
+        R_ASSERT_LOG(
+            ret_val == RETURN_SUCCESS, 
+            RETURN_FAILURE, 
+            "i = %d, state = %d",
+            i, 
+            del_cmnt_stm_proc[i].state);
+    }
+
+    run_data.pfr = pfr;
+    run_data.pfw = pfw;
+    
     return RETURN_SUCCESS;
 }
 
@@ -281,20 +348,12 @@ ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw)
     R_ASSERT(pfw != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    int c;
 
-    ret_val = delcom_stm_init();
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    ret_val = del_cmnt_stm_init(pfr, pfw);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
     
-    while((c = fgetc(pfr)) != EOF)
-    {
-        ENUM_DELCOM_STM state = get_current_stm_state();
-        DELCOM_STM_PROC handler = get_delcom_stm_proc(state);
-        R_ASSERT(handler != NULL, RETURN_FAILURE);
-        
-        ret_val = handler(pfr, pfw, c);
-        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    }
+    ret_val = stm_run(stm);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
     
     return RETURN_SUCCESS;
 }

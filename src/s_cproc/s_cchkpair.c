@@ -56,6 +56,12 @@ PRIVATE void display_check_correct_info(void)
     printf("Check correct!\n");
 }
 
+PRIVATE void generate_check_error(const _S8 c)
+{
+    display_check_error_info(c);
+    run_data.whether_any_error_exists = BOOLEAN_TRUE;
+}
+
 PRIVATE ENUM_RETURN push(const int c)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
@@ -126,8 +132,8 @@ PRIVATE ENUM_RETURN pop_and_check(const int c, ENUM_RETURN *result)
     {
         *result = RETURN_FAILURE;
         R_LOG("c_temp = %c, c = %c", c_temp, c);
-        run_data.whether_any_error_exists = BOOLEAN_TRUE;
-        display_check_error_info(c_temp);
+
+        generate_check_error(c_temp);
     }
     
     return RETURN_SUCCESS;
@@ -428,8 +434,7 @@ PRIVATE ENUM_RETURN checkpair_stm_proc_end()
         ret_val = stack_pop(run_data.stack, (void *)&c_temp, &len, sizeof(c_temp));
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
-        run_data.whether_any_error_exists = BOOLEAN_TRUE;
-        display_check_error_info(c_temp);
+        generate_check_error(c_temp);
     }
     
     return RETURN_SUCCESS;
@@ -492,18 +497,27 @@ PRIVATE ENUM_RETURN checkpair_stm_init(void)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cchk_pair(FILE *pfr)
+ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result)
 {
+    R_ASSERT(check_result != NULL, RETURN_FAILURE);
+    
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
     ENUM_RETURN ret_val;
 
+    *check_result = RETURN_SUCCESS;
+
     ret_val = checkpair_stm_init();
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
 
     run_data.pfr = pfr;
     ret_val = stm_run(stm);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
 
+    if(run_data.whether_any_error_exists)
+    {
+        *check_result = RETURN_FAILURE;
+    }
+    
     return RETURN_SUCCESS;
 }
 
