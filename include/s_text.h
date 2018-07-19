@@ -74,6 +74,21 @@
         }\
     }while(0);
 
+#define OUTPUT_STRN(dest, size, target, target_len)\
+    do{\
+        DEBUG_PRINT("OUTPUT_STRN: %s", target);\
+        if(size > target_len)\
+        {\
+            memcpy(dest, target, target_len);\
+            dest += target_len;\
+            size -= target_len;\
+        }else\
+        {\
+            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
+        }\
+    }while(0);
+
+
 __BEGIN_C_DECLS
 
 /* set separaors, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
@@ -135,8 +150,10 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf);
 
 /* fold long input lines into two or more shorter lines after the last
 non-blank character that occurs before the n -th column of input */
-ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num);
+ENUM_RETURN s_fold(_S8 *source, _S8 *dest, _S32 size, _S32 fold_num);
 
+/* fold long input string into two or more shorter lines which length is fold_len at most */
+ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len);
 
 ENUM_RETURN s_hstrtou64(const _S8 *str, _U64 *value);
 ENUM_RETURN s_hstrtos64(const _S8 *str, _S64 *value);

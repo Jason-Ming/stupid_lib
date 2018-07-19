@@ -48,7 +48,7 @@ PRIVATE ENUM_BOOLEAN is_separator(_S8 c)
 {
     return (whether_word_separators_have_been_set?
         word_separators[(_U8)c]:
-        ('\n' == c || '\t' == c || ' ' == c || '\v' == c || '\f' == c));
+        (' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c));
 }
 
 ENUM_RETURN s_count_word_f(FILE *pfr, size_t *word_num)
@@ -313,19 +313,20 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, _S32 fold_num)
+ENUM_RETURN s_fold(_S8 *source, _S8 *dest, _S32 size, _S32 fold_num)
 {
-    R_ASSERT(pstr_buf_source != NULL, RETURN_FAILURE);
-    R_ASSERT(pstr_buf_temp != NULL, RETURN_FAILURE);
-    R_ASSERT(fold_num > 0, RETURN_FAILURE);
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(size > 0, RETURN_FAILURE);
+    R_ASSERT(fold_num >= 5, RETURN_FAILURE);
     
-    _S32 len = strlen(pstr_buf_source);
+    _S32 len = strlen(source);
     //if(len >= fold_num, RETURN_SUCCESS);
 
-    memset(pstr_buf_temp, '\0', buf_temp_len);
+    memset(dest, '\0', size);
 
     DEBUG_PRINT("source: %s\nsource len: %d\ndest: %s\ndest len: %d",
-        pstr_buf_source, len, pstr_buf_temp, buf_temp_len);
+        source, len, dest, size);
     
     _S32 pos = 0;
     _S32 pos_blank = -1;
@@ -338,28 +339,28 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
         {
             if(pos_blank != -1)
             {
-                pstr_buf_source[pos_blank] = '\0';
+                source[pos_blank] = '\0';
                 
                 R_ASSERT_LOG(
-                    buf_temp_len - strlen(pstr_buf_temp) >= pos - start_pos + 1, 
+                    size - strlen(dest) >= pos - start_pos + 1, 
                     RETURN_FAILURE,
-                    "buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+                    "size = %d, strlen(dest) = %zu, "
                     "pos = %d, start_pos = %d",
-                    buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+                    size, strlen(dest), pos, start_pos);
 
-                DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+                DEBUG_PRINT("size = %d, strlen(dest) = %zu, "
                     "pos = %d, start_pos = %d",
-                    buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+                    size, strlen(dest), pos, start_pos);
                 
-                strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
+                strcat(dest, &source[start_pos]);
 
                 R_ASSERT_LOG(
-                    buf_temp_len - strlen(pstr_buf_temp) >= 2, 
+                    size - strlen(dest) >= 2, 
                     RETURN_FAILURE,
-                    "buf_temp_len = %d, strlen(pstr_buf_temp) = %zu\n",
-                    buf_temp_len, strlen(pstr_buf_temp));
+                    "size = %d, strlen(dest) = %zu\n",
+                    size, strlen(dest));
 
-                strcat(pstr_buf_temp, "\n");
+                strcat(dest, "\n");
                 
                 pos = pos_blank + 1;
                 fold_len = 0;
@@ -373,7 +374,7 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
             }
         }
         
-        if(pstr_buf_source[pos] == ' ' || pstr_buf_source[pos] == '\n')
+        if(source[pos] == ' ' || source[pos] == '\n')
         {
             pos_blank = pos;
         }
@@ -383,20 +384,123 @@ ENUM_RETURN s_fold(_S8 *pstr_buf_source, _S8 *pstr_buf_temp, _S32 buf_temp_len, 
     }
 
     R_ASSERT_LOG(
-        buf_temp_len - strlen(pstr_buf_temp) >= pos - start_pos + 1, 
+        size - strlen(dest) >= pos - start_pos + 1, 
         RETURN_FAILURE,
-        "buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+        "size = %d, strlen(dest) = %zu, "
         "pos = %d, start_pos = %d",
-        buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
+        size, strlen(dest), pos, start_pos);
 
-    DEBUG_PRINT("buf_temp_len = %d, strlen(pstr_buf_temp) = %zu, "
+    DEBUG_PRINT("size = %d, strlen(dest) = %zu, "
         "pos = %d, start_pos = %d",
-        buf_temp_len, strlen(pstr_buf_temp), pos, start_pos);
-    strcat(pstr_buf_temp, &pstr_buf_source[start_pos]);
+        size, strlen(dest), pos, start_pos);
+    strcat(dest, &source[start_pos]);
 
     return RETURN_SUCCESS;
 }
 
+
+/* word in this function has 3 type: '\n', continuing blanks, continuing non-blanks */
+PRIVATE _S32 find_next_word_position(const _S8 *source)
+{
+    _S8 c = *source;
+    _S32 len = 0;
+    if(' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c)
+    {
+        source++;
+        len++;
+        
+        while(*source != '\0')
+        {
+            c = *source;
+            if(' ' == c || '\t' == c || '\v' == c || '\f' == c)
+            {
+                ++(source);
+                len++;
+                continue;
+            }
+            else
+            {
+                return len;
+            }
+        }
+    }
+    else
+    {
+        source++;
+        len++;
+        
+        while(*source != '\0')
+        {
+            c = *source;
+            if(' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c)
+            {
+                return len;
+            }
+            else
+            {
+                ++(source);
+                len++;
+                continue;
+            }
+        }
+    }
+
+    return len;
+}
+
+ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
+
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+    R_ASSERT(dest != NULL, RETURN_FAILURE);
+    R_ASSERT(size > 0, RETURN_FAILURE);
+    R_ASSERT(fold_len >= 5, RETURN_FAILURE);
+
+    _S32 next_word_len = 0;
+    _S32 left_space = fold_len;
+    ENUM_BOOLEAN newline = BOOLEAN_TRUE;
+    
+    while(*source != '\0')
+    {
+        /* find next word position: word means 
+        1.first ch is space, the word length is the longest space ch;
+        2.first ch is not space, the word length is the longest non-space ch; */
+        const _S8 *source_temp = source;
+        
+        next_word_len = find_next_word_position(source);
+
+        if(left_space >= next_word_len)
+        {
+            OUTPUT_STRN(dest, size, source_temp, next_word_len);
+            source = source_temp + next_word_len;
+            left_space -= next_word_len;
+            newline = BOOLEAN_FALSE;
+        }
+        else
+        {
+            if(newline)
+            {
+                OUTPUT_STRN(dest, size, source_temp, left_space);
+                OUTPUT_STR('\n', dest, size);
+
+                source = source_temp + left_space;
+                left_space = fold_len;
+                newline = BOOLEAN_TRUE;
+            }
+            else
+            {
+                OUTPUT_STR('\n', dest, size);
+                source = source_temp;
+                left_space = fold_len;
+                newline = BOOLEAN_TRUE;
+            }
+        }
+    }
+
+    OUTPUT_END(dest, size);
+
+    return RETURN_SUCCESS;
+}
 
 ENUM_RETURN s_hstrtou64(const _S8 *str, _U64 *value)
 {
