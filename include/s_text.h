@@ -99,6 +99,13 @@
         }\
     }while(0);
 
+typedef struct TAG_STRU_TABLE_TEXT_FORMAT
+{
+    size_t margin_left;
+    size_t margin_right;
+    size_t table_column_size;
+    ENUM_BOOLEAN align_left;
+}STRU_TABLE_TEXT_FORMAT;
 
 __BEGIN_C_DECLS
 
@@ -308,6 +315,9 @@ _S32 numcmp(const _S8 * s1, const _S8 * s2);
  * @return: -1(s1 > s2)£¬0(s1 == s2), 1(s1 < s2)
  */
 _S32 numcmp_r(const _S8 * s1, const _S8 * s2);
+
+
+ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[]);
 
 __END_C_DECLS
 

@@ -200,7 +200,7 @@ ENUM_RETURN s_getlines_f(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t
     size_t line_len = 0;
     *line_num = 0;
     
-    while(s_getline_f(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
+    while(s_getline_f(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
     {
         line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
         R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
@@ -226,7 +226,7 @@ ENUM_RETURN s_getlines_s(const _S8 **source, _S8 *line_ptr[], size_t line_ptr_nu
     size_t line_len = 0;
     *line_num = 0;
     
-    while(s_getline_s(source, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
+    while(s_getline_s(source, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
     {
         line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
         R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
@@ -1463,5 +1463,123 @@ _S32 numcmp(const _S8 * s1, const _S8 * s2)
 _S32 numcmp_r(const _S8 * s1, const _S8 * s2)
 {
 	return numcmp(s2, s1);
+}
+
+#define MAX_PRINT_TABLE_TEXT_ELEMENT_LINE 8
+#define MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN 256
+#define MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN 256
+#define MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN (MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN*MAX_PRINT_TABLE_TEXT_ELEMENT_LINE)
+
+typedef struct TAG_STRU_PRINT_TABLE_TEXT_ELEMENT
+{
+    _S8 format[MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN];
+    size_t lines;//line_max 8
+    _S8 line_text[MAX_PRINT_TABLE_TEXT_ELEMENT_LINE][MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN];
+}STRU_PRINT_TABLE_TEXT_ELEMENT;
+
+ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[])
+{
+    PRIVATE _S8 text_fold_buffer[MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN];
+    PRIVATE _S8 format_string[MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN];
+    
+    size_t len;
+    size_t fold_len;
+    ENUM_RETURN ret_val;
+    size_t table_elements = rows * columns;
+    const _S8 *text_temp;
+
+    STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_elements =
+        (STRU_PRINT_TABLE_TEXT_ELEMENT*)malloc(table_elements*sizeof(STRU_PRINT_TABLE_TEXT_ELEMENT));
+    R_ASSERT(print_table_text_elements != NULL, RETURN_FAILURE);
+
+    for(int i = 0; i < table_elements; i++)
+    {
+        memset(print_table_text_elements[i].format, '\0', MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN);
+        print_table_text_elements[i].lines = 0;
+        memset(print_table_text_elements[i].line_text, '\0', MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN);
+    }
+    
+    for(size_t row = 0; row < rows; row++)
+    {
+        size_t max_line = 0;
+        
+        for(size_t col = 0; col < columns; col++)
+        {
+            size_t index = row * columns + col;
+            
+            R_ASSERT_DO(text[index] != NULL, RETURN_FAILURE, FREE(print_table_text_elements));
+            R_ASSERT_DO(format[index].margin_left + format[index].margin_right + 5 
+                < format[index].table_column_size, RETURN_FAILURE, FREE(print_table_text_elements));
+            fold_len = format[index].table_column_size - format[index].margin_left - format[index].margin_right;
+
+            STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+
+            _S8 *format_temp = print_table_text_element->format;
+            size_t format_len = MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN;
+            
+            OUTPUT_STR_MULTI(' ', format[index].margin_left, format_temp, format_len);
+            
+            sprintf(format_string, "%%%s%zds", format[index].align_left?"-":"", fold_len);
+
+            OUTPUT_STRN(format_temp, format_len, format_string, strlen(format_string));
+            
+            OUTPUT_STR_MULTI(' ', format[index].margin_right, format_temp, format_len);
+
+            OUTPUT_END(format_temp, format_len);
+            
+            ret_val = s_fold_s(text[index], text_fold_buffer, MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN, fold_len);
+            R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
+
+            _S32 lines = 0;
+            text_temp = text_fold_buffer;
+            while(print_table_text_element->lines < MAX_PRINT_TABLE_TEXT_ELEMENT_LINE 
+                && s_getline_s(&text_temp, 
+                    print_table_text_element->line_text[lines], 
+                    MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN, &len) == RETURN_SUCCESS 
+                && len > 0)
+            {
+                ret_val = s_trim(print_table_text_element->line_text[lines]);
+                R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
+                lines++;
+            }
+                
+            print_table_text_element->lines = lines;
+
+            if(max_line < lines)
+            {
+                max_line = lines;
+            }
+        }
+
+        for(size_t col = 0; col < columns; col++)
+        {
+            size_t index = row * columns + col;
+            STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+            print_table_text_element->lines = max_line;
+        }
+        
+    }
+
+    for(size_t row = 0; row < rows; row++)
+    {
+        size_t max_line = print_table_text_elements[row*columns].lines;
+
+        for(size_t line = 0; line < max_line; line++)
+        {
+            
+            for(size_t col = 0; col < columns; col++)
+            {
+                size_t index = row * columns + col;
+                
+                STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+                printf(print_table_text_element->format, print_table_text_element->line_text[line]);
+            }
+            printf("\n");
+        }
+    }
+
+    FREE(print_table_text_elements);
+
+    return RETURN_SUCCESS;
 }
 

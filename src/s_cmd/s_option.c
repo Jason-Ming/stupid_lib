@@ -298,17 +298,20 @@ ENUM_BOOLEAN whether_option_h_has_been_processed(void)
 
 void display_option_help_info(STRU_OPTION_CONTROL_BLOCK *p_option_cb)
 {
-    char temp_buf[64] = {'\0'};
+    PRIVATE _S8 temp_buf[64] = {'\0'};
+
+    STRU_TABLE_TEXT_FORMAT format[2] = {{4, 0, 24, BOOLEAN_TRUE}, {1, 0, 71, BOOLEAN_TRUE}};
+    const _S8 *text[2];
     
     while(p_option_cb != NULL)
     {
-
         sprintf(temp_buf, "%s%s", 
             p_option_cb->option, 
             (p_option_cb->arg_type == ARG_TYPE_DATA)?" <arg>":"");
 
-        
-        printf("    %-20s %s\n", temp_buf, p_option_cb->help_info);
+        text[0] = temp_buf;
+        text[1] = p_option_cb->help_info;
+        V_ASSERT(s_print_table_text(text, 1, 2, format) == RETURN_SUCCESS);
 
         p_option_cb = p_option_cb->next;
     }

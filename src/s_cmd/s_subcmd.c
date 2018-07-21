@@ -327,11 +327,15 @@ void display_all_subcmd_help_info(void)
     printf("\nuse %s <sub command> -h to see help information about a specific subcommand\n", get_bin_name());
     
     printf("\nThese are common sub commands used in various situations:\n\n");
+
+    STRU_TABLE_TEXT_FORMAT format[2] = {{3, 0, 13, BOOLEAN_TRUE}, {1, 0, 81, BOOLEAN_TRUE}};
+    const _S8 *text[2];
     
     while(p != NULL)
     {
-        printf("   %-10s %s\n", p->subcmd, p->help_info);
-
+        text[0] = p->subcmd;
+        text[1] = p->help_info;
+        V_ASSERT(s_print_table_text(text, 1, 2, format) == RETURN_SUCCESS);
         p = p->next;
     }
 }
