@@ -111,6 +111,16 @@ TEST(s_fold_s, s1_fold_len_non_blanks)
     STRCMP_EQUAL(expected_s, s2);
 }
 
+TEST(s_fold_s, s1_fold_len_non_blanks_followed_a_newline)
+{
+    s1 = "1234567890\n";
+    expected_s = "1234567890\n";
+    retval = s_fold_s(s1, s2, len, 10);
+
+    CHECK_EQUAL(RETURN_SUCCESS, retval);
+    STRCMP_EQUAL(expected_s, s2);
+}
+
 TEST(s_fold_s, s1_fold_len_non_blanks_with_newline)
 {
     s1 = "123456789\n";

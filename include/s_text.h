@@ -26,7 +26,7 @@
 /* c can not be '\0', if you output '\0', please use OUTPUT_END */
 #define OUTPUT_STR(c, dest, size)\
     do{\
-        _S8 ___c_ = c;\
+        _S32 ___c_ = c;\
         DEBUG_PRINT("OUTPUT_STR: %c", ___c_);\
         if(size > 1)\
         {\
@@ -53,11 +53,11 @@
 
 #define OUTPUT_STR_RANGE(begin, end, dest, size) \
     do{\
-        _S8 ___b = begin, ___e = end;\
+        _S32 ___b = begin, ___e = end;\
         if(___b != '\0' && ___e != '\0')\
         {\
             DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", ___b, ___e);\
-            for(_S8 ___c = ___b; ___c <= ___e; ___c++)\
+            for(_S32 ___c = ___b; ___c <= ___e; ___c++)\
             {\
                 OUTPUT_STR(___c, dest, size);\
             }\
@@ -66,12 +66,23 @@
 
 #define OUTPUT_STR_MULTI(c, num, dest, size) \
     do{\
-        _S8 ___c = c;\
+        _S32 ___c = c;\
         DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", ___c, num);\
         for(_S32 i = 0; i < num; i++)\
         {\
             OUTPUT_STR(___c, dest, size);\
         }\
+    }while(0);
+
+#define OUTPUT_STRN_F(fpw, fpr, target_len)\
+    do{\
+        DEBUG_PRINT("OUTPUT_STRN_F: %zd", target_len);\
+        _S32 ___c;size_t ___len = target_len;\
+        while(___len-- > 0)\
+        {;\
+            ___c = fgetc(fpr);\
+            fputc(___c, fpw);\
+        };\
     }while(0);
 
 #define OUTPUT_STRN(dest, size, target, target_len)\
@@ -150,7 +161,8 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf);
 
 /* fold long input lines into two or more shorter lines after the last
 non-blank character that occurs before the n -th column of input */
-ENUM_RETURN s_fold(_S8 *source, _S8 *dest, _S32 size, _S32 fold_num);
+ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len);
+
 
 /* fold long input string into two or more shorter lines which length is fold_len at most */
 ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len);

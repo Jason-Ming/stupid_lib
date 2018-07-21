@@ -34,14 +34,14 @@ typedef struct TAG_STRU_DCL_VAR
 
 
 /* not include C99 and C11 */
-PRIVATE char *keyword_declare[] = {
+PRIVATE _S8 *keyword_declare[] = {
     "auto", "char", "const", "double", "enum", "extern", "float", "int", "long", "register", "short", "signed", 
     "static", "struct", "typedef", "union", "unsigned", "void", "volatile"};
 
-PRIVATE char *keyword_control[] = {
+PRIVATE _S8 *keyword_control[] = {
     "break", "case", "continue", "default", "do", "else", "for" "goto", "if", "return", "sizeof", "switch", "while"};
 
-PRIVATE char separators[] = {'(', ')', '[', ']', '{', '}', '*', ' ', '\t', ';', ',', '\n'};
+PRIVATE _S8 separators[] = {'(', ')', '[', ']', '{', '}', '*', ' ', '\t', ';', ',', '\n'};
 
 PRIVATE _S8 * g_dcl_token_str[] = {
     "(", ")", "*", "[", "]", "{", "}", ",", ";", "type", "identifier", "number", "control", "invalid token"};
@@ -64,7 +64,7 @@ _S8 * get_dcl_type_str(ENUM_DCL_TYPE type)
 
     return g_dcl_type_str[type];
 }
-PRIVATE ENUM_BOOLEAN is_separator(_S8 c)
+PRIVATE ENUM_BOOLEAN is_separator(_S32 c)
 {
     size_t size = SIZE_OF_ARRAY(separators);
     _S32 i = 0;
@@ -300,7 +300,7 @@ ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_s
     
     _S8 *temp = statement_buffer;
     *len = 0;
-    _S8 c;
+    _S32 c;
     
     /* skip white space */
     while((c = fgetc(pfr)) != EOF)

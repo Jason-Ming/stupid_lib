@@ -44,10 +44,12 @@ void s_set_separators(_S8 *separators)
     
 }
 
-PRIVATE ENUM_BOOLEAN is_separator(_S8 c)
+PRIVATE ENUM_BOOLEAN is_separator(_S32 c)
 {
+    R_ASSERT(c >= 0 && c < MAX_CHAR, BOOLEAN_FALSE);
+    
     return (whether_word_separators_have_been_set?
-        word_separators[(_U8)c]:
+        word_separators[c]:
         (' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c));
 }
 
@@ -56,7 +58,7 @@ ENUM_RETURN s_count_word_f(FILE *pfr, size_t *word_num)
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
     R_ASSERT(word_num != NULL, RETURN_FAILURE);
     *word_num = 0;
-    _S8 c;
+    _S32 c;
     ENUM_BOOLEAN in_word = BOOLEAN_FALSE;
 
     while((c = fgetc(pfr)) != EOF)
@@ -111,7 +113,7 @@ ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word
     R_ASSERT(word_len != NULL, RETURN_FAILURE);
 
     size_t len = buf_size;
-    _S8 c;
+    _S32 c;
     ENUM_BOOLEAN in_word = BOOLEAN_FALSE;
     
     /* skip white space */
@@ -244,7 +246,7 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
     R_ASSERT(buffer != NULL, RETURN_FAILURE);
     R_ASSERT(length != NULL, RETURN_FAILURE);
 
-    _S8 c;
+    _S32 c;
     size_t len_temp = buffer_size;
 
     while((c = fgetc(fp)) != EOF && c != '\n')
@@ -313,98 +315,74 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_fold(_S8 *source, _S8 *dest, _S32 size, _S32 fold_num)
+
+
+/* word in this function has 3 type: '\n', continuing blanks, continuing non-blanks */
+PRIVATE _S32 find_next_word_position_f(FILE *pfr, ENUM_BOOLEAN *next_word_is_newline)
 {
-    R_ASSERT(source != NULL, RETURN_FAILURE);
-    R_ASSERT(dest != NULL, RETURN_FAILURE);
-    R_ASSERT(size > 0, RETURN_FAILURE);
-    R_ASSERT(fold_num >= 5, RETURN_FAILURE);
-    
-    _S32 len = strlen(source);
-    //if(len >= fold_num, RETURN_SUCCESS);
-
-    memset(dest, '\0', size);
-
-    DEBUG_PRINT("source: %s\nsource len: %d\ndest: %s\ndest len: %d",
-        source, len, dest, size);
-    
-    _S32 pos = 0;
-    _S32 pos_blank = -1;
-    _S32 fold_len = 0;
-    _S32 start_pos = pos;
-    
-    while(pos < len)
+    _S32 c;
+    _S32 len = 0;
+    *next_word_is_newline = BOOLEAN_FALSE;
+    if((c = fgetc(pfr)) == EOF)
     {
-        if(fold_len >= fold_num)
+        return 0;
+    }
+    
+    if(' ' == c || '\t' == c || '\v' == c || '\f' == c)
+    {
+        len++;
+        while((c = fgetc(pfr)) != EOF)
         {
-            if(pos_blank != -1)
+            if(' ' == c || '\t' == c || '\v' == c || '\f' == c)
             {
-                source[pos_blank] = '\0';
-                
-                R_ASSERT_LOG(
-                    size - strlen(dest) >= pos - start_pos + 1, 
-                    RETURN_FAILURE,
-                    "size = %d, strlen(dest) = %zu, "
-                    "pos = %d, start_pos = %d",
-                    size, strlen(dest), pos, start_pos);
-
-                DEBUG_PRINT("size = %d, strlen(dest) = %zu, "
-                    "pos = %d, start_pos = %d",
-                    size, strlen(dest), pos, start_pos);
-                
-                strcat(dest, &source[start_pos]);
-
-                R_ASSERT_LOG(
-                    size - strlen(dest) >= 2, 
-                    RETURN_FAILURE,
-                    "size = %d, strlen(dest) = %zu\n",
-                    size, strlen(dest));
-
-                strcat(dest, "\n");
-                
-                pos = pos_blank + 1;
-                fold_len = 0;
-                pos_blank = -1;
-                start_pos = pos;
+                len++;
                 continue;
             }
             else
             {
-                
+                break;
             }
         }
+    }
+    else if ('\n' == c)
+    {
+        len++;
+        *next_word_is_newline = BOOLEAN_TRUE;
+        return len;
+    }
+    else
+    {
+        len++;
         
-        if(source[pos] == ' ' || source[pos] == '\n')
+        while((c = fgetc(pfr)) != EOF)
         {
-            pos_blank = pos;
+            if(' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c)
+            {
+                break;
+            }
+            else
+            {
+                len++;
+                continue;
+            }
         }
-
-        pos++;
-        fold_len++;
     }
 
-    R_ASSERT_LOG(
-        size - strlen(dest) >= pos - start_pos + 1, 
-        RETURN_FAILURE,
-        "size = %d, strlen(dest) = %zu, "
-        "pos = %d, start_pos = %d",
-        size, strlen(dest), pos, start_pos);
-
-    DEBUG_PRINT("size = %d, strlen(dest) = %zu, "
-        "pos = %d, start_pos = %d",
-        size, strlen(dest), pos, start_pos);
-    strcat(dest, &source[start_pos]);
-
-    return RETURN_SUCCESS;
+    fseek(pfr, -1, SEEK_CUR);
+    return len;
 }
-
-
-/* word in this function has 3 type: '\n', continuing blanks, continuing non-blanks */
-PRIVATE _S32 find_next_word_position(const _S8 *source)
+PRIVATE _S32 find_next_word_position_s(const _S8 *source, ENUM_BOOLEAN *next_word_is_newline)
 {
     _S8 c = *source;
     _S32 len = 0;
-    if(' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c)
+    *next_word_is_newline = BOOLEAN_FALSE;
+    
+    if(c == '\0')
+    {
+        return 0;
+    }
+    
+    if(' ' == c || '\t' == c || '\v' == c || '\f' == c)
     {
         source++;
         len++;
@@ -423,6 +401,13 @@ PRIVATE _S32 find_next_word_position(const _S8 *source)
                 return len;
             }
         }
+    }
+    else if('\n' == c)
+    {
+        source++;
+        len++;
+        *next_word_is_newline = BOOLEAN_TRUE;
+        return len;
     }
     else
     {
@@ -448,6 +433,73 @@ PRIVATE _S32 find_next_word_position(const _S8 *source)
     return len;
 }
 
+ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len)
+
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(pfw != NULL, RETURN_FAILURE);
+    R_ASSERT(fold_len >= 5, RETURN_FAILURE);
+
+    _S32 c;
+    _S32 next_word_len = 0;
+    _S32 left_space = fold_len;
+    ENUM_BOOLEAN newline = BOOLEAN_TRUE;
+    ENUM_BOOLEAN next_word_is_newline = BOOLEAN_FALSE;
+
+    //feof must be triggered by fgetc, if pfr point to EOF, but has not been touched by fgetc, feof is false
+    while((c = fgetc(pfr)) != EOF)
+    {
+        fseek(pfr, -1, SEEK_CUR);
+        
+        /* find next word position: word means 
+        1.first ch is space, the word length is the longest space ch;
+        2.first ch is not space, the word length is the longest non-space ch; */
+
+        next_word_len = find_next_word_position_f(pfr, &next_word_is_newline);
+
+        if(next_word_len == 0)
+        {
+            break;
+        }
+        
+        fseek(pfr, -next_word_len, SEEK_CUR);
+
+        if(next_word_is_newline)
+        {
+            OUTPUT_STRN_F(pfw, pfr, next_word_len);
+            left_space = fold_len;
+            newline = BOOLEAN_TRUE;
+            continue;
+        }
+        
+        if(left_space >= next_word_len)
+        {
+            OUTPUT_STRN_F(pfw, pfr, next_word_len);
+            left_space -= next_word_len;
+            newline = BOOLEAN_FALSE;
+        }
+        else
+        {
+            if(newline)
+            {
+                OUTPUT_STRN_F(pfw, pfr, left_space);
+                fputc('\n', pfw);
+
+                left_space = fold_len;
+                newline = BOOLEAN_TRUE;
+            }
+            else
+            {
+                fputc('\n', pfw);
+                left_space = fold_len;
+                newline = BOOLEAN_TRUE;
+            }
+        }
+    }
+
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
 
 {
@@ -459,20 +511,33 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
     _S32 next_word_len = 0;
     _S32 left_space = fold_len;
     ENUM_BOOLEAN newline = BOOLEAN_TRUE;
+    ENUM_BOOLEAN next_word_is_newline = BOOLEAN_FALSE;
     
     while(*source != '\0')
     {
         /* find next word position: word means 
         1.first ch is space, the word length is the longest space ch;
         2.first ch is not space, the word length is the longest non-space ch; */
-        const _S8 *source_temp = source;
-        
-        next_word_len = find_next_word_position(source);
+
+        next_word_len = find_next_word_position_s(source, &next_word_is_newline);
+        if(next_word_len == 0)
+        {
+            break;
+        }
+
+        if(next_word_is_newline)
+        {
+            OUTPUT_STRN(dest, size, source, next_word_len);
+            source = source + next_word_len;
+            left_space = fold_len;
+            newline = BOOLEAN_TRUE;
+            continue;
+        }
 
         if(left_space >= next_word_len)
         {
-            OUTPUT_STRN(dest, size, source_temp, next_word_len);
-            source = source_temp + next_word_len;
+            OUTPUT_STRN(dest, size, source, next_word_len);
+            source = source + next_word_len;
             left_space -= next_word_len;
             newline = BOOLEAN_FALSE;
         }
@@ -480,21 +545,21 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
         {
             if(newline)
             {
-                OUTPUT_STRN(dest, size, source_temp, left_space);
+                OUTPUT_STRN(dest, size, source, left_space);
                 OUTPUT_STR('\n', dest, size);
 
-                source = source_temp + left_space;
+                source = source + left_space;
                 left_space = fold_len;
                 newline = BOOLEAN_TRUE;
             }
             else
             {
                 OUTPUT_STR('\n', dest, size);
-                source = source_temp;
                 left_space = fold_len;
                 newline = BOOLEAN_TRUE;
             }
         }
+
     }
 
     OUTPUT_END(dest, size);

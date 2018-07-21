@@ -33,7 +33,7 @@ typedef struct TAG_STRU_DEL_CMNT_STM_RUN_DATA
 {
     FILE *pfr;
     FILE *pfw;
-    int c;
+    _S32 c;
     ENUM_BOOLEAN whether_any_error_exists;
 }STRU_DEL_CMNT_STM_RUN_DATA;
 
