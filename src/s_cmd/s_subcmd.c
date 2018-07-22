@@ -335,7 +335,7 @@ void display_all_subcmd_help_info(void)
     {
         text[0] = p->subcmd;
         text[1] = p->help_info;
-        V_ASSERT(s_print_table_text(text, 1, 2, format) == RETURN_SUCCESS);
+        V_ASSERT(s_print_text_table(text, 1, 2, format) == RETURN_SUCCESS);
         p = p->next;
     }
 }

@@ -1465,40 +1465,94 @@ _S32 numcmp_r(const _S8 * s1, const _S8 * s2)
 	return numcmp(s2, s1);
 }
 
-#define MAX_PRINT_TABLE_TEXT_ELEMENT_LINE 8
-#define MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN 256
-#define MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN 256
-#define MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN (MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN*MAX_PRINT_TABLE_TEXT_ELEMENT_LINE)
+#define MAX_TEXT_TABLE_ELEMENT_LINE 8
+#define MAX_TEXT_TABLE_ELEMENT_LINE_LEN 256
+#define MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN 256
+#define MAX_TEXT_TABLE_ELEMENT_FOLD_TEXT_LEN (MAX_TEXT_TABLE_ELEMENT_LINE_LEN*MAX_TEXT_TABLE_ELEMENT_LINE)
 
-typedef struct TAG_STRU_PRINT_TABLE_TEXT_ELEMENT
+typedef struct TAG_STRU_TEXT_TABLE_ELEMENT
 {
-    _S8 format[MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN];
+    _S8 format[MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN];
     size_t lines;//line_max 8
-    _S8 line_text[MAX_PRINT_TABLE_TEXT_ELEMENT_LINE][MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN];
-}STRU_PRINT_TABLE_TEXT_ELEMENT;
+    _S8 line_text[MAX_TEXT_TABLE_ELEMENT_LINE][MAX_TEXT_TABLE_ELEMENT_LINE_LEN];
+}STRU_TEXT_TABLE_ELEMENT;
 
-ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[])
+PRIVATE STRU_TEXT_TABLE_ELEMENT* get_new_text_table(size_t rows, size_t columns)
 {
-    PRIVATE _S8 text_fold_buffer[MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN];
-    PRIVATE _S8 format_string[MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN];
-    
-    size_t len;
-    size_t fold_len;
-    ENUM_RETURN ret_val;
     size_t table_elements = rows * columns;
-    const _S8 *text_temp;
-
-    STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_elements =
-        (STRU_PRINT_TABLE_TEXT_ELEMENT*)malloc(table_elements*sizeof(STRU_PRINT_TABLE_TEXT_ELEMENT));
-    R_ASSERT(print_table_text_elements != NULL, RETURN_FAILURE);
+    STRU_TEXT_TABLE_ELEMENT* text_table_elements =
+        (STRU_TEXT_TABLE_ELEMENT*)malloc(table_elements*sizeof(STRU_TEXT_TABLE_ELEMENT));
+    R_ASSERT(text_table_elements != NULL, NULL);
 
     for(int i = 0; i < table_elements; i++)
     {
-        memset(print_table_text_elements[i].format, '\0', MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN);
-        print_table_text_elements[i].lines = 0;
-        memset(print_table_text_elements[i].line_text, '\0', MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN);
+        memset(text_table_elements[i].format, '\0', MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN);
+        text_table_elements[i].lines = 0;
+        memset(text_table_elements[i].line_text, '\0', MAX_TEXT_TABLE_ELEMENT_FOLD_TEXT_LEN);
     }
+
+    return text_table_elements;
+}
+
+PRIVATE ENUM_RETURN build_text_table_format(STRU_TEXT_TABLE_ELEMENT* text_table_element,
+    STRU_TABLE_TEXT_FORMAT format)
+{
+    PRIVATE _S8 format_string[MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN];
+    R_ASSERT(format.margin_left + format.margin_right + 5 
+        < format.table_column_size, RETURN_FAILURE);
     
+    size_t fold_len = format.table_column_size - format.margin_left - format.margin_right;
+    _S8 *format_temp = text_table_element->format;
+    size_t format_len = MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN;
+
+    OUTPUT_STR_MULTI(' ', format.margin_left, format_temp, format_len);
+
+    sprintf(format_string, "%%%s%zds", format.align_left?"-":"", fold_len);
+
+    OUTPUT_STRN(format_temp, format_len, format_string, strlen(format_string));
+
+    OUTPUT_STR_MULTI(' ', format.margin_right, format_temp, format_len);
+
+    OUTPUT_END(format_temp, format_len);
+
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN build_text_table_element(STRU_TEXT_TABLE_ELEMENT* text_table_element,
+    const _S8 *text, STRU_TABLE_TEXT_FORMAT format)
+{
+    
+    PRIVATE _S8 text_fold_buffer[MAX_TEXT_TABLE_ELEMENT_FOLD_TEXT_LEN];
+    ENUM_RETURN ret_val;
+    size_t fold_len = format.table_column_size - format.margin_left - format.margin_right;
+
+    R_ASSERT(text != NULL, RETURN_FAILURE);
+    ret_val = s_fold_s(text, text_fold_buffer, MAX_TEXT_TABLE_ELEMENT_FOLD_TEXT_LEN, fold_len);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    _S32 lines = 0;
+    size_t len = 0;
+    const _S8 *text_temp = text_fold_buffer;
+    while(text_table_element->lines < MAX_TEXT_TABLE_ELEMENT_LINE 
+        && s_getline_s(&text_temp, 
+            text_table_element->line_text[lines], 
+            MAX_TEXT_TABLE_ELEMENT_LINE_LEN, &len) == RETURN_SUCCESS 
+        && len > 0)
+    {
+        ret_val = s_trim(text_table_element->line_text[lines]);
+        R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        lines++;
+    }
+        
+    text_table_element->lines = lines;
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN build_text_table(STRU_TEXT_TABLE_ELEMENT* text_table_elements, 
+    const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[])
+{
+    ENUM_RETURN ret_val;
+
     for(size_t row = 0; row < rows; row++)
     {
         size_t max_line = 0;
@@ -1506,60 +1560,36 @@ ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, S
         for(size_t col = 0; col < columns; col++)
         {
             size_t index = row * columns + col;
-            
-            R_ASSERT_DO(text[index] != NULL, RETURN_FAILURE, FREE(print_table_text_elements));
-            R_ASSERT_DO(format[index].margin_left + format[index].margin_right + 5 
-                < format[index].table_column_size, RETURN_FAILURE, FREE(print_table_text_elements));
-            fold_len = format[index].table_column_size - format[index].margin_left - format[index].margin_right;
 
-            STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+            STRU_TEXT_TABLE_ELEMENT* text_table_element = text_table_elements + index;
 
-            _S8 *format_temp = print_table_text_element->format;
-            size_t format_len = MAX_PRINT_TABLE_TEXT_ELEMENT_FORMAT_LEN;
-            
-            OUTPUT_STR_MULTI(' ', format[index].margin_left, format_temp, format_len);
-            
-            sprintf(format_string, "%%%s%zds", format[index].align_left?"-":"", fold_len);
+            ret_val = build_text_table_format(text_table_element, format[index]);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-            OUTPUT_STRN(format_temp, format_len, format_string, strlen(format_string));
+            ret_val = build_text_table_element(text_table_element, text[index], format[index]);
+            R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
-            OUTPUT_STR_MULTI(' ', format[index].margin_right, format_temp, format_len);
-
-            OUTPUT_END(format_temp, format_len);
-            
-            ret_val = s_fold_s(text[index], text_fold_buffer, MAX_PRINT_TABLE_TEXT_ELEMENT_FOLD_TEXT_LEN, fold_len);
-            R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
-
-            _S32 lines = 0;
-            text_temp = text_fold_buffer;
-            while(print_table_text_element->lines < MAX_PRINT_TABLE_TEXT_ELEMENT_LINE 
-                && s_getline_s(&text_temp, 
-                    print_table_text_element->line_text[lines], 
-                    MAX_PRINT_TABLE_TEXT_ELEMENT_LINE_LEN, &len) == RETURN_SUCCESS 
-                && len > 0)
+            if(max_line < text_table_element->lines)
             {
-                ret_val = s_trim(print_table_text_element->line_text[lines]);
-                R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
-                lines++;
-            }
-                
-            print_table_text_element->lines = lines;
-
-            if(max_line < lines)
-            {
-                max_line = lines;
+                max_line = text_table_element->lines;
             }
         }
 
         for(size_t col = 0; col < columns; col++)
         {
             size_t index = row * columns + col;
-            STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+            STRU_TEXT_TABLE_ELEMENT* print_table_text_element = text_table_elements + index;
             print_table_text_element->lines = max_line;
         }
         
     }
+    
+    return RETURN_SUCCESS;
+}
 
+PRIVATE ENUM_RETURN print_text_table(STRU_TEXT_TABLE_ELEMENT* print_table_text_elements,
+    size_t rows, size_t columns)
+{
     for(size_t row = 0; row < rows; row++)
     {
         size_t max_line = print_table_text_elements[row*columns].lines;
@@ -1571,12 +1601,33 @@ ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, S
             {
                 size_t index = row * columns + col;
                 
-                STRU_PRINT_TABLE_TEXT_ELEMENT* print_table_text_element = print_table_text_elements + index;
+                STRU_TEXT_TABLE_ELEMENT* print_table_text_element = print_table_text_elements + index;
                 printf(print_table_text_element->format, print_table_text_element->line_text[line]);
             }
             printf("\n");
         }
     }
+
+    return RETURN_SUCCESS;
+}
+ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[])
+{
+    R_ASSERT(text != NULL, RETURN_FAILURE);
+    R_ASSERT(format != NULL, RETURN_FAILURE);
+    R_ASSERT(rows > 0, RETURN_FAILURE);
+    R_ASSERT(columns > 0, RETURN_FAILURE);
+    
+    ENUM_RETURN ret_val;
+    
+    STRU_TEXT_TABLE_ELEMENT* print_table_text_elements = NULL;
+    print_table_text_elements = get_new_text_table(rows, columns);
+    R_ASSERT(print_table_text_elements != NULL, RETURN_FAILURE);
+
+    ret_val = build_text_table(print_table_text_elements, text, rows, columns, format);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
+
+    ret_val = print_text_table(print_table_text_elements, rows, columns);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
 
     FREE(print_table_text_elements);
 

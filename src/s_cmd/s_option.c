@@ -311,7 +311,7 @@ void display_option_help_info(STRU_OPTION_CONTROL_BLOCK *p_option_cb)
 
         text[0] = temp_buf;
         text[1] = p_option_cb->help_info;
-        V_ASSERT(s_print_table_text(text, 1, 2, format) == RETURN_SUCCESS);
+        V_ASSERT(s_print_text_table(text, 1, 2, format) == RETURN_SUCCESS);
 
         p_option_cb = p_option_cb->next;
     }

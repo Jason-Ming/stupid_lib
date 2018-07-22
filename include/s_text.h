@@ -317,7 +317,7 @@ _S32 numcmp(const _S8 * s1, const _S8 * s2);
 _S32 numcmp_r(const _S8 * s1, const _S8 * s2);
 
 
-ENUM_RETURN s_print_table_text(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[]);
+ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[]);
 
 __END_C_DECLS
 
