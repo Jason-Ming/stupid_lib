@@ -5,38 +5,11 @@
 #include "s_text.h"
 #include "s_cproc.h"
 
-struct TAG_STRU_DCL_VAR;
-
-typedef struct TAG_STRU_DCL_TYPE
-{
-    ENUM_DCL_TYPE type;
-    
-    /* only for array */
-    size_t size;
-
-    /* means: 
-    1.array's elelment type; 
-    2.pointer's pointing type;
-    3.function's returnning type;
-    */
-    struct TAG_STRU_DCL_TYPE *p_contain_type;
-
-    /* only for function */
-    struct TAG_STRU_DCL_VAR *parameters;
-}STRU_DCL_TYPE;
-
-typedef struct TAG_STRU_DCL_VAR
-{
-    const char *name;
-    struct TAG_STRU_DCL_TYPE *p_type;
-    struct TAG_STRU_DCL_VAR *next;
-}STRU_DCL_VAR;
-
-
 /* not include C99 and C11 */
 PRIVATE _S8 *keyword_declare[] = {
     "auto", "char", "const", "double", "enum", "extern", "float", "int", "long", "register", "short", "signed", 
-    "static", "struct", "typedef", "union", "unsigned", "void", "volatile"};
+    "static", "struct", "typedef", "union", "unsigned", "void", "volatile",
+    "ENUM_RETURN", "FILE", "_S8", "size_t", "ENUM_DCL_TOKEN", "_S32" };
 
 PRIVATE _S8 *keyword_control[] = {
     "break", "case", "continue", "default", "do", "else", "for" "goto", "if", "return", "sizeof", "switch", "while"};
@@ -91,16 +64,16 @@ ENUM_BOOLEAN is_keyword_type(_S8 *string)
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
     _S32 i = 0;
 
-    DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_declare));
+    //DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_declare));
     
     while(i < SIZE_OF_ARRAY(keyword_declare))
     {
-        DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_declare[i]), keyword_declare[i], strlen(string), string);
+        //DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_declare[i]), keyword_declare[i], strlen(string), string);
         R_FALSE_RET(strcmp(keyword_declare[i], string) != 0, BOOLEAN_TRUE);
         i++;
     };
 
-    DEBUG_PRINT("return!\n");
+    //DEBUG_PRINT("return!\n");
     return BOOLEAN_FALSE;
 }
 
@@ -108,15 +81,15 @@ ENUM_BOOLEAN is_keyword_control(_S8 *string)
 {
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
     _S32 i = 0;
-    DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_control));
+    //DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_control));
     while(i < SIZE_OF_ARRAY(keyword_control))
     {
-        DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_control[i]), keyword_control[i], strlen(string), string);
+//        DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_control[i]), keyword_control[i], strlen(string), string);
         R_FALSE_RET(strcmp(keyword_control[i], string) != 0, BOOLEAN_TRUE);
         i++;
     };
 
-    DEBUG_PRINT("return!\n");
+   // DEBUG_PRINT("return!\n");
     return BOOLEAN_FALSE;
 }
 
@@ -212,6 +185,11 @@ PRIVATE ENUM_DCL_TOKEN parse_word(_S8 *string)
     R_ASSERT(string != NULL, DCL_TOKEN_INVALID);
     ENUM_DCL_TOKEN token_temp = DCL_TOKEN_INVALID;
 
+    if(strlen(string) == 0)
+    {
+        return DCL_TOKEN_END;
+    }
+    
     if(is_number(string))
     {
         token_temp = DCL_TOKEN_NUMBER;
@@ -236,7 +214,7 @@ PRIVATE ENUM_DCL_TOKEN parse_word(_S8 *string)
     return token_temp;
 }
 
-ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token)
+ENUM_RETURN s_cget_token(const _S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, const _S8 **next_token)
 {
     R_ASSERT(statement != NULL, RETURN_FAILURE);
     R_ASSERT(token_buffer != NULL, RETURN_FAILURE);
@@ -253,8 +231,6 @@ ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size
     /* skip white space */
     while(isspace(*statement)) statement++;
 
-    DEBUG_PRINT("%c\n", *statement);
-    
     if(*statement != '\0')
     {
         token_temp = parse_symbol(*statement);
@@ -264,6 +240,7 @@ ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size
     if(token_temp != DCL_TOKEN_INVALID)
     {
         OUTPUT_END(token_buffer, buffer_size);
+        DEBUG_PRINT("token string: %s\n", temp);
         *token = token_temp;
         *len = 1;
         *next_token = statement;
@@ -275,13 +252,11 @@ ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size
         OUTPUT_STR(*statement++, token_buffer, buffer_size);
     }
     
-    DEBUG_PRINT("%c\n", *statement);
-    
     OUTPUT_END(token_buffer, buffer_size);
 
-    DEBUG_PRINT("%s\n", temp);
-
     token_temp = parse_word(temp);
+    
+    DEBUG_PRINT("token string: %s\n", temp);
 
     *token = token_temp;
     *len = strlen(temp);

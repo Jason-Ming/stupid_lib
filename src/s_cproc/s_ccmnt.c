@@ -342,6 +342,12 @@ PRIVATE ENUM_RETURN del_cmnt_stm_init(FILE *pfr, FILE *pfw)
     return RETURN_SUCCESS;
 }
 
+PRIVATE _VOID del_cmnt_stm_clear(_VOID)
+{
+    ENUM_RETURN ret_val = stm_delete(&stm);
+    V_ASSERT(ret_val == RETURN_SUCCESS);
+}
+
 ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw)
 {
     R_ASSERT(pfr != NULL, RETURN_FAILURE);
@@ -350,10 +356,12 @@ ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
     ret_val = del_cmnt_stm_init(pfr, pfw);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, del_cmnt_stm_clear());
     
     ret_val = stm_run(stm);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, del_cmnt_stm_clear());
+
+    del_cmnt_stm_clear();
     
     return RETURN_SUCCESS;
 }

@@ -20,6 +20,7 @@ typedef enum TAG_ENUM_DCL_TOKEN
     DCL_TOKEN_IDENTIFIER,            /* x??, _?? */
     DCL_TOKEN_NUMBER,                /* 10 */
     DCL_TOKEN_CONTROL,               /* if, break, etc.. */
+    DCL_TOKEN_END,                   /* end of a statement like "" */
     DCL_TOKEN_INVALID,
     DCL_TOKEN_MAX,
 }ENUM_DCL_TOKEN;
@@ -52,13 +53,17 @@ ENUM_RETURN s_cdel_cmnt(FILE *pfr, FILE *pfw);
    If check is passed, check_result is 1 */
 ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result);
 
-/* be sure the content in file does not contain any comment¡¢macro and had been checked pairing match */
+/* statement means: code separated by semicolon.
+   be sure the content in file does not contain any comment¡¢macro and had been checked pairing match
+   the result does not include semicolon at the end */
 ENUM_RETURN s_cget_statement(FILE * pfr, _S8 statement_buffer[], size_t buffer_size, size_t *len);
 
 /* make sure you get the statement from 's_cget_statement' */
-ENUM_RETURN s_cget_token(_S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, _S8 **next_token);
+ENUM_RETURN s_cget_token(const _S8 * statement, _S8 token_buffer[], size_t buffer_size, size_t *len, ENUM_DCL_TOKEN *token, const _S8 **next_token);
 
 /* make sure you get the statement from 's_cget_statement', and at present, this function could parse declaration only */
 ENUM_RETURN s_cparse_statement(_S8 *statement);
+ENUM_RETURN s_cdcl(const _S8 *statement);
+
 __END_C_DECLS
 #endif

@@ -497,6 +497,15 @@ PRIVATE ENUM_RETURN checkpair_stm_init(void)
     return RETURN_SUCCESS;
 }
 
+PRIVATE _VOID checkpair_stm_clear(_VOID)
+{
+    ENUM_RETURN ret_val = stm_delete(&stm);
+    V_ASSERT(ret_val == RETURN_SUCCESS);
+    
+    ret_val = stack_delete(&(run_data.stack));
+    V_ASSERT(ret_val == RETURN_SUCCESS);
+}
+
 ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result)
 {
     R_ASSERT(check_result != NULL, RETURN_FAILURE);
@@ -507,17 +516,19 @@ ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result)
     *check_result = RETURN_SUCCESS;
 
     ret_val = checkpair_stm_init();
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, checkpair_stm_clear());
 
     run_data.pfr = pfr;
     ret_val = stm_run(stm);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(stm));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, checkpair_stm_clear());
 
     if(run_data.whether_any_error_exists)
     {
         *check_result = RETURN_FAILURE;
     }
-    
+
+    checkpair_stm_clear();
+
     return RETURN_SUCCESS;
 }
 

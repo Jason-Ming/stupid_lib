@@ -318,10 +318,10 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf)
 
 
 /* word in this function has 3 type: '\n', continuing blanks, continuing non-blanks */
-PRIVATE _S32 find_next_word_position_f(FILE *pfr, ENUM_BOOLEAN *next_word_is_newline)
+PRIVATE size_t find_next_word_position_f(FILE *pfr, ENUM_BOOLEAN *next_word_is_newline)
 {
     _S32 c;
-    _S32 len = 0;
+    size_t len = 0;
     *next_word_is_newline = BOOLEAN_FALSE;
     if((c = fgetc(pfr)) == EOF)
     {
@@ -441,8 +441,8 @@ ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len)
     R_ASSERT(fold_len >= 5, RETURN_FAILURE);
 
     _S32 c;
-    _S32 next_word_len = 0;
-    _S32 left_space = fold_len;
+    size_t next_word_len = 0;
+    size_t left_space = fold_len;
     ENUM_BOOLEAN newline = BOOLEAN_TRUE;
     ENUM_BOOLEAN next_word_is_newline = BOOLEAN_FALSE;
 

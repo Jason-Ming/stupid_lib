@@ -27,7 +27,6 @@
 #define OUTPUT_STR(c, dest, size)\
     do{\
         _S32 ___c_ = c;\
-        DEBUG_PRINT("OUTPUT_STR: %c", ___c_);\
         if(size > 1)\
         {\
             *dest++ = ___c_;\
@@ -40,7 +39,6 @@
 
 #define OUTPUT_END(dest, size)\
     do{\
-        DEBUG_PRINT("OUTPUT_END");\
         if(size > 0)\
         {\
             *dest++ = '\0';\
@@ -56,7 +54,6 @@
         _S32 ___b = begin, ___e = end;\
         if(___b != '\0' && ___e != '\0')\
         {\
-            DEBUG_PRINT("OUTPUT_STR_RANGE: %c~%c", ___b, ___e);\
             for(_S32 ___c = ___b; ___c <= ___e; ___c++)\
             {\
                 OUTPUT_STR(___c, dest, size);\
@@ -67,7 +64,6 @@
 #define OUTPUT_STR_MULTI(c, num, dest, size) \
     do{\
         _S32 ___c = c;\
-        DEBUG_PRINT("OUTPUT_STR_MULTI: %c, %zd", ___c, num);\
         for(_S32 i = 0; i < num; i++)\
         {\
             OUTPUT_STR(___c, dest, size);\
@@ -76,7 +72,6 @@
 
 #define OUTPUT_STRN_F(fpw, fpr, target_len)\
     do{\
-        DEBUG_PRINT("OUTPUT_STRN_F: %zd", target_len);\
         _S32 ___c;size_t ___len = target_len;\
         while(___len-- > 0)\
         {;\
@@ -87,7 +82,6 @@
 
 #define OUTPUT_STRN(dest, size, target, target_len)\
     do{\
-        DEBUG_PRINT("OUTPUT_STRN: %s", target);\
         if(size > target_len)\
         {\
             memcpy(dest, target, target_len);\

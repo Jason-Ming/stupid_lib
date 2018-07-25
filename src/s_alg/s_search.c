@@ -48,12 +48,18 @@ _S32 binsearch2(_S32 x, _S32 v[], _S32 n)
     int low, high, mid;
     low = -1;
     high = n;
-    while (low + 1 < high) {
-    mid = (low + high) / 2;
-    if (v[mid] < x)
-    low = mid;
-    else
-    high = mid;
+    while (low + 1 < high) 
+    {
+        mid = (low + high) / 2;
+        
+        if (v[mid] < x)
+        {
+            low = mid;
+        }
+        else
+        {
+            high = mid;
+        }
     }
 
     time_taken = clock() - time_taken;
