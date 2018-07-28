@@ -647,7 +647,7 @@ ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
     _S32 sign = 1;
     _S32 temp = 0;
     size_t len = strlen(str);
-    R_ASSERT(len > 0, RETURN_FAILURE);
+    R_FALSE_RET(len > 0, RETURN_FAILURE);
     
     if(*str == '-')
     {
@@ -662,11 +662,11 @@ ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
         len--;
     }
 
-    R_ASSERT(len > 0, RETURN_FAILURE);
+    R_FALSE_RET(len > 0, RETURN_FAILURE);
 
     while(*str != '\0')
     {
-        R_ASSERT(isdigit(*str), RETURN_FAILURE);
+        R_FALSE_RET(isdigit(*str), RETURN_FAILURE);
         temp = 10 * temp + (*str - '0');
         str++;
     }

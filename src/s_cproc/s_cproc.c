@@ -6,18 +6,22 @@
 #include "s_cproc.h"
 
 /* not include C99 and C11 */
-PRIVATE _S8 *keyword_declare[] = {
-    "auto", "char", "const", "double", "enum", "extern", "float", "int", "long", "register", "short", "signed", 
-    "static", "struct", "typedef", "union", "unsigned", "void", "volatile",
+PRIVATE _S8 *keyword_type[] = {
+    "char", "double", "enum", "float", "int", "long", "short", "signed", 
+    "struct", "union", "unsigned", "void", 
     "ENUM_RETURN", "FILE", "_S8", "size_t", "ENUM_DCL_TOKEN", "_S32" };
 
+PRIVATE _S8 *keyword_type_qualifier[] = {
+    "auto", "const", "extern", "register", 
+    "static", "volatile" };
+
 PRIVATE _S8 *keyword_control[] = {
-    "break", "case", "continue", "default", "do", "else", "for" "goto", "if", "return", "sizeof", "switch", "while"};
+    "break", "case", "continue", "default", "do", "else", "for" "goto", "if", "return", "sizeof", "switch", "typedef", "while"};
 
 PRIVATE _S8 separators[] = {'(', ')', '[', ']', '{', '}', '*', ' ', '\t', ';', ',', '\n'};
 
 PRIVATE _S8 * g_dcl_token_str[] = {
-    "(", ")", "*", "[", "]", "{", "}", ",", ";", "type", "identifier", "number", "control", "invalid token"};
+    "(", ")", "*", "[", "]", "{", "}", ",", ";", "type", "qualifier", "identifier", "number", "control", "end", "invalid token"};
 
 PRIVATE _S8 * g_dcl_type_str[ ] = {
     "array", "pointer", "function", "struct", "enum", "union", "invalid type"};
@@ -64,16 +68,30 @@ ENUM_BOOLEAN is_keyword_type(_S8 *string)
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
     _S32 i = 0;
 
-    //DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_declare));
+    //DEBUG_PRINT("%zd\n", SIZE_OF_ARRAY(keyword_type));
     
-    while(i < SIZE_OF_ARRAY(keyword_declare))
+    while(i < SIZE_OF_ARRAY(keyword_type))
     {
-        //DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_declare[i]), keyword_declare[i], strlen(string), string);
-        R_FALSE_RET(strcmp(keyword_declare[i], string) != 0, BOOLEAN_TRUE);
+        //DEBUG_PRINT("compare: %zd %s, %zd %s\n", strlen(keyword_type[i]), keyword_type[i], strlen(string), string);
+        R_FALSE_RET(strcmp(keyword_type[i], string) != 0, BOOLEAN_TRUE);
         i++;
     };
 
     //DEBUG_PRINT("return!\n");
+    return BOOLEAN_FALSE;
+}
+
+ENUM_BOOLEAN is_keyword_type_qualifier(_S8 *string)
+{
+    R_ASSERT(string != NULL, BOOLEAN_FALSE);
+    _S32 i = 0;
+
+    while(i < SIZE_OF_ARRAY(keyword_type_qualifier))
+    {
+        R_FALSE_RET(strcmp(keyword_type_qualifier[i], string) != 0, BOOLEAN_TRUE);
+        i++;
+    };
+
     return BOOLEAN_FALSE;
 }
 
@@ -97,7 +115,7 @@ ENUM_BOOLEAN is_keyword(_S8 *string)
 {
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
     
-    return (is_keyword_control(string) || is_keyword_type(string));
+    return (is_keyword_control(string) || is_keyword_type(string) || is_keyword_type_qualifier(string));
 }
 
 ENUM_BOOLEAN is_identifier(_S8 *string)
@@ -240,7 +258,6 @@ ENUM_RETURN s_cget_token(const _S8 * statement, _S8 token_buffer[], size_t buffe
     if(token_temp != DCL_TOKEN_INVALID)
     {
         OUTPUT_END(token_buffer, buffer_size);
-        DEBUG_PRINT("token string: %s\n", temp);
         *token = token_temp;
         *len = 1;
         *next_token = statement;
@@ -255,8 +272,6 @@ ENUM_RETURN s_cget_token(const _S8 * statement, _S8 token_buffer[], size_t buffe
     OUTPUT_END(token_buffer, buffer_size);
 
     token_temp = parse_word(temp);
-    
-    DEBUG_PRINT("token string: %s\n", temp);
 
     *token = token_temp;
     *len = strlen(temp);

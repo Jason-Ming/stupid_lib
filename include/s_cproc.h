@@ -17,10 +17,11 @@ typedef enum TAG_ENUM_DCL_TOKEN
     DCL_TOKEN_COMMA,                 /* , */
     DCL_TOKEN_SEMICOLON,             /* ; */
     DCL_TOKEN_TYPE,                  /* int, char, short, long, float, double, unsigned, etc.. */
+    DCL_TOKEN_TYPE_QUALIFIER,        /* auto, const, extern, static, volatile, register */
     DCL_TOKEN_IDENTIFIER,            /* x??, _?? */
     DCL_TOKEN_NUMBER,                /* 10 */
     DCL_TOKEN_CONTROL,               /* if, break, etc.. */
-    DCL_TOKEN_END,                   /* end of a statement like "" */
+    DCL_TOKEN_END,                   /* if read to the end of a statement */
     DCL_TOKEN_INVALID,
     DCL_TOKEN_MAX,
 }ENUM_DCL_TOKEN;
