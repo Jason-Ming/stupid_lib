@@ -119,6 +119,7 @@ typedef struct TAG_STRU_DCL_TOKEN
 #else
 #define DCL_DBG_PRINT(head, tail)
 #endif
+
 PRIVATE ENUM_RETURN add_token_to_list(
     const _S8 *token_string, 
     ENUM_DCL_TOKEN token_type, 
@@ -424,7 +425,9 @@ PRIVATE ENUM_RETURN dcl_get_next_premeter(
 PRIVATE ENUM_RETURN proc_dcl_list(
     STRU_DCL_TOKEN *p_token_list_head,
     STRU_DCL_TOKEN *p_token_list_tail,
-    ENUM_BOOLEAN in_function_premeters);
+    ENUM_BOOLEAN in_function_premeters,
+    ENUM_BOOLEAN *need_type);
+
 
 PRIVATE ENUM_RETURN find_type_for_qualifier(
     STRU_DCL_TOKEN *p_qualifier,
@@ -580,13 +583,17 @@ PRIVATE ENUM_RETURN proc_type_qualifier(
 }
 PRIVATE ENUM_RETURN proc_prelist(
     STRU_DCL_TOKEN *p_prelist_head,
-    STRU_DCL_TOKEN *p_prelist_tail)
+    STRU_DCL_TOKEN *p_prelist_tail,
+    ENUM_BOOLEAN *need_type)
 {
-    DCL_DBG_PRINT(p_prelist_head, p_prelist_tail);
     
+    DCL_DBG_PRINT(p_prelist_head, p_prelist_tail);
+    R_ASSERT(need_type != NULL, RETURN_FAILURE);
+
     R_FALSE_RET(p_prelist_head != NULL, RETURN_SUCCESS);
 
-    proc_type_qualifier(&p_prelist_head, &p_prelist_tail);
+    ENUM_RETURN ret_val = proc_type_qualifier(&p_prelist_head, &p_prelist_tail);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     while(p_prelist_tail != NULL)
     {
@@ -595,11 +602,13 @@ PRIVATE ENUM_RETURN proc_prelist(
             case DCL_TOKEN_STAR:
             {   
                 DCL_PRINT("a %spointer to ", p_prelist_tail->qualifier.is_const?"const ":"");
+                *need_type = BOOLEAN_TRUE;
                 break;
             }
             case DCL_TOKEN_TYPE:
             {
                 DCL_PRINT("%stype-'%s'", p_prelist_tail->qualifier.is_const?"const ":"", p_prelist_tail->p_string);
+                *need_type = BOOLEAN_FALSE;
                 break;
             }
             case DCL_TOKEN_TYPE_QUALIFIER:
@@ -620,18 +629,21 @@ PRIVATE ENUM_RETURN proc_prelist(
 
         p_prelist_tail = p_prelist_tail->previous;
     }
-    
+
     return RETURN_SUCCESS;
 }
 
 PRIVATE ENUM_RETURN proc_function_premeters(
     STRU_DCL_TOKEN *p_token_list_head,
-    STRU_DCL_TOKEN *p_token_list_tail)
+    STRU_DCL_TOKEN *p_token_list_tail,
+    ENUM_BOOLEAN *need_type)
 {
     DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
 
     R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
     R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
+    R_ASSERT(need_type != NULL, RETURN_FAILURE);
+    
     STRU_DCL_TOKEN *p_token_list_head_temp = p_token_list_head;
     STRU_DCL_TOKEN *p_token_list_tail_temp = p_token_list_tail;
     STRU_DCL_TOKEN *p_token_list_head_premeter;
@@ -639,6 +651,7 @@ PRIVATE ENUM_RETURN proc_function_premeters(
     ENUM_RETURN ret_val;
 
     DCL_PRINT("a function(");
+    *need_type = BOOLEAN_FALSE;
 
     if(p_token_list_head->next != p_token_list_tail)
     {
@@ -646,7 +659,7 @@ PRIVATE ENUM_RETURN proc_function_premeters(
         p_token_list_tail_temp = p_token_list_tail->previous;
         while(RETURN_SUCCESS == dcl_get_next_premeter(p_token_list_head_temp, p_token_list_tail_temp, &p_token_list_head_premeter, &p_token_list_tail_premeter))
         {
-            ret_val = proc_dcl_list(p_token_list_head_premeter, p_token_list_tail_premeter, BOOLEAN_TRUE);
+            ret_val = proc_dcl_list(p_token_list_head_premeter, p_token_list_tail_premeter, BOOLEAN_TRUE, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
             if(p_token_list_tail_premeter == p_token_list_tail_temp)
@@ -671,17 +684,21 @@ PRIVATE ENUM_RETURN proc_function_premeters(
     }
 
     DCL_PRINT(") returning ");
+    *need_type = BOOLEAN_TRUE;
     return RETURN_SUCCESS;
 }
 
 PRIVATE ENUM_RETURN proc_array_size(
     STRU_DCL_TOKEN *p_token_list_head,
-    STRU_DCL_TOKEN *p_token_list_tail)
+    STRU_DCL_TOKEN *p_token_list_tail,
+    ENUM_BOOLEAN *need_type)
 {
     DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
 
     R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
     R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
+    R_ASSERT(need_type != NULL, RETURN_FAILURE);
+    
     STRU_DCL_TOKEN *p_token_list_head_temp = p_token_list_head;
 
     _S32 size = 0;
@@ -689,6 +706,7 @@ PRIVATE ENUM_RETURN proc_array_size(
     _S32 parenthesis_level = 0;
 
     DCL_PRINT("a array");
+    *need_type = BOOLEAN_FALSE;
     while(p_token_list_head_temp != NULL)
     {
         switch(p_token_list_head_temp->token_type)
@@ -751,6 +769,7 @@ PRIVATE ENUM_RETURN proc_array_size(
     }
     
     DCL_PRINT(" of ");
+    *need_type = BOOLEAN_TRUE;
 
     return RETURN_SUCCESS;
 }
@@ -758,7 +777,8 @@ PRIVATE ENUM_RETURN proc_array_size(
 PRIVATE ENUM_RETURN proc_direct_dcl_list(
     STRU_DCL_TOKEN *p_token_list_head,
     STRU_DCL_TOKEN *p_token_list_tail,
-    ENUM_BOOLEAN in_function_premeters)
+    ENUM_BOOLEAN in_function_premeters,
+    ENUM_BOOLEAN *need_type)
 {
     DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
 
@@ -769,6 +789,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         if(in_function_premeters)
         {
             DCL_PRINT("identifier-'not given' is ");
+            *need_type = BOOLEAN_TRUE;
             return RETURN_SUCCESS;
         }
         else
@@ -828,9 +849,9 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             {
                 if(in_function_premeters)
                 {
-                    ret_val = proc_direct_dcl_list(NULL, NULL, in_function_premeters);
+                    ret_val = proc_direct_dcl_list(NULL, NULL, in_function_premeters, need_type);
                     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-                    ret_val = proc_function_premeters(p_token_list_tail_temp, p_token_list_tail);
+                    ret_val = proc_function_premeters(p_token_list_tail_temp, p_token_list_tail, need_type);
                     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                     return RETURN_SUCCESS;
                 }
@@ -843,7 +864,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             else
             {
                 /* (dcl_list) */
-                ret_val = proc_dcl_list(p_token_list_head->next, p_token_list_tail->previous, in_function_premeters);
+                ret_val = proc_dcl_list(p_token_list_head->next, p_token_list_tail->previous, in_function_premeters, need_type);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 return RETURN_SUCCESS;
             }
@@ -851,10 +872,10 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         else
         {
             /* direct_dcl_list (function premeters) */
-            ret_val = proc_direct_dcl_list(p_token_list_head, p_token_list_tail_temp->previous, in_function_premeters);
+            ret_val = proc_direct_dcl_list(p_token_list_head, p_token_list_tail_temp->previous, in_function_premeters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
-            ret_val = proc_function_premeters(p_token_list_tail_temp, p_token_list_tail);
+            ret_val = proc_function_premeters(p_token_list_tail_temp, p_token_list_tail, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             return RETURN_SUCCESS;
         }
@@ -881,17 +902,17 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         /* direct_dcl_list only contain [][], the array identifier is not given */
         if(p_token_list_tail_temp == p_token_list_head->previous)
         {
-            ret_val = proc_direct_dcl_list(NULL, NULL, in_function_premeters);
+            ret_val = proc_direct_dcl_list(NULL, NULL, in_function_premeters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
         else
         {
             /* dcl_list [array size] */
-            ret_val = proc_direct_dcl_list(p_token_list_head, p_token_list_tail_temp, in_function_premeters);
+            ret_val = proc_direct_dcl_list(p_token_list_head, p_token_list_tail_temp, in_function_premeters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
         
-        ret_val = proc_array_size(p_token_list_tail_temp->next, p_token_list_tail);
+        ret_val = proc_array_size(p_token_list_tail_temp->next, p_token_list_tail, need_type);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
         return RETURN_SUCCESS;
@@ -903,6 +924,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         if(p_token_list_head == p_token_list_tail)
         {
             DCL_PRINT("identifier-'%s' is ", p_token_list_head->p_string);
+            *need_type = BOOLEAN_TRUE;
             return RETURN_SUCCESS;
         }
         else
@@ -921,7 +943,8 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
 PRIVATE ENUM_RETURN proc_dcl_list(
     STRU_DCL_TOKEN *p_token_list_head,
     STRU_DCL_TOKEN *p_token_list_tail,
-    ENUM_BOOLEAN in_function_premeters)
+    ENUM_BOOLEAN in_function_premeters,
+    ENUM_BOOLEAN *need_type)
 {
     STRU_DCL_TOKEN *p_prelist_head = NULL;
     STRU_DCL_TOKEN *p_prelist_tail = NULL;
@@ -939,10 +962,20 @@ PRIVATE ENUM_RETURN proc_dcl_list(
         &p_direct_dcl_list_tail);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = proc_direct_dcl_list(p_direct_dcl_list_head, p_direct_dcl_list_tail, in_function_premeters);
+    ret_val = proc_direct_dcl_list(
+        p_direct_dcl_list_head, 
+        p_direct_dcl_list_tail, 
+        in_function_premeters,
+        need_type);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    
-    ret_val = proc_prelist(p_prelist_head, p_prelist_tail);
+
+    if(*need_type == BOOLEAN_FALSE)
+    {
+        display_dcl_error(p_token_list_head, p_token_list_tail, "declaration error");
+        return RETURN_FAILURE;
+    }
+
+    ret_val = proc_prelist(p_prelist_head, p_prelist_tail, need_type);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     return RETURN_SUCCESS;
@@ -959,14 +992,21 @@ ENUM_RETURN s_cdcl(const _S8 *statement)
 
     ret_val = build_token_list(statement, &p_token_list_head, &p_token_list_tail);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, release_token_list(&p_token_list_head, &p_token_list_tail));
-    
-    ret_val = proc_dcl_list(p_token_list_head, p_token_list_tail, BOOLEAN_FALSE);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, release_token_list(&p_token_list_head, &p_token_list_tail));
 
+    ENUM_BOOLEAN need_type = BOOLEAN_FALSE;
+    
+    ret_val = proc_dcl_list(p_token_list_head, p_token_list_tail, BOOLEAN_FALSE, &need_type);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, release_token_list(&p_token_list_head, &p_token_list_tail));
+  
     DCL_PRINT("\n");
     
-
     release_token_list(&p_token_list_head, &p_token_list_tail);
+    
+    if(need_type == BOOLEAN_TRUE)
+    {
+        display_dcl_error(p_token_list_head, p_token_list_tail, "missing type");
+        return RETURN_FAILURE;
+    }
 
     return RETURN_SUCCESS;
 }
