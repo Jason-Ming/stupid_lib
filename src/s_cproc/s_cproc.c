@@ -216,6 +216,10 @@ PRIVATE ENUM_DCL_TOKEN parse_word(_S8 *string)
     {
         token_temp = DCL_TOKEN_TYPE;
     }
+    else if(is_keyword_type_qualifier(string))
+    {
+        token_temp = DCL_TOKEN_TYPE_QUALIFIER;
+    }
     else if(is_keyword_control(string))
     {
         token_temp = DCL_TOKEN_CONTROL;
