@@ -110,7 +110,8 @@ typedef struct TAG_STRU_DCL_TOKEN
 #define DCL_PRINT(fmt, args...)\
     printf(LIGHT_BLUE""fmt""NONE, ##args);
 
-#ifdef DCL_DBG
+#define DCL_DBG 0
+#if DCL_DBG
 #define DCL_DBG_PRINT(head, tail)\
     printf("\n%s:\n", __FUNCTION__);\
     print_token_list(head, tail);
@@ -435,8 +436,8 @@ PRIVATE ENUM_RETURN proc_function_premeters(
 
     if(p_token_list_head->next != p_token_list_tail)
     {
-        p_token_list_head_temp = p_token_list_head_temp->next;
-        p_token_list_tail_temp = p_token_list_tail_temp->previous;
+        p_token_list_head_temp = p_token_list_head->next;
+        p_token_list_tail_temp = p_token_list_tail->previous;
         while(RETURN_SUCCESS == dcl_get_next_premeter(p_token_list_head_temp, p_token_list_tail_temp, &p_token_list_head_premeter, &p_token_list_tail_premeter))
         {
             ret_val = proc_dcl_list(p_token_list_head_premeter, p_token_list_tail_premeter, BOOLEAN_TRUE);
@@ -447,14 +448,15 @@ PRIVATE ENUM_RETURN proc_function_premeters(
                 break;
             }
 
-            if(p_token_list_head_premeter->next == NULL 
-                || p_token_list_head_premeter->next->next == NULL)
+            if(p_token_list_tail_premeter->next == NULL 
+                || p_token_list_tail_premeter->next->next == NULL)
             {
-                display_dcl_error(p_token_list_head_premeter, p_token_list_tail_premeter, "function premeter error");
+                display_dcl_error(p_token_list_tail_premeter, p_token_list_tail, "function premeter error");
                 return RETURN_FAILURE;
             }
             
-            p_token_list_head_temp = p_token_list_head_premeter->next->next;
+            p_token_list_head_temp = p_token_list_tail_premeter->next->next;
+            p_token_list_tail_temp = p_token_list_tail->previous;
         }
     }
     else
