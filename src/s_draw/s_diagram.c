@@ -6,7 +6,7 @@
 #include "s_defines.h"
 #include "s_limits.h"
 #include "s_log.h"
-#include "s_draw.h"
+#include "s_diagram.h"
 
 
 #define PRINT_STRING_SIZE CHART_DATA_INFO_STR_SIZE//每个单元格的大小

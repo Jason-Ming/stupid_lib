@@ -1,5 +1,5 @@
 #ifndef __S_DRAW_H__
-#define __S_DRAW_H__
+#define __S_DIAGRAM_H__
 
 #include <stdio.h>
 #include "s_clinkage.h"
