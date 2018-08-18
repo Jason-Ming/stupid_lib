@@ -20,7 +20,7 @@ PRIVATE ENUM_RETURN subcmd_help_proc(_VOID)
 
 ENUM_RETURN default_option_proc_handler(const char *arg)
 {
-    R_LOG("Do nothing..");
+    S_LOG("Do nothing..");
     return RETURN_SUCCESS;
 }
 

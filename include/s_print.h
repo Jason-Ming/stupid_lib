@@ -35,8 +35,12 @@
     \033[?25l   隐藏光标   
     \033[?25h   显示光标
 */
+#define BACKGROUND_WHITE         "\033[47m"
+#define BACKGROUND_YELLOW        "\033[43m"
 
 #define NONE         "\033[m" 
+#define BLACK        "\033[0;30m" 
+#define LIGHT_BLACK  "\033[1;30m" 
 #define RED          "\033[0;31m" 
 #define LIGHT_RED    "\033[1;31m" 
 #define GREEN        "\033[0;32m" 

@@ -66,7 +66,7 @@ PRIVATE ENUM_RETURN push(const int c)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
-    R_LOG("%c, line %d, column %d", c, run_data.line, run_data.column);
+    S_LOG("%c, line %d, column %d", c, run_data.line, run_data.column);
     ret_val = stack_push(run_data.stack, (void *)&c, sizeof(c));
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
@@ -94,7 +94,7 @@ PRIVATE ENUM_RETURN pop_and_check(const int c, ENUM_RETURN *result)
         c_temp = 0;
     }
 
-    R_LOG("%c, %c, line %d, column %d", c, c_temp, run_data.line, run_data.column);
+    S_LOG("%c, %c, line %d, column %d", c, c_temp, run_data.line, run_data.column);
     
     switch (c_temp)
     {
@@ -131,7 +131,7 @@ PRIVATE ENUM_RETURN pop_and_check(const int c, ENUM_RETURN *result)
     if(c_temp != c)
     {
         *result = RETURN_FAILURE;
-        R_LOG("c_temp = %c, c = %c", c_temp, c);
+        S_LOG("c_temp = %c, c = %c", c_temp, c);
 
         generate_check_error(c_temp);
     }
@@ -171,7 +171,7 @@ PRIVATE ENUM_RETURN checkpair_stm_preproc()
     run_data.c = fgetc(run_data.pfr);
     if(run_data.whether_any_error_exists == BOOLEAN_TRUE)
     {
-        R_LOG("check error!");
+        S_LOG("check error!");
         ret_val = set_current_stm_state(stm, CHECKPAIR_STM_END);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
@@ -247,7 +247,7 @@ PRIVATE ENUM_RETURN checkpair_stm_proc_normal()
         }
         case '\'':
         {
-            R_LOG("line %d, column %d", run_data.line, run_data.column);
+            S_LOG("line %d, column %d", run_data.line, run_data.column);
             ret_val = set_current_stm_state(stm, CHECKPAIR_STM_STRING_SINGLE_QUOTE);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             break;
@@ -305,7 +305,7 @@ PRIVATE ENUM_RETURN checkpair_stm_proc_string_single_quote()
         {
             if(whether_backslash_occured == BOOLEAN_FALSE)
             {
-                R_LOG("line %d, column %d", run_data.line, run_data.column);
+                S_LOG("line %d, column %d", run_data.line, run_data.column);
                 ret_val = set_current_stm_state(stm, CHECKPAIR_STM_NORMAL);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             }
@@ -421,7 +421,7 @@ PRIVATE ENUM_RETURN checkpair_stm_proc_intermediate()
 PRIVATE ENUM_RETURN checkpair_stm_proc_end()
 {
     //if there is any error before return to the main process to display the error
-    R_FALSE_RET(run_data.whether_any_error_exists == BOOLEAN_FALSE, RETURN_SUCCESS);
+    S_R_FALSE(run_data.whether_any_error_exists == BOOLEAN_FALSE, RETURN_SUCCESS);
 
     //run to here will mean missing some char in the end of the file
     size_t stack_data_count = 0;

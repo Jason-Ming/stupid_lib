@@ -1,7 +1,7 @@
 #include "CppUTest/TestHarness.h"
 #include <string.h>
 #include "s_type.h"
-
+#include "s_cproc.h"
 #include <iostream>
 
 using namespace std;
@@ -24,5 +24,6 @@ TEST_GROUP(TYPE)
 TEST(TYPE, test0)
 {
     //s_print_types();
+    //s_cc(NULL, NULL);
 }
 

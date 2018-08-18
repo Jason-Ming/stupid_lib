@@ -163,7 +163,7 @@ PRIVATE ENUM_RETURN parse_args(int argc, char **argv)
     /* 从argv[1]开始处理 */
     set_argv_indicator(1);
     
-    R_LOG("total args: %d", argc);
+    S_LOG("total args: %d", argc);
     
     ret_val = parse_args_do(argc, argv);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

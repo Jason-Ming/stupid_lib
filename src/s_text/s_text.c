@@ -2,10 +2,12 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 #include <ctype.h>
 
 #include "s_defines.h"
+#include "s_limits.h"
 #include "s_log.h"
 #include "s_text.h"
 #include "s_mem.h"
@@ -133,7 +135,7 @@ ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word
         else
         {
             in_word = BOOLEAN_TRUE;
-            OUTPUT_STR(c, word_buf, buf_size);
+            OUTPUT_C(c, word_buf, buf_size);
         }
     } 
 
@@ -251,12 +253,12 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
 
     while((c = fgetc(fp)) != EOF && c != '\n')
     {
-        OUTPUT_STR(c, buffer, buffer_size);
+        OUTPUT_C(c, buffer, buffer_size);
     }
 
     if(c == '\n')
     {
-        OUTPUT_STR(c, buffer, buffer_size);
+        OUTPUT_C(c, buffer, buffer_size);
     }
 
     OUTPUT_END(buffer, buffer_size);
@@ -280,13 +282,13 @@ ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, si
 
     while((c = **source) != '\0' && c != '\n')
     {
-        OUTPUT_STR(c, buffer, buffer_size);
+        OUTPUT_C(c, buffer, buffer_size);
         (*source)++;
     }
 
     if(c == '\n')
     {
-        OUTPUT_STR(c, buffer, buffer_size);
+        OUTPUT_C(c, buffer, buffer_size);
         (*source)++;
     }
 
@@ -466,7 +468,7 @@ ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len)
 
         if(next_word_is_newline)
         {
-            OUTPUT_STRN_F(pfw, pfr, next_word_len);
+            OUTPUT_STR_F(pfw, pfr, next_word_len);
             left_space = fold_len;
             newline = BOOLEAN_TRUE;
             continue;
@@ -474,7 +476,7 @@ ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len)
         
         if(left_space >= next_word_len)
         {
-            OUTPUT_STRN_F(pfw, pfr, next_word_len);
+            OUTPUT_STR_F(pfw, pfr, next_word_len);
             left_space -= next_word_len;
             newline = BOOLEAN_FALSE;
         }
@@ -482,7 +484,7 @@ ENUM_RETURN s_fold_f(FILE *pfr, FILE *pfw, size_t fold_len)
         {
             if(newline)
             {
-                OUTPUT_STRN_F(pfw, pfr, left_space);
+                OUTPUT_STR_F(pfw, pfr, left_space);
                 fputc('\n', pfw);
 
                 left_space = fold_len;
@@ -527,7 +529,7 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
 
         if(next_word_is_newline)
         {
-            OUTPUT_STRN(dest, size, source, next_word_len);
+            OUTPUT_STR(dest, size, source, next_word_len);
             source = source + next_word_len;
             left_space = fold_len;
             newline = BOOLEAN_TRUE;
@@ -536,7 +538,7 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
 
         if(left_space >= next_word_len)
         {
-            OUTPUT_STRN(dest, size, source, next_word_len);
+            OUTPUT_STR(dest, size, source, next_word_len);
             source = source + next_word_len;
             left_space -= next_word_len;
             newline = BOOLEAN_FALSE;
@@ -545,8 +547,8 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
         {
             if(newline)
             {
-                OUTPUT_STRN(dest, size, source, left_space);
-                OUTPUT_STR('\n', dest, size);
+                OUTPUT_STR(dest, size, source, left_space);
+                OUTPUT_C('\n', dest, size);
 
                 source = source + left_space;
                 left_space = fold_len;
@@ -554,7 +556,7 @@ ENUM_RETURN s_fold_s(const _S8 *source, _S8 *dest, size_t size, size_t fold_len)
             }
             else
             {
-                OUTPUT_STR('\n', dest, size);
+                OUTPUT_C('\n', dest, size);
                 left_space = fold_len;
                 newline = BOOLEAN_TRUE;
             }
@@ -611,7 +613,8 @@ ENUM_RETURN s_hstrtou64(const _S8 *str, _U64 *value)
         }
         else
         {
-            R_RET_LOG(RETURN_FAILURE, "invalid char: %c", c);
+            S_LOG("invalid char: %c", c);
+			return RETURN_FAILURE;
         }
 
         sum = sum * 16 + temp;
@@ -647,7 +650,7 @@ ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
     _S32 sign = 1;
     _S32 temp = 0;
     size_t len = strlen(str);
-    R_FALSE_RET(len > 0, RETURN_FAILURE);
+    S_R_FALSE(len > 0, RETURN_FAILURE);
     
     if(*str == '-')
     {
@@ -662,11 +665,11 @@ ENUM_RETURN s_strtos32(const _S8 *str, _S32 *value)
         len--;
     }
 
-    R_FALSE_RET(len > 0, RETURN_FAILURE);
+    S_R_FALSE(len > 0, RETURN_FAILURE);
 
     while(*str != '\0')
     {
-        R_FALSE_RET(isdigit(*str), RETURN_FAILURE);
+        S_R_FALSE(isdigit(*str), RETURN_FAILURE);
         temp = 10 * temp + (*str - '0');
         str++;
     }
@@ -811,12 +814,12 @@ ENUM_RETURN s_s32tostr(_S32 value, _S8 *dest, size_t size)
 
     do
     {
-        OUTPUT_STR((value % 10)*sign + '0', dest, size);
+        OUTPUT_C((value % 10)*sign + '0', dest, size);
     }while((value /= 10) != 0);
 
     if(sign < 0)
     {
-        OUTPUT_STR('-', dest, size);
+        OUTPUT_C('-', dest, size);
     }
 
     *dest = '\0';
@@ -847,19 +850,19 @@ ENUM_RETURN s_s32tostrbw(_S32 value, _S32 b, _S32 w, _S8 *dest, size_t size)
     do
     {
         index = (value % b)*sign;
-        OUTPUT_STR( digits[index], dest, size);
+        OUTPUT_C( digits[index], dest, size);
         len++;
     }while((value /= b) != 0);
 
     if(sign < 0)
     {
-        OUTPUT_STR('-', dest, size);
+        OUTPUT_C('-', dest, size);
         len++;
     }
 
     while(len < w)
     {
-        OUTPUT_STR(' ', dest, size);
+        OUTPUT_C(' ', dest, size);
         len++;
     }
     
@@ -881,7 +884,7 @@ ENUM_RETURN s_squeeze(_S8 *source, const _S8 *target)
     R_ASSERT(source != NULL, RETURN_FAILURE);
     R_ASSERT(target != NULL, RETURN_FAILURE);
 
-    R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
+    S_R_FALSE(strlen(target) > 0, RETURN_SUCCESS);
     
     _S8 s[MAX_CHAR] = {0};
     _S8 c;
@@ -912,7 +915,7 @@ ENUM_RETURN s_any(const _S8 *source, const _S8 *target, const _S8**pp_occur)
     R_ASSERT(pp_occur != NULL, RETURN_FAILURE);
     *pp_occur = NULL;
 
-    R_FALSE_RET(strlen(target) > 0, RETURN_SUCCESS);
+    S_R_FALSE(strlen(target) > 0, RETURN_SUCCESS);
     
     _S8 s[MAX_CHAR] = {0};
     _S8 c;
@@ -971,13 +974,13 @@ ENUM_RETURN s_escape(const _S8* source, _S8* dest, size_t size)
             case '\'':
             case '\?':
             {
-                OUTPUT_STR('\\', dest, size);
-                OUTPUT_STR(escape[(_U8)c], dest, size);
+                OUTPUT_C('\\', dest, size);
+                OUTPUT_C(escape[(_U8)c], dest, size);
                 break;
             }
             default:
             {
-                OUTPUT_STR(c, dest, size);
+                OUTPUT_C(c, dest, size);
                 break;
             }
         }
@@ -1034,13 +1037,13 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
                 case '\'':
                 case '?':
                 {
-                    OUTPUT_STR(unescape[(_U8)c], dest, size);
+                    OUTPUT_C(unescape[(_U8)c], dest, size);
                     break;
                 }
                 default:
                 {
-                    OUTPUT_STR('\\', dest, size);
-                    OUTPUT_STR(c, dest, size);
+                    OUTPUT_C('\\', dest, size);
+                    OUTPUT_C(c, dest, size);
                     break;
                 }
             }
@@ -1055,7 +1058,7 @@ ENUM_RETURN s_unescape(const _S8* source, _S8* dest, size_t size)
             }
             else
             {
-                OUTPUT_STR(c, dest, size);
+                OUTPUT_C(c, dest, size);
             }
         }
         source++;
@@ -1118,7 +1121,7 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
 
     *index = -1;
     size_t len = strlen(target);
-    R_FALSE_RET(len > 0, RETURN_SUCCESS);
+    S_R_FALSE(len > 0, RETURN_SUCCESS);
 
     /*  source*  len = 6 */
     /*  0123456  */
@@ -1146,7 +1149,7 @@ ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index)
 
     *index = -1;
     size_t len = strlen(target);
-    R_FALSE_RET(len > 0, RETURN_SUCCESS);
+    S_R_FALSE(len > 0, RETURN_SUCCESS);
     
     const _S8 *temp = source + strlen(source) - len;
     
@@ -1171,7 +1174,7 @@ ENUM_RETURN s_strend(const _S8 *source, const _S8 *target, ENUM_BOOLEAN *whether
 
     size_t len_t = strlen(target);
     *whether_target_occur = BOOLEAN_FALSE;
-    R_FALSE_RET(len_t > 0, RETURN_SUCCESS);
+    S_R_FALSE(len_t > 0, RETURN_SUCCESS);
 
     size_t len_s = strlen(source);
     
@@ -1204,7 +1207,7 @@ ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
     {
         if(*source != ' ')
         {
-            OUTPUT_STR(*source, dest, len);
+            OUTPUT_C(*source, dest, len);
             if(*source == '\n' || *source == '\t')
             {
                 offset = 0;
@@ -1226,13 +1229,13 @@ ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
 
             if(j <= k)
             {
-                OUTPUT_STR('\t', dest, len);
+                OUTPUT_C('\t', dest, len);
                 offset = 0;
                 source += j;
             }
             else if(*(source + k) == '\t')
             {
-                OUTPUT_STR('\t', dest, len);
+                OUTPUT_C('\t', dest, len);
                 offset = 0;
                 source += (k + 1);
             }
@@ -1240,7 +1243,7 @@ ENUM_RETURN s_entab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
             {
                 for(_S32 l = 0; l < k; l++)
                 {
-                    OUTPUT_STR(*source, dest, len);
+                    OUTPUT_C(*source, dest, len);
                     offset++;
                     source++;
                 }
@@ -1266,7 +1269,7 @@ ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
     {
         if(*source != '\t')
         {
-            OUTPUT_STR(*source, dest, len);
+            OUTPUT_C(*source, dest, len);
             (*source == '\n')?(offset = 0):(offset++);
         }
         else
@@ -1274,7 +1277,7 @@ ENUM_RETURN s_detab(const _S8 *source, _S8 *dest, size_t len, _S32 tab_stop)
             j = cal_space_number(offset, tab_stop);
             for(_S32 k = 0; k < j; k++)
             {
-                OUTPUT_STR(' ', dest, len);
+                OUTPUT_C(' ', dest, len);
                 
             }
             offset = 0;
@@ -1505,13 +1508,13 @@ PRIVATE ENUM_RETURN build_text_table_format(STRU_TEXT_TABLE_ELEMENT* text_table_
     _S8 *format_temp = text_table_element->format;
     size_t format_len = MAX_TEXT_TABLE_ELEMENT_FORMAT_LEN;
 
-    OUTPUT_STR_MULTI(' ', format.margin_left, format_temp, format_len);
+    OUTPUT_C_MULTI(' ', format.margin_left, format_temp, format_len);
 
     sprintf(format_string, "%%%s%zds", format.align_left?"-":"", fold_len);
 
-    OUTPUT_STRN(format_temp, format_len, format_string, strlen(format_string));
+    OUTPUT_STR(format_temp, format_len, format_string, strlen(format_string));
 
-    OUTPUT_STR_MULTI(' ', format.margin_right, format_temp, format_len);
+    OUTPUT_C_MULTI(' ', format.margin_right, format_temp, format_len);
 
     OUTPUT_END(format_temp, format_len);
 
@@ -1631,6 +1634,56 @@ ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, S
 
     FREE(print_table_text_elements);
 
+    return RETURN_SUCCESS;
+}
+_UL s_get_inode_by_filename(const _S8 *p_filename)
+{
+    S_R_ASSERT(p_filename != NULL, SL_INVALID);
+    struct stat *buf=NULL;
+    buf=(struct stat *)malloc(sizeof(struct stat));
+    S_R_ASSERT(buf != NULL, SL_INVALID);
+    
+    stat(p_filename,buf);
+    
+    _UL inode = buf->st_ino;
+    FREE(buf);
+
+    return inode;
+}
+
+ENUM_RETURN s_save_file_to_text_buffer(
+    FILE *pfr, 
+    _S8 **pp_text_buffer, 
+    size_t *p_buffer_size)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(pp_text_buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(p_buffer_size != NULL, RETURN_FAILURE);
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    
+    /* 获取文件大小 */  
+    ret_val = fseek (pfr , 0 , SEEK_END);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    _SL file_size = ftell (pfr);
+	R_ASSERT(file_size != -1, RETURN_FAILURE);
+
+	DEBUG_PRINT("file size = %ld\n", file_size);
+	
+	*p_buffer_size = file_size + 2;
+
+    *pp_text_buffer = (_S8 *)malloc(*p_buffer_size);
+    R_ASSERT(*pp_text_buffer != NULL, RETURN_FAILURE);
+
+    ret_val = fseek (pfr , 0 , SEEK_SET);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    size_t len = fread (*pp_text_buffer,1,*p_buffer_size,pfr);
+    R_ASSERT(len + 2 == *p_buffer_size, RETURN_FAILURE);
+
+	/* append newline at the end of file */
+	(*pp_text_buffer)[len] = '\n';
+	(*pp_text_buffer)[len + 1] = '\0';
     return RETURN_SUCCESS;
 }
 

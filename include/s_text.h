@@ -6,6 +6,7 @@
 #include "s_defines.h"
 #include "s_type.h"
 
+#define INVALID_CHAR (-1)
 //将一个字母转换为大写
 #define UPPERCASE( c ) ( ((c) >= 'a' && (c) <= 'z') ? ((c) - 0x20) : (c) )
 #define LOWERCASE( c ) ( ((c) >= 'A' && (c) <= 'Z') ? ((c) + 0x20) : (c) )
@@ -24,55 +25,45 @@
 #define CONC_(x, y) x##_##y
 
 /* c can not be '\0', if you output '\0', please use OUTPUT_END */
-#define OUTPUT_STR(c, dest, size)\
+#define OUTPUT_C(c, dest, size)\
     do{\
-        _S32 ___c_ = c;\
-        if(size > 1)\
-        {\
-            *dest++ = ___c_;\
-            size--;\
-        }else\
-        {\
-            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
-        }\
+        _S8 ___c_ = (c);\
+        S_ASSERT_LOG_DO((size) > 1, break, "buffer '"#dest"''s size(%zd) is not enough!", (size));\
+        *(dest)++ = ___c_;\
+        (size)--;\
     }while(0);
 
 #define OUTPUT_END(dest, size)\
     do{\
-        if(size > 0)\
-        {\
-            *dest++ = '\0';\
-            size--;\
-        }else\
-        {\
-            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
-        }\
+		S_ASSERT_LOG_DO((size) > 0, break, "buffer '"#dest"''s size(%zd) is not enough!", (size));\
+        *(dest)++ = '\0';\
+        (size)--;\
     }while(0);
 
-#define OUTPUT_STR_RANGE(begin, end, dest, size) \
+#define OUTPUT_C_RANGE(begin, end, dest, size) \
     do{\
-        _S32 ___b = begin, ___e = end;\
+        _S8 ___b = (begin), ___e = (end);\
         if(___b != '\0' && ___e != '\0')\
         {\
-            for(_S32 ___c = ___b; ___c <= ___e; ___c++)\
+            for(_S8 ___c = ___b; ___c <= ___e; ___c++)\
             {\
-                OUTPUT_STR(___c, dest, size);\
+                OUTPUT_C(___c, (dest), (size));\
             }\
         }\
     }while(0);
 
-#define OUTPUT_STR_MULTI(c, num, dest, size) \
+#define OUTPUT_C_MULTI(c, num, dest, size) \
     do{\
-        _S32 ___c = c;\
-        for(_S32 i = 0; i < num; i++)\
+        _S8 ___c = (c);\
+        for(_S8 i = 0; i < (num); i++)\
         {\
-            OUTPUT_STR(___c, dest, size);\
+            OUTPUT_C(___c, (dest), (size));\
         }\
     }while(0);
 
-#define OUTPUT_STRN_F(fpw, fpr, target_len)\
+#define OUTPUT_STR_F(fpw, fpr, len)\
     do{\
-        _S32 ___c;size_t ___len = target_len;\
+        _S8 ___c;size_t ___len = (len);\
         while(___len-- > 0)\
         {;\
             ___c = fgetc(fpr);\
@@ -80,17 +71,12 @@
         };\
     }while(0);
 
-#define OUTPUT_STRN(dest, size, target, target_len)\
+#define OUTPUT_STR(dest, size, target, target_len)\
     do{\
-        if(size > target_len)\
-        {\
-            memcpy(dest, target, target_len);\
-            dest += target_len;\
-            size -= target_len;\
-        }else\
-        {\
-            S_ASSERT("buffer '"#dest"''s size(%zd) is not enough!", size);\
-        }\
+		S_ASSERT_LOG_DO((size) > (target_len), break, "buffer '"#dest"''s size(%zd) is not enough!", (size));\
+        memcpy((dest), (target), (target_len));\
+        (dest) += (target_len);\
+        (size) -= (target_len);\
     }while(0);
 
 typedef struct TAG_STRU_TABLE_TEXT_FORMAT
@@ -143,7 +129,7 @@ ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word
 ENUM_RETURN s_get_word_s(const _S8 **source, _S8 *word_buf, size_t buf_size, size_t *word_len);
 
 
-/* read a line into buffer, return length(not include '\0'), fp point to next line or EOF */
+/* read a line into buffer(include '\n'), return length(not include '\0'), fp point to next line or EOF */
 ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length);
 
 /* read a line into buffer, return length(not include '\0'), source point to next line or '\0' */
@@ -312,6 +298,13 @@ _S32 numcmp_r(const _S8 * s1, const _S8 * s2);
 
 
 ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[]);
+
+_UL s_get_inode_by_filename(const _S8 *p_filename);
+
+ENUM_RETURN s_save_file_to_text_buffer(
+    FILE *pfr, 
+    _S8 **pp_text_buffer, 
+    size_t *p_buffer_size);
 
 __END_C_DECLS
 

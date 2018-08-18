@@ -1,0 +1,33 @@
+2.[断行连接]
+1.每个源文件都会在末尾添加换行符,若文件末尾是backslashnewline，将产生一个告警
+2.每个紧跟一换行符的反斜线字符(/,backslash),连同后跟的换行符一起被删除,以将物理上的源代码行接合起来,形成逻辑上的源代码行,在任何物理源代码行中,只有最后一个反斜线字符,用作这种接合才符合条件,在/和换行符之间的空白字符将产生告警
+3.在2的换行符转换之后的字符序列中不能存在\,若存在\将产生一个错误
+3.[处理注释和空白]
+4.一个源文件不应以某个预处理记号的一部分﹑或某个注释的一部分结束.将产生一个错误
+5.每个注释被一个空格符所替换
+6.换行符仍保留
+s_cproc_stm.c:429:4: error: stray ‘\’ in program
+    STAY;
+    ^
+对于continued newline只进行一次去除处理，去除之后，前面的\和相邻的newline不进行处理
+
+ #define str(s)      # s
+    #define xstr(s)     str(s)
+    #define debug(s, t) printf("x" # s "= %d, x" # t "= %s", /
+                        x ## s, x ## t)
+    #define INCFILE(n)  vers ## n // 来自前面#include的例子[见P150例2]
+    #define glue(a, b)  a ## b
+    #define xglue(a, b) glue(a, b)
+    #define HIGHLOW "hello"
+    #define LOW     LOW ", world"
+    debug(1, 2);
+    printf("x" # "1" "= %d, x" # "2" "= %s", x1, x2)
+    fputs(str(strncmp("abc/0d", "abc", '/4') 
+        == 0) str(: @/n), s); ⑦
+    fputs("strncmp(\"abc\\0d\", \"abc\", '\\4') == 0" ": @\n", s); ⑦
+    #include xstr(INCFILE(2).h) ⑧
+    #include "vers2.h" ⑧
+    glue(HIGH, LOW); ⑨
+    "hello"
+    xglue(HIGH, LOW) ⑩
+    "hello" ", world"⑩

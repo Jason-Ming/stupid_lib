@@ -73,9 +73,9 @@ PRIVATE ENUM_BOOLEAN whether_error_code_is_valid(int code)
 
 PRIVATE ENUM_BOOLEAN whether_error_has_been_registered(int code)
 {
-    R_FALSE_RET(whether_error_code_is_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
+    S_R_FALSE(whether_error_code_is_valid(code) == BOOLEAN_TRUE, BOOLEAN_FALSE);
     
-    R_FALSE_RET(error_info_array[code].code != INVALID_ERROR_CODE, BOOLEAN_FALSE);
+    S_R_FALSE(error_info_array[code].code != INVALID_ERROR_CODE, BOOLEAN_FALSE);
 
     return BOOLEAN_TRUE;
 }
@@ -121,7 +121,7 @@ PRIVATE ENUM_BOOLEAN whether_error_needs_additional_info(int code)
 
 PRIVATE void debug_print_generated_error(STRU_GENERATED_ERROR_INFO *p)
 {
-    R_LOG("code: %d, info: %s, additional_info: %s", p->code, get_error_info(p->code), p->additional_info);
+    S_LOG("code: %d, info: %s, additional_info: %s", p->code, get_error_info(p->code), p->additional_info);
 }
 
 _VOID debug_print_errors(_VOID)
@@ -249,7 +249,7 @@ PRIVATE ENUM_RETURN register_error_info(int code, const char * info, ENUM_BOOLEA
     R_ASSERT_LOG(whether_error_has_been_registered(code) == BOOLEAN_FALSE, RETURN_FAILURE,
         "the error code: %d is already registered", code);
 
-    R_LOG("code: %d, info: %s, need_additional_info: %d, tip: %d", code, info, need_additional_info, tip);
+    S_LOG("code: %d, info: %s, need_additional_info: %d, tip: %d", code, info, need_additional_info, tip);
     
     error_info_array[code].code = code;
     error_info_array[code].info = info;

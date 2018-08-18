@@ -84,12 +84,13 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_conc()
     if(c == '-')
     {
         //原样输出
-        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C(c, s_expand_run_data.dest, s_expand_run_data.size);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
         set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
-        R_RET_LOG(RETURN_FAILURE, "unexpected char: %c", c);
+        S_LOG("unexpected char: %c", c);
+		return RETURN_FAILURE;
     }
     else
     {
@@ -116,11 +117,12 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_begin()
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
         set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
-        R_RET_LOG(RETURN_FAILURE, "unexpected char: %c", c);
+        S_LOG("unexpected char: %c", c);
+		return RETURN_FAILURE;
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         begin = end = c;
     }
     
@@ -138,25 +140,26 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_to()
 
     if(c == '-')
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         
         //原样输出
-        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
-        OUTPUT_STR(c, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C(c, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C(c, s_expand_run_data.dest, s_expand_run_data.size);
         set_current_stm_state(s_expand_stm, EXPAND_STATE_CONC);
     }
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
         set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
-        R_RET_LOG(RETURN_FAILURE, "unexpected char: %c", c);
+        S_LOG("unexpected char: %c", c);
+		return RETURN_FAILURE;
     }
     else
     {
         //与之前的begin不形成递增
         if(s_range(end, c) == BOOLEAN_FALSE)
         {
-            OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
-            OUTPUT_STR('-', s_expand_run_data.dest, s_expand_run_data.size);
+            OUTPUT_C_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+            OUTPUT_C('-', s_expand_run_data.dest, s_expand_run_data.size);
             begin = end = c;
             set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
         }
@@ -187,11 +190,12 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_range_end()
     else if(!isdigit(c) && !isupper(c) && !(islower(c))) /* -1-2a-z---B*/
     {
         set_current_stm_state(s_expand_stm, EXPAND_STATE_END);
-        R_RET_LOG(RETURN_FAILURE, "unexpected char: %c", c);
+        S_LOG("unexpected char: %c", c);
+		return RETURN_FAILURE;
     }
     else
     {
-        OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
         begin = end = c;
         set_current_stm_state(s_expand_stm, EXPAND_STATE_RANGE_BEGIN);
     }
@@ -209,11 +213,11 @@ PRIVATE ENUM_RETURN s_expand_stm_state_proc_end()
     ENUM_EXPAND_STATE state = get_last_stm_state(s_expand_stm);
 
 
-    OUTPUT_STR_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
+    OUTPUT_C_RANGE(begin, end, s_expand_run_data.dest, s_expand_run_data.size);
     
     if(state == EXPAND_STATE_RANGE_TO)
     {
-        OUTPUT_STR('-', s_expand_run_data.dest, s_expand_run_data.size);
+        OUTPUT_C('-', s_expand_run_data.dest, s_expand_run_data.size);
     }
     
     *(s_expand_run_data.dest)++ = '\0';

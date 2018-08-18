@@ -461,7 +461,7 @@ ENUM_RETURN s_calc_rp(const _S8 *str, _SD *result)
     {
         ERROR_PRINT("Expression error!\n"); 
         SET_VAR_VALUE(*result, DOUBLE_NAN_PLUS);
-        R_LOG("s_calc_rp_do failed!");
+        S_LOG("s_calc_rp_do failed!");
     }
 
     ret_val = s_calc_rp_clear();

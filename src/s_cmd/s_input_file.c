@@ -20,7 +20,7 @@ PRIVATE char* input_files[MAX_NUM_OF_INPUT_FILES] = {NULL};
 PRIVATE ENUM_RETURN add_input_file(const char *file)
 {
     R_ASSERT(file != NULL, RETURN_FAILURE);
-    R_LOG("add file: %s", file);
+    S_LOG("add file: %s", file);
     
     input_files[num_of_input_files] = malloc(strlen(file) + 1);
     R_ASSERT(input_files[num_of_input_files] != NULL, RETURN_FAILURE);
@@ -47,11 +47,11 @@ ENUM_RETURN parse_input_files(int argc, char **argv)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
     /* do noting when there is any error */
-    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS,"");
+    S_R_FALSE_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS,"");
  
     while(i < argc)
     {
-        R_LOG("i = %d, argv = %s", i, argv[i]);
+        S_LOG("i = %d, argv = %s", i, argv[i]);
    
         /* if an option occured, break */
         if(whether_string_is_in_option_format(argv[i]) == BOOLEAN_TRUE)

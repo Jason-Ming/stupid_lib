@@ -39,66 +39,63 @@ char* log_getfn(void);
 
 #ifdef DEBUG_SWITCH
 #define DEBUG_PRINT(fmt, args...)\
-    LOG_PRINT(LIGHT_GRAY"[%s] [file: %s, line: %ld] [function: %s]\n   debuginfo: "fmt""NONE"\n", \
+    LOG_PRINT(LIGHT_GRAY"[%s] [file: %s, line: %ld] [function: %s]\n"NONE"   debuginfo: "fmt""NONE"\n", \
         get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__, ##args);
 #else
 #define DEBUG_PRINT(fmt, args...)
 #endif
 
 //不能用编译时间，蠢货!
-#define R_LOG(fmt, args...)\
-        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            fmt"\n"NONE,\
-            get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-            ##args);\
+#define S_LOG(fmt, args...)\
+	LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+		fmt"\n"NONE,\
+		get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+		##args);\
 
-#define R_RET_LOG(value, fmt, args...)\
-    do{\
-            LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-                fmt"\n"NONE,\
-                get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-            ##args);\
-                return value;}while(0);
+#define S_FALSE_LOG(condition, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"FALSE("#condition")!, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+        ##args);\
+	}
+#define S_FALSE_DO(condition, action)\
+	if(!(condition))\
+	{\
+		action;\
+	}
 
-#define R_FALSE_LOG(condition, fmt, args...)\
-    if(!(condition))\
-    {\
-        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, "fmt"\n"NONE,\
-            get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-            ##args);\
-    }
+#define S_FALSE_LOG_DO(condition, action, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"FALSE("#condition")!, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+        ##args);\
+		action;\
+	}
 
-#define R_FALSE_DO_LOG(condition, action, fmt, args...)\
-    if(!(condition))\
-    {\
-        LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "FALSE("#condition")!, "fmt"\n"NONE,\
-            get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-            ##args);\
-        action;\
-    }
-
-#define V_FALSE_RET(condition)\
+#define S_V_FALSE(condition)\
     if(!(condition))\
     {\
         return;\
     }
 
-#define R_FALSE_RET(condition, value)\
+#define S_R_FALSE(condition, value)\
     if(!(condition))\
     {\
         return value;\
     }
 
-#define R_FALSE_RET_DO(condition, value, action)\
+#define S_R_FALSE_DO(condition, value, action)\
     if(!(condition))\
     {\
         action;\
         return value;\
     }
 
-#define R_FALSE_RET_LOG(condition, value, fmt, args...)\
+#define S_R_FALSE_LOG(condition, value, fmt, args...)\
     if(!(condition))\
     {\
         LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
@@ -108,7 +105,7 @@ char* log_getfn(void);
         return value;\
     }
     
-#define R_FALSE_RET_DO_LOG(condition, value, action, fmt, args...)\
+#define S_R_FALSE_LOG_DO(condition, value, action, fmt, args...)\
     if(!(condition))\
     {\
         LOG_PRINT(GREEN"[%s] [file: %s, line: %ld] [function: %s]\n   "\
@@ -119,26 +116,140 @@ char* log_getfn(void);
         return value;\
     }
 
-#define S_ASSERT(fmt, args...)\
-    LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-        "ASSERT! "fmt"\n"NONE,\
-        get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-        ##args);
-
-#define V_ASSERT(condition)\
+#define S_ASSERT(condition)\
     if(!(condition))\
     {\
         LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
             "ASSERT("#condition")!\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
-        return;\
     }
+
+#define S_ASSERT_DO(condition, action)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
+		action;\
+	}
+
+#define S_ASSERT_LOG(condition, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")! "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			##args);\
+	}
+
+
+#define S_ASSERT_LOG_DO(condition, action, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")! "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			##args);\
+		action;\
+	}
+
+#define S_V_ASSERT(condition)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
+		return;\
+	}
+
+#define S_V_ASSERT_DO(condition, action)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld.\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value);\
+		action;\
+		return;\
+	}
+
+#define S_V_ASSERT_LOG(condition, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value, ##args);\
+		return;\
+	}
+
+#define S_V_ASSERT_LOG_DO(condition, action, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value, ##args);\
+		action;\
+		return;\
+	}
+
+#define S_R_ASSERT(condition, value)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT(" # condition")!, return  = %ld.\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value);\
+		return value;\
+	}
+
+#define S_R_ASSERT_DO(condition, value, action)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld.\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value);\
+		action;\
+		return value;\
+	}
+
+#define S_R_ASSERT_LOG(condition, value, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value, ##args);\
+		return value;\
+	}
+
+#define S_R_ASSERT_LOG_DO(condition, value, action, fmt, args...)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
+			(_SL)value, ##args);\
+		action;\
+		return value;\
+	}
+
+#define V_ASSERT(condition)\
+	if(!(condition))\
+	{\
+		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
+			"ASSERT("#condition")!\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
+		return;\
+	}
 
 #define R_ASSERT(condition, value)\
     if(!(condition))\
     {\
         LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-            "ASSERT("#condition")!, return  = %ld.\n"NONE,\
+            "ASSERT(" # condition")!, return  = %ld.\n"NONE,\
             get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
             (_SL)value);\
         return value;\

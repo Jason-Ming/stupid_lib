@@ -190,7 +190,7 @@ ENUM_RETURN register_subcmd(
 
     R_ASSERT(whether_subcmd_has_been_registered(subcmd_name) == BOOLEAN_FALSE, RETURN_FAILURE);
 
-    R_LOG("%s = %s, %s = %p, %s = %s\n", 
+    S_LOG("%s = %s, %s = %p, %s = %s\n", 
         "subcmd", subcmd_name,
         "handler", handler,
         "help_info", help_info);
@@ -237,7 +237,7 @@ ENUM_RETURN add_a_new_option_cb_to_subcmd_cb(STRU_OPTION_CONTROL_BLOCK *p_new)
 
 ENUM_BOOLEAN whether_subcmd_has_been_registered(const char *subcmd_name)
 {
-    R_FALSE_RET_LOG(subcmd_name != NULL, BOOLEAN_FALSE, "subcmd_name: %s", subcmd_name);
+    S_R_FALSE_LOG(subcmd_name != NULL, BOOLEAN_FALSE, "subcmd_name: %s", subcmd_name);
     
     return (get_subcmd_cb_by_name(subcmd_name) != NULL)? BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
@@ -255,7 +255,7 @@ PRIVATE ENUM_RETURN set_current_running_subcmd(const char *subcmd_name)
 
 PRIVATE STRU_SUBCMD_CONTROL_BLOCK *get_current_running_subcmd_cb(void)
 {
-    R_FALSE_RET(p_current_running_subcmd_cb != NULL, NULL);
+    S_R_FALSE(p_current_running_subcmd_cb != NULL, NULL);
     
     R_ASSERT(p_current_running_subcmd_cb->is_running == BOOLEAN_TRUE, NULL);
     
@@ -345,9 +345,9 @@ PRIVATE ENUM_RETURN parse_subcmds_do(int argc, char **argv)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     int i = get_argv_indicator();
 
-    R_FALSE_RET_LOG(i < argc, RETURN_SUCCESS, "i = %d, argc = %d", i, argc);
+    S_R_FALSE_LOG(i < argc, RETURN_SUCCESS, "i = %d, argc = %d", i, argc);
 
-    R_LOG("i = %d, argv = %s", i, argv[i]);
+    S_LOG("i = %d, argv = %s", i, argv[i]);
     
     /* 当前subcmd未在控制块中注册过则停止处理 */
     if(whether_subcmd_has_been_registered(argv[i]) == BOOLEAN_FALSE)
@@ -399,9 +399,9 @@ ENUM_RETURN process_subcmds(void)
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
     /* do noting when there is any error */
-    R_FALSE_RET_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS, "");
+    S_R_FALSE_LOG(BOOLEAN_FALSE == whether_any_error_exists(), RETURN_SUCCESS, "");
 
-    R_FALSE_RET_LOG(whether_option_h_has_been_processed() == BOOLEAN_FALSE, 
+    S_R_FALSE_LOG(whether_option_h_has_been_processed() == BOOLEAN_FALSE, 
         RETURN_SUCCESS, 
         "option -h is processed, return!\n");
 
@@ -413,7 +413,7 @@ ENUM_RETURN process_subcmds(void)
         ret_val = generate_system_error(ERROR_CODE_SUBCMD_PROC_FAIL, NULL);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         
-        R_LOG("subcmd [%s] handler process failed!\n", p->subcmd);
+        S_LOG("subcmd [%s] handler process failed!\n", p->subcmd);
     }
 
     return RETURN_SUCCESS;

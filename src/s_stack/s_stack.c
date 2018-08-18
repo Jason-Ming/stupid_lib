@@ -194,7 +194,7 @@ ENUM_RETURN stack_clear(STACK p_stack)
 {
     R_ASSERT(p_stack != NULL, RETURN_FAILURE);
     STRU_STACK *p_stack_temp = (STRU_STACK*)p_stack;
-    R_FALSE_RET(p_stack_temp->data_count > 0, RETURN_SUCCESS);
+    S_R_FALSE(p_stack_temp->data_count > 0, RETURN_SUCCESS);
 
     R_ASSERT(p_stack_temp->p_data_list_head != NULL, RETURN_FAILURE);
     STRU_STACK_DATA *p_head, *p_temp;
