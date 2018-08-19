@@ -1,5 +1,6 @@
 #ifndef __S_LIST_H__
 #define __S_LIST_H__
+#include <string.h>
 #include <s_clinkage.h>
 #include <s_type.h>
 #include <s_defines.h>
@@ -90,43 +91,39 @@ static inline int list_empty(const struct list_head *head)
 }
 
 // 获得结构体(TYPE)的变量成员(MEMBER)在此结构体中的偏移量。
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define s_offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 // 根据"结构体(type)变量"中的"域成员变量(member)的指针(ptr)"
 //来获取指向整个结构体变量的指针
 #define container_of(ptr, type, member) ({          \
     const __typeof( ((type *)0)->member ) *__mptr = (ptr);    \
-    (type *)( (char *)__mptr - offsetof(type,member) );})
+    (type *)( (char *)__mptr - s_offsetof(type,member) );})
 
 // 遍历双向链表
-#define list_for_each(pos, head) \
+#define list_for_each_all(pos, head) \
     for (pos = (head)->next; pos != (head); pos = pos->next)
 
-#define list_for_each_safe(pos, n, head) \
+#define list_for_each_all_reverse(pos, head) \
+            for (pos = (head)->prev; pos != (head); pos = pos->prev)
+
+#define list_for_each(pos, head, start, end) \
+        for (pos = ((start) == (head))?((start)->next):(start);\
+            pos != (((end) == (head))?(head):(end)->next); pos = (pos)->next)
+
+#define list_for_each_reverse(pos, head, start, end) \
+            for (pos = ((end) == (head))?((end)->prev):(end); \
+                pos != (((start) == (head))?(head):(start)->prev); pos = pos->prev)
+
+#define list_for_each_all_safe(pos, n, head) \
     for (pos = (head)->next, n = pos->next; pos != (head); \
         pos = n, n = pos->next)
 
+#define list_for_each_all_safe_reverse(pos, p, head) \
+        for (pos = (head)->prev, p = pos->prev; pos != (head); \
+            pos = p, p = pos->prev)
+
 #define list_entry(ptr, type, member) \
     container_of(ptr, type, member)
-
-#endif
-#if 0
-
-
-__BEGIN_C_DECLS
-
-ENUM_RETURN s_list_create(
-    LIST *p_list, 
-    FUNC_LIST_NODE_COMPARE compare_handler,
-    FUNC_LIST_NODE_FREE free_handler);
-ENUM_RETURN s_list_delete(LIST *p_list);
-ENUM_RETURN s_list_add_node_to_list(LIST list, NODE add_after, NODE new);
-ENUM_RETURN s_list_delete_node_from_list(LIST list, NODE delete_after);
-NODE s_list_get_node_by_key(LIST list, KEY key);
-NODE s_list_get_head(LIST list);
-NODE s_list_get_tail(LIST list);
-
-__END_C_DECLS
 
 #endif
 

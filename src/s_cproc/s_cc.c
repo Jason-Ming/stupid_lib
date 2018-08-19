@@ -52,6 +52,9 @@
 #include "s_cdcl.h"
 #include "s_cc.h"
 #include "s_cproc_macro.h"
+#include "s_cproc_text.h"
+#include "s_cproc_token.h"
+
 
 ENUM_RETURN s_cget_statement(_S8 ** pp_text_buffer, _S8 statement_buffer[], size_t buffer_size, size_t *len)
 {
@@ -110,32 +113,40 @@ ENUM_RETURN s_cget_statement(_S8 ** pp_text_buffer, _S8 statement_buffer[], size
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cc(FILE * pfr, FILE * pfw)
+ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 {
-	R_ASSERT(pfr != NULL, RETURN_FAILURE);
+	R_ASSERT(file_name != NULL, RETURN_FAILURE);
 
 	ENUM_RETURN ret_val = RETURN_SUCCESS;
-    _S8 *p_text_buffer = NULL;
-    size_t text_buffer_size = 0;
 
-	STRU_C_TOKEN_NODE *p_token_list_head = NULL;
-	STRU_C_TOKEN_NODE *p_token_list_tail = NULL;
+    STACK stack = NULL;
+    ret_val = stack_create(&stack);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(stack != NULL, RETURN_FAILURE);
 
-    ret_val = s_cpp(pfr, &p_text_buffer, &text_buffer_size, &p_token_list_head, &p_token_list_tail);
+    s_cproc_text_list_init();
+    s_cproc_macro_list_init();
+    s_cproc_token_list_init();
+    
+    ret_val = s_cpp(file_name, stack);
     S_ASSERT(ret_val == RETURN_SUCCESS);
 
-	s_cpp_print(pfw, p_token_list_head, p_token_list_tail);
+    s_cproc_text_print_list_debug_info();
+    s_cproc_token_print_list_debug_info();
+    s_cproc_macro_print_list_debug_info();
 
-	ret_val = s_cdcl(p_text_buffer, p_token_list_head, p_token_list_tail);
+	s_cproc_token_print_list(pfw);
+
+    s_cproc_token_delete_blanks_and_newline();
+    s_cproc_token_print_list_debug_info();
+    
+	ret_val = s_cdcl();
     S_ASSERT(ret_val == RETURN_SUCCESS);
 
-	FREE(p_text_buffer);
-	
-	ret_val = release_token_list(&p_token_list_head, &p_token_list_tail);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+	s_cproc_text_release_list();
+    s_cproc_token_release_list();
+    s_cproc_macro_release_list();
 
-    ret_val = s_cproc_macro_release_list();
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 	return RETURN_SUCCESS;
 }
 

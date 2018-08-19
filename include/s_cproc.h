@@ -29,7 +29,7 @@ the text after transform of 1 is output to a file.
 if the file pointer is NULL, it will be output to a buffer which is allocated by this function. 
 if the buffer is NULL, it will be output to the standard IO.
 */
-ENUM_RETURN s_cc(FILE * pfr, FILE * pfw);
+ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw);
 
 __END_C_DECLS
 #endif

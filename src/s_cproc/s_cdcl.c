@@ -10,6 +10,7 @@
 
 #include "s_ctoken.h"
 #include "s_cpp.h"
+#include "s_cproc_token.h"
 #include "s_cdcl.h"
 
 struct TAG_STRU_DCL_VAR;
@@ -92,11 +93,11 @@ typedef struct TAG_STRU_DCL_VAR
 #define DCL_PRINT(fmt, args...)\
     printf(LIGHT_BLUE""fmt""NONE, ##args);
 
-#define DCL_DBG 0
+#define DCL_DBG 1
 #if DCL_DBG
 #define DCL_DBG_PRINT(head, tail)\
     printf("\n%s:\n", __FUNCTION__);\
-    print_token_list(head, tail);
+    s_ctoken_print_list(NULL, s_cproc_token_get_list_head(), head, tail);
 #else
 #define DCL_DBG_PRINT(head, tail)
 #endif
@@ -135,7 +136,7 @@ PRIVATE _VOID display_dcl_error(
     const _S8 *info)
 {
     printf(LIGHT_RED"Error: %s\n"NONE, info);
-    print_token_list(p_token_list_head, p_token_list_tail);
+    s_ctoken_print_list(NULL, s_cproc_token_get_list_head(), p_token_list_head, p_token_list_tail);
 };
 
 PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
@@ -159,11 +160,14 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
     *pp_direct_dcl_list_tail = NULL;
     ENUM_BOOLEAN has_direct_dcl_list = BOOLEAN_FALSE;
     
-    while(p_token_list_head != NULL)
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node;
+    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
     {
-        if(p_token_list_head->info.token_type == C_TOKEN_IDENTIFIER 
-            || p_token_list_head->info.token_type == C_TOKEN_PARENTHESIS_LEFT
-            || p_token_list_head->info.token_type == C_TOKEN_BRACKET_LEFT)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        if(p_token_list_node->info.token_type == C_TOKEN_IDENTIFIER 
+            || p_token_list_node->info.token_type == C_TOKEN_PARENTHESIS_LEFT
+            || p_token_list_node->info.token_type == C_TOKEN_BRACKET_LEFT)
         {
             has_direct_dcl_list = BOOLEAN_TRUE;
             break;
@@ -172,18 +176,11 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
         {
             if(*pp_prelist_head == NULL)
             {
-                *pp_prelist_head = p_token_list_head;
+                *pp_prelist_head = p_token_list_node;
             }
 
-            *pp_prelist_tail = p_token_list_head;
+            *pp_prelist_tail = p_token_list_node;
         }
-
-        if(p_token_list_head == p_token_list_tail)
-        {
-            break;
-        }
-        
-        p_token_list_head = p_token_list_head->next;
     };
 
     if(!has_direct_dcl_list)
@@ -219,9 +216,13 @@ PRIVATE ENUM_RETURN dcl_get_next_parameter(
     ENUM_BOOLEAN in_parenthesis = BOOLEAN_FALSE;
     ENUM_BOOLEAN find_comma = BOOLEAN_FALSE;
     
-    while(p_token_list_head != NULL)
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
     {
-        switch(p_token_list_head->info.token_type)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        switch(p_token_list_node->info.token_type)
         {
             case C_TOKEN_PARENTHESIS_LEFT:
             {
@@ -252,20 +253,13 @@ PRIVATE ENUM_RETURN dcl_get_next_parameter(
         {
             break;
         }
-        
-        if(p_token_list_head == p_token_list_tail)
-        {
-            break;
-        }
-        
-        p_token_list_head = p_token_list_head->next;
     }
 
-    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+    R_ASSERT(p_token_list_node != s_cproc_token_get_list_head(), RETURN_FAILURE);
 
     if(find_comma)
     {
-        *pp_parameter_tail = p_token_list_head->previous;
+        *pp_parameter_tail = list_entry(p_token_list_node->list.prev, STRU_C_TOKEN_NODE, list);
     }
     else
     {
@@ -299,13 +293,18 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
     
     ENUM_BOOLEAN stop_loop = BOOLEAN_FALSE;
     ENUM_BOOLEAN has_previous_type = BOOLEAN_FALSE;
-    while(p_token_loop_previous_type != NULL)
+
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+    list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_token_loop_previous_type->list)
     {
-        switch(p_token_loop_previous_type->info.token_type)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        switch(p_token_list_node->info.token_type)
         {
             case C_TOKEN_KEYWORD_TYPE:
             {
-                p_token_loop_previous_type->info.qualifier.is_const = BOOLEAN_TRUE;
+                p_token_list_node->info.qualifier.is_const = BOOLEAN_TRUE;
                 stop_loop = BOOLEAN_TRUE;
                 has_previous_type = BOOLEAN_TRUE;
                 break;
@@ -313,7 +312,7 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
 
             case C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY:
             {
-                p_token_loop_previous_type->info.qualifier.is_const = BOOLEAN_TRUE;
+                p_token_list_node->info.qualifier.is_const = BOOLEAN_TRUE;
                 stop_loop = BOOLEAN_TRUE;
                 has_previous_type = BOOLEAN_TRUE;
                 break;
@@ -332,12 +331,10 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
             }
         }
         
-        if(stop_loop || p_token_loop_previous_type == p_prelist_head)
+        if(stop_loop)
         {
             break;
         }
-
-        p_token_loop_previous_type = p_token_loop_previous_type->previous;
     }
 
     if(has_previous_type == BOOLEAN_TRUE)
@@ -349,13 +346,16 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
     /* find next type */
     stop_loop = BOOLEAN_FALSE;
     ENUM_BOOLEAN has_next_type = BOOLEAN_FALSE;
-    while(p_token_loop_next_type != NULL)
+
+    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_loop_next_type->list, &p_prelist_tail->list)
     {
-        switch(p_token_loop_next_type->info.token_type)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        switch(p_token_list_node->info.token_type)
         {
             case C_TOKEN_KEYWORD_TYPE:
             {
-                p_token_loop_next_type->info.qualifier.is_const = BOOLEAN_TRUE;
+                p_token_list_node->info.qualifier.is_const = BOOLEAN_TRUE;
                 stop_loop = BOOLEAN_TRUE;
                 has_next_type = BOOLEAN_TRUE;
                 break;
@@ -363,7 +363,7 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
 
             case C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY:
             {
-                p_token_loop_next_type->info.qualifier.is_const = BOOLEAN_TRUE;
+                p_token_list_node->info.qualifier.is_const = BOOLEAN_TRUE;
                 stop_loop = BOOLEAN_TRUE;
                 has_next_type = BOOLEAN_TRUE;
                 break;
@@ -382,12 +382,10 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
             }
         }
         
-        if(stop_loop || p_token_loop_next_type == p_prelist_tail)
+        if(stop_loop)
         {
             break;
         }
-
-        p_token_loop_next_type = p_token_loop_next_type->next;
     }
 
     if(has_next_type == BOOLEAN_TRUE)
@@ -399,37 +397,34 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
     return RETURN_SUCCESS;
 }
 PRIVATE ENUM_RETURN proc_type_qualifier(
-    STRU_C_TOKEN_NODE **pp_prelist_head,
-    STRU_C_TOKEN_NODE **pp_prelist_tail)
+    STRU_C_TOKEN_NODE *p_prelist_head,
+    STRU_C_TOKEN_NODE *p_prelist_tail)
 {
-    R_ASSERT(pp_prelist_head != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_prelist_tail != NULL, RETURN_FAILURE);
-    STRU_C_TOKEN_NODE *p_token_loop = *pp_prelist_head;
+    R_ASSERT(p_prelist_head != NULL, RETURN_FAILURE);
+    R_ASSERT(p_prelist_tail != NULL, RETURN_FAILURE);
+
     ENUM_RETURN ret_val;
     
     /* delete continuing const */
-    while(p_token_loop != NULL)
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_prelist_tail->list)
     {
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
         ENUM_BOOLEAN find_type = BOOLEAN_FALSE;
-        if(p_token_loop->info.token_type == C_TOKEN_KEYWORD_TYPE_QUALIFIER 
-            && (strcmp("const", p_token_loop->info.p_string) == 0))
+        if(p_token_list_node->info.token_type == C_TOKEN_KEYWORD_TYPE_QUALIFIER 
+            && (strcmp("const", p_token_list_node->info.p_string) == 0))
         {
-            ret_val = find_type_for_qualifier(p_token_loop, *pp_prelist_head, *pp_prelist_tail, &find_type);
+            ret_val = find_type_for_qualifier(p_token_list_node, p_prelist_head, p_prelist_tail, &find_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
             if(find_type == BOOLEAN_FALSE)
             {
-                display_dcl_error(*pp_prelist_head, *pp_prelist_tail, "missing type for qualifier");
+                display_dcl_error(p_prelist_head, p_prelist_tail, "missing type for qualifier");
                 return RETURN_FAILURE;
             }
         }
-
-        if(p_token_loop == *pp_prelist_tail)
-        {
-            break;
-        }
-        
-        p_token_loop = p_token_loop->next;
     };
     
     return RETURN_SUCCESS;
@@ -443,24 +438,28 @@ PRIVATE ENUM_RETURN proc_prelist(
     DCL_DBG_PRINT(p_prelist_head, p_prelist_tail);
     R_ASSERT(need_type != NULL, RETURN_FAILURE);
 
-    S_R_FALSE(p_prelist_head != NULL, RETURN_SUCCESS);
+    S_R_FALSE(p_prelist_head != s_cproc_token_get_list_head(), RETURN_SUCCESS);
 
-    ENUM_RETURN ret_val = proc_type_qualifier(&p_prelist_head, &p_prelist_tail);
+    ENUM_RETURN ret_val = proc_type_qualifier(p_prelist_head, p_prelist_tail);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    while(p_prelist_tail != NULL)
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+    list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_prelist_tail->list)
     {
-        switch(p_prelist_tail->info.token_type)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        switch(p_token_list_node->info.token_type)
         {
             case C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY:
             {   
-                DCL_PRINT("a %spointer to ", p_prelist_tail->info.qualifier.is_const?"const ":"");
+                DCL_PRINT("a %spointer to ", p_token_list_node->info.qualifier.is_const?"const ":"");
                 *need_type = BOOLEAN_TRUE;
                 break;
             }
             case C_TOKEN_KEYWORD_TYPE:
             {
-                DCL_PRINT("%stype-'%s'", p_prelist_tail->info.qualifier.is_const?"const ":"", p_prelist_tail->info.p_string);
+                DCL_PRINT("%stype-'%s'", p_token_list_node->info.qualifier.is_const?"const ":"", p_token_list_node->info.p_string);
                 *need_type = BOOLEAN_FALSE;
                 break;
             }
@@ -470,17 +469,10 @@ PRIVATE ENUM_RETURN proc_prelist(
             }
             default:
             {
-                display_dcl_error(p_prelist_head, p_prelist_tail, "");
+                display_dcl_error(p_prelist_head, p_token_list_node, "");
                 return RETURN_FAILURE;
             }
         }
-
-        if(p_prelist_tail == p_prelist_head)
-        {
-            break;
-        }
-
-        p_prelist_tail = p_prelist_tail->previous;
     }
 
     return RETURN_SUCCESS;
@@ -506,10 +498,11 @@ PRIVATE ENUM_RETURN proc_function_parameters(
     DCL_PRINT("a function(");
     *need_type = BOOLEAN_FALSE;
 
-    if(p_token_list_head->next != p_token_list_tail)
+    if(p_token_list_head->list.next != &p_token_list_tail->list)
     {
-        p_token_list_head_temp = p_token_list_head->next;
-        p_token_list_tail_temp = p_token_list_tail->previous;
+        p_token_list_head_temp = list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE, list);
+        p_token_list_tail_temp = list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE, list);
+
         while(RETURN_SUCCESS == dcl_get_next_parameter(p_token_list_head_temp, p_token_list_tail_temp, &p_token_list_head_parameter, &p_token_list_tail_parameter))
         {
             ret_val = proc_dcl_list(p_token_list_head_parameter, p_token_list_tail_parameter, BOOLEAN_TRUE, need_type);
@@ -520,15 +513,15 @@ PRIVATE ENUM_RETURN proc_function_parameters(
                 break;
             }
 
-            if(p_token_list_tail_parameter->next == NULL 
-                || p_token_list_tail_parameter->next->next == NULL)
+            if(p_token_list_tail_parameter->list.next == &s_cproc_token_get_list_head()->list 
+                || p_token_list_tail_parameter->list.next->next == &s_cproc_token_get_list_head()->list)
             {
                 display_dcl_error(p_token_list_tail_parameter, p_token_list_tail, "function premeter error");
                 return RETURN_FAILURE;
             }
             
-            p_token_list_head_temp = p_token_list_tail_parameter->next->next;
-            p_token_list_tail_temp = p_token_list_tail->previous;
+            p_token_list_head_temp = list_entry(p_token_list_tail_parameter->list.next->next, STRU_C_TOKEN_NODE, list);
+            p_token_list_tail_temp = list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE, list);
         }
     }
     else
@@ -552,17 +545,20 @@ PRIVATE ENUM_RETURN proc_array_size(
     R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
     R_ASSERT(need_type != NULL, RETURN_FAILURE);
     
-    STRU_C_TOKEN_NODE *p_token_list_head_temp = p_token_list_head;
-
     _S32 size = 0;
     ENUM_RETURN ret_val;
     _S32 parenthesis_level = 0;
 
     DCL_PRINT("a array");
     *need_type = BOOLEAN_FALSE;
-    while(p_token_list_head_temp != NULL)
+
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
     {
-        switch(p_token_list_head_temp->info.token_type)
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        switch(p_token_list_node->info.token_type)
         {
             case C_TOKEN_BRACKET_LEFT:
             {
@@ -596,7 +592,7 @@ PRIVATE ENUM_RETURN proc_array_size(
                     return RETURN_FAILURE;
                 }
 
-                ret_val = s_strtos32(p_token_list_head_temp->info.p_string, &size);
+                ret_val = s_strtos32(p_token_list_node->info.p_string, &size);
                 if(ret_val == RETURN_FAILURE)
                 {
                     display_dcl_error(p_token_list_head, p_token_list_tail, "array size is not a number");
@@ -613,12 +609,6 @@ PRIVATE ENUM_RETURN proc_array_size(
                 return RETURN_FAILURE;
             }
         }
-        
-        if(p_token_list_head_temp == p_token_list_tail)
-        {
-            break;
-        }
-        p_token_list_head_temp = p_token_list_head_temp->next;
     }
     
     DCL_PRINT(" of ");
@@ -633,11 +623,15 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     ENUM_BOOLEAN in_function_parameters,
     ENUM_BOOLEAN *need_type)
 {
+    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+    R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
+    
     DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
 
     ENUM_RETURN ret_val;
 
-    if(p_token_list_head == NULL && p_token_list_tail == NULL)
+    if(p_token_list_head == s_cproc_token_get_list_head() 
+        && p_token_list_tail == s_cproc_token_get_list_head())
     {
         if(in_function_parameters)
         {
@@ -652,13 +646,18 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         }
     }
 
+    struct list_head *pos;
+    //STRU_C_TOKEN_NODE *p_token_list_node = NULL;
+
     STRU_C_TOKEN_NODE *p_token_list_tail_temp = p_token_list_tail;
     _S32 parenthesis_level = 0;
     if(p_token_list_tail_temp->info.token_type == C_TOKEN_PARENTHESIS_RIGHT)
     {
         /* find one ()' '(' from tail */
-        while(p_token_list_tail_temp != NULL)
+        list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &s_cproc_token_get_list_head()->list, &p_token_list_tail->list)
         {
+            p_token_list_tail_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
             switch(p_token_list_tail_temp->info.token_type)
             {
                 case C_TOKEN_PARENTHESIS_RIGHT:
@@ -683,12 +682,10 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             {
                 break;
             }
-
-            p_token_list_tail_temp = p_token_list_tail_temp->previous;
         }
 
         /* not have a pair */
-        if(p_token_list_tail_temp == NULL)
+        if(p_token_list_tail_temp == s_cproc_token_get_list_head())
         {
             display_dcl_error(p_token_list_head, p_token_list_tail, "parenthesis pairing error");
             return RETURN_FAILURE;
@@ -698,7 +695,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         if(p_token_list_tail_temp == p_token_list_head)
         {
             /* empty() */
-            if(p_token_list_head->next == p_token_list_tail)
+            if(p_token_list_head->list.next == &p_token_list_tail->list)
             {
                 if(in_function_parameters)
                 {
@@ -717,7 +714,10 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             else
             {
                 /* (dcl_list) */
-                ret_val = proc_dcl_list(p_token_list_head->next, p_token_list_tail->previous, in_function_parameters, need_type);
+                ret_val = proc_dcl_list(
+                    list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE,list),
+                    list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE,list),
+                    in_function_parameters, need_type);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 return RETURN_SUCCESS;
             }
@@ -725,7 +725,9 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         else
         {
             /* direct_dcl_list (function premeters) */
-            ret_val = proc_direct_dcl_list(p_token_list_head, p_token_list_tail_temp->previous, in_function_parameters, need_type);
+            ret_val = proc_direct_dcl_list(p_token_list_head, 
+                list_entry(p_token_list_tail_temp->list.prev, STRU_C_TOKEN_NODE,list), 
+                in_function_parameters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
             ret_val = proc_function_parameters(p_token_list_tail_temp, p_token_list_tail, need_type);
@@ -738,22 +740,22 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     /* array */
     if(p_token_list_tail->info.token_type == C_TOKEN_BRACKET_RIGHT)
     {
-        p_token_list_tail_temp = p_token_list_tail_temp->previous;
-        
-        while(p_token_list_tail_temp != NULL)
+        list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, 
+            &s_cproc_token_get_list_head()->list, 
+            p_token_list_tail_temp->list.prev)
         {
+            p_token_list_tail_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
             if(p_token_list_tail_temp->info.token_type != C_TOKEN_BRACKET_LEFT
                 &&p_token_list_tail_temp->info.token_type != C_TOKEN_BRACKET_RIGHT
                 &&p_token_list_tail_temp->info.token_type != C_TOKEN_CONSTANT_INTEGER)
             {
                 break;
             }
-            
-            p_token_list_tail_temp = p_token_list_tail_temp->previous;
         }
 
         /* direct_dcl_list only contain [][], the array identifier is not given */
-        if(p_token_list_tail_temp == p_token_list_head->previous)
+        if(&p_token_list_tail_temp->list == p_token_list_head->list.prev)
         {
             ret_val = proc_direct_dcl_list(NULL, NULL, in_function_parameters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -765,7 +767,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
         
-        ret_val = proc_array_size(p_token_list_tail_temp->next, p_token_list_tail, need_type);
+        ret_val = proc_array_size(list_entry(p_token_list_tail_temp->list.next, STRU_C_TOKEN_NODE, list), p_token_list_tail, need_type);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
         return RETURN_SUCCESS;
@@ -832,30 +834,28 @@ PRIVATE ENUM_RETURN proc_dcl_list(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cdcl(
-	_S8 *p_text_buffer,
-	STRU_C_TOKEN_NODE *p_token_list_head,
-    STRU_C_TOKEN_NODE *p_token_list_tail)
+ENUM_RETURN s_cdcl(_VOID)
 {
-	R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
-    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
-	R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
     ENUM_RETURN ret_val;
 
     printf(LIGHT_CYAN"declaration: ");
-	print_token_list(p_token_list_head, p_token_list_tail);
+	s_cproc_token_print_list(NULL);
 	printf(NONE"\n");
 	
     ENUM_BOOLEAN need_type = BOOLEAN_FALSE;
     
-    ret_val = proc_dcl_list(p_token_list_head, p_token_list_tail, BOOLEAN_FALSE, &need_type);
+    ret_val = proc_dcl_list(
+        s_cproc_token_get_list_head(), 
+        s_cproc_token_get_list_head(), 
+        BOOLEAN_FALSE, 
+        &need_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
   
     DCL_PRINT("\n");
 
     if(need_type == BOOLEAN_TRUE)
     {
-        display_dcl_error(p_token_list_head, p_token_list_tail, "missing type");
+        display_dcl_error(s_cproc_token_get_list_head(), s_cproc_token_get_list_head(), "missing type");
         return RETURN_FAILURE;
     }
 

@@ -7,7 +7,9 @@
 #include "s_text.h"
 #include "s_stack.h"
 #include "s_stm.h"
+#include "s_list.h"
 #include "s_cproc.h"
+#include "s_cpp.h"
 # include "s_ctoken.h"
 
 
@@ -105,8 +107,10 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_PP_CONTROL_PRAGMA,                                LIGHT_GREEN"preprocessing control: pragma"NONE},
 	
     {C_TOKEN_PP_HEADER_NAME,                                   LIGHT_GREEN"Preprocessing: header name"NONE},
-    {C_TOKEN_PP_HEADER_H_START,                                LIGHT_GREEN"Preprocessing: header <"NONE},
-    {C_TOKEN_PP_HEADER_H_FINISH,                               LIGHT_GREEN"Preprocessing: header >"NONE},
+    {C_TOKEN_PP_HEADER_H_START,                                LIGHT_GREEN"Preprocessing: header <-START"NONE},
+    {C_TOKEN_PP_HEADER_H_FINISH,                               LIGHT_GREEN"Preprocessing: header >-FINISH"NONE},
+    {C_TOKEN_PP_HEADER_Q_START,                                LIGHT_GREEN"Preprocessing: header \"-START"NONE},
+    {C_TOKEN_PP_HEADER_Q_FINISH,                               LIGHT_GREEN"Preprocessing: header \"-FINISH"NONE},
     {C_TOKEN_PP_IDENTIFIER,                                    LIGHT_GREEN"Preprocessing: identifier"NONE},
 	{C_TOKEN_PP_NUMBER,                                        LIGHT_GREEN"Preprocessing: number"NONE},
 	{C_TOKEN_PP_CHARACTER_CONSTANT,                            LIGHT_GREEN"Preprocessing: character constant"NONE},
@@ -152,7 +156,7 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_OPERATOR_BIT_RIGHT_SHIFT_ASSIGN,                  LIGHT_GREEN">>="NONE},
 
     {C_TOKEN_OPERATOR_LOGICAL_LESS,                            LIGHT_GREEN"<"NONE},
-    {C_TOKEN_OPERATOR_LOGICAL_LESS_QEUAL,                      LIGHT_GREEN"<="NONE},
+    {C_TOKEN_OPERATOR_LOGICAL_LESS_EQUAL,                      LIGHT_GREEN"<="NONE},
     {C_TOKEN_OPERATOR_BIT_LEFT_SHIFT,                          LIGHT_GREEN"<<"NONE},
     {C_TOKEN_OPERATOR_BIT_LEFT_SHIFT_ASSIGN,                   LIGHT_GREEN"<<="NONE},
 
@@ -189,7 +193,7 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_INVALID,                                          LIGHT_RED"INVALID"NONE},
 };
 
-const _S8 * get_dcl_token_str(ENUM_C_TOKEN token)
+const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token)
 {
     R_ASSERT(token >= C_TOKEN_NORMAL && token < C_TOKEN_MAX, "token out of range");
     R_ASSERT_LOG(g_c_token_enum_info[token].token == token, "token value in private data error", "token = %d", token);
@@ -213,7 +217,7 @@ PRIVATE ENUM_BOOLEAN is_separator(_S32 c)
     return BOOLEAN_FALSE;
 }
 
-PRIVATE ENUM_BOOLEAN is_number(_S8 *string)
+PRIVATE ENUM_BOOLEAN is_number(const _S8 *string)
 {
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
     _S32 number = -1;
@@ -241,27 +245,27 @@ PRIVATE ENUM_DCL_KEYWORD get_ckeyword_type(const _S8 *string)
     return g_ckeyword[i].type;
 }
 
-ENUM_BOOLEAN is_keyword_type(_S8 *string)
+ENUM_BOOLEAN is_keyword_type(const _S8 *string)
 {
     return get_ckeyword_type(string) == DCL_KEYWORD_TYPE;
 }
 
-ENUM_BOOLEAN is_keyword_type_qualifier(_S8 *string)
+ENUM_BOOLEAN is_keyword_type_qualifier(const _S8 *string)
 {
     return get_ckeyword_type(string) == DCL_KEYWORD_TYPE_QUALIFIER;
 }
 
-ENUM_BOOLEAN is_keyword_control(_S8 *string)
+ENUM_BOOLEAN is_keyword_control(const _S8 *string)
 {
     return get_ckeyword_type(string) == DCL_KEYWORD_CONTROL;
 }
 
-ENUM_BOOLEAN is_keyword(_S8 *string)
+ENUM_BOOLEAN is_keyword(const _S8 *string)
 {
     return get_ckeyword_type(string) != DCL_KEYWORD_INVALID;
 }
 
-ENUM_BOOLEAN is_identifier(_S8 *string)
+ENUM_BOOLEAN is_identifier(const _S8 *string)
 {
     R_ASSERT(string != NULL, BOOLEAN_FALSE);
 
@@ -292,7 +296,7 @@ PRIVATE ENUM_C_TOKEN parse_symbol(_S8 c)
     return token_temp;
 }
 
-PRIVATE ENUM_C_TOKEN parse_word(_S8 *string)
+ENUM_C_TOKEN s_ctoken_parse_identifier(_S8 *string)
 {
     R_ASSERT(string != NULL, C_TOKEN_INVALID);
     ENUM_C_TOKEN token_temp = C_TOKEN_INVALID;
@@ -333,7 +337,7 @@ PRIVATE ENUM_C_TOKEN parse_word(_S8 *string)
 /* get token from cpp lines */
 
 
-ENUM_RETURN s_cget_token(
+ENUM_RETURN s_ctoken_get_token(
 	const _S8 *p_text_buffer, 
 	size_t *len, 
 	ENUM_C_TOKEN *token)
@@ -579,7 +583,7 @@ ENUM_RETURN s_cget_token(
             p_text_buffer++;
             if(*p_text_buffer == '=')
             {
-                token_temp = C_TOKEN_OPERATOR_LOGICAL_LESS_QEUAL;
+                token_temp = C_TOKEN_OPERATOR_LOGICAL_LESS_EQUAL;
                 (*len)++;
                 p_text_buffer++;
             }
@@ -604,7 +608,7 @@ ENUM_RETURN s_cget_token(
             p_text_buffer++;
             if(*p_text_buffer == '=')
             {
-                token_temp = C_TOKEN_OPERATOR_LOGICAL_LESS_QEUAL;
+                token_temp = C_TOKEN_OPERATOR_LOGICAL_LESS_EQUAL;
                 (*len)++;
                 p_text_buffer++;
             }
@@ -714,18 +718,18 @@ ENUM_RETURN s_cget_token(
     
     OUTPUT_END(p_token_buffer, buffer_size);
 
-    token_temp = parse_word(token_buffer);
+    token_temp = s_ctoken_parse_identifier(token_buffer);
 
     *token = token_temp;
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN get_token_type(const _S8 *p_string, ENUM_C_TOKEN *p_type)
+ENUM_RETURN s_ctoken_get_token_type(const _S8 *p_string, ENUM_C_TOKEN *p_type)
 {
 	return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_token_make_new(
+ENUM_RETURN s_ctoken_make_new(
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
     size_t text_offset,
@@ -754,14 +758,16 @@ ENUM_RETURN s_cproc_token_make_new(
     p_new_token_temp->info.line_position.offset = text_offset;
     p_new_token_temp->info.line_position.line = line_index;
     p_new_token_temp->info.line_position.column = line_column;
-    p_new_token_temp->next = NULL;
-    p_new_token_temp->previous = NULL;
+    p_new_token_temp->list.next = NULL;
+    p_new_token_temp->list.prev = NULL;
     *pp_new_token_node = p_new_token_temp;
 
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_token_copy(const STRU_C_TOKEN_NODE *p_token_node_source, STRU_C_TOKEN_NODE **pp_token_node_dest)
+ENUM_RETURN s_ctoken_copy(
+    const STRU_C_TOKEN_NODE *p_token_node_source, 
+    STRU_C_TOKEN_NODE **pp_token_node_dest)
 {
     R_ASSERT(p_token_node_source != NULL, RETURN_FAILURE);
     R_ASSERT(pp_token_node_dest != NULL, RETURN_FAILURE);
@@ -773,8 +779,7 @@ ENUM_RETURN s_cproc_token_copy(const STRU_C_TOKEN_NODE *p_token_node_source, STR
     p_token_node_temp = (STRU_C_TOKEN_NODE*)malloc(sizeof(STRU_C_TOKEN_NODE));
     S_R_ASSERT(p_token_node_temp != NULL, RETURN_FAILURE);
 
-    p_token_node_temp->previous = NULL;
-    p_token_node_temp->next = NULL;
+    p_token_node_temp->list = p_token_node_source->list;
     p_token_node_temp->info = p_token_node_source->info;
     p_token_node_temp->info.p_string = NULL;
     p_token_node_temp->info.p_string = (_S8*)malloc(strlen(p_token_node_source->info.p_string) + 1);
@@ -785,50 +790,30 @@ ENUM_RETURN s_cproc_token_copy(const STRU_C_TOKEN_NODE *p_token_node_source, STR
 
     return RETURN_SUCCESS;
 }
-ENUM_RETURN s_cproc_token_add_node_to_list(
-    STRU_C_TOKEN_NODE *p_new_token_node,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail)
+ENUM_RETURN s_ctoken_add_node_to_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_new_token_node)
 {
     R_ASSERT(p_new_token_node != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_tail != NULL, RETURN_FAILURE);
 
-    if(*pp_token_list_head == NULL)
-    {
-        R_ASSERT(*pp_token_list_tail == NULL, RETURN_FAILURE);
-        
-        *pp_token_list_head = p_new_token_node;
-        *pp_token_list_tail = p_new_token_node;
-    }
-    else
-    {
-        R_ASSERT(*pp_token_list_tail != NULL, RETURN_FAILURE);
-
-        p_new_token_node->previous = *pp_token_list_tail;
-        (*pp_token_list_tail)->next = p_new_token_node;
-        *pp_token_list_tail = p_new_token_node;
-    }
+    list_add_tail(&p_new_token_node->list, &p_token_list_head->list);
 
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN add_token_to_list(
+ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
     size_t text_offset,
     size_t line_index,
-    size_t line_column,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail)
+    size_t line_column)
 {
     R_ASSERT(token_string != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_tail != NULL, RETURN_FAILURE);
-    
+
     STRU_C_TOKEN_NODE *p_new_token_node = NULL;
     ENUM_RETURN ret_val;
-    ret_val = s_cproc_token_make_new(
+    ret_val = s_ctoken_make_new(
         token_string,
         token_type, 
         text_offset, 
@@ -838,130 +823,114 @@ ENUM_RETURN add_token_to_list(
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     S_R_ASSERT(p_new_token_node != NULL, RETURN_FAILURE);
     
-    ret_val = s_cproc_token_add_node_to_list(
-        p_new_token_node,
-        pp_token_list_head,
-        pp_token_list_tail);
+    ret_val = s_ctoken_add_node_to_list(
+        p_token_list_head,
+        p_new_token_node);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     return RETURN_SUCCESS;
 };
 
-ENUM_RETURN delete_token_from_list(
-    STRU_C_TOKEN_NODE *p_token_to_be_deleted,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail)
+_VOID s_ctoken_free_node(STRU_C_TOKEN_NODE *p_token_to_be_deleted)
 {
-    R_ASSERT(p_token_to_be_deleted != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_tail != NULL, RETURN_FAILURE);
-
-    R_ASSERT(*pp_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(*pp_token_list_tail != NULL, RETURN_FAILURE);
-
-    /* the token to be deleted is the list head and list tail */
-    if(*pp_token_list_head == p_token_to_be_deleted 
-        && *pp_token_list_tail == p_token_to_be_deleted)
-    {
-        *pp_token_list_head = NULL;
-        *pp_token_list_tail = NULL;
-    }
-    /* the token to be deleted is the list head */
-    else if(*pp_token_list_head == p_token_to_be_deleted)
-    {
-        *pp_token_list_head = (*pp_token_list_head)->next;
-        (*pp_token_list_head)->previous = NULL;
-    }
-    /* the token to be deleted is the list tail */
-    else if(*pp_token_list_tail == p_token_to_be_deleted)
-    {
-        *pp_token_list_tail = (*pp_token_list_tail)->previous;
-        (*pp_token_list_tail)->next = NULL;
-    }
-    else
-    {
-        p_token_to_be_deleted->previous->next = p_token_to_be_deleted->next;
-        p_token_to_be_deleted->next->previous = p_token_to_be_deleted->previous;
-    }
+    S_V_FALSE(p_token_to_be_deleted != NULL);
+    DEBUG_PRINT("token-string: \033[7m%s"NONE, p_token_to_be_deleted->info.p_string);
     
     FREE(p_token_to_be_deleted->info.p_string);
     FREE(p_token_to_be_deleted);
+}
+
+ENUM_RETURN s_ctoken_delete_node_from_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_to_be_deleted)
+{
+    R_ASSERT(p_token_to_be_deleted != NULL, RETURN_FAILURE);
+    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_token_to_be_deleted != p_token_list_head, RETURN_FAILURE);
+    list_del_init(&p_token_to_be_deleted->list);
+    
+    s_ctoken_free_node(p_token_to_be_deleted);
 
     return RETURN_SUCCESS;
 };
 
-ENUM_RETURN release_token_list(
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail)
+_VOID s_ctoken_release_list(STRU_C_TOKEN_NODE *p_token_list_head)
 {
-    R_ASSERT(pp_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(pp_token_list_tail != NULL, RETURN_FAILURE);
-    STRU_C_TOKEN_NODE *p_token_list_head = *pp_token_list_head;
+    S_V_ASSERT(p_token_list_head != NULL);
     STRU_C_TOKEN_NODE *p_token_temp;
+    struct list_head *pos, *next;
     
-    while(p_token_list_head != NULL)
+    list_for_each_all_safe(pos, next, &p_token_list_head->list)
     {
-        p_token_temp = p_token_list_head;
-        FREE(p_token_temp->info.p_string);
-        p_token_list_head = p_token_list_head->next;
-        FREE(p_token_temp);
+        p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        list_del_init(pos);
+        s_ctoken_free_node(p_token_temp);
     }
-
-    *pp_token_list_head = NULL;
-    *pp_token_list_tail = NULL;
-    
-    return RETURN_SUCCESS;
 }
 
-_VOID print_token_list(
-    STRU_C_TOKEN_NODE *p_token_list_head, 
-    STRU_C_TOKEN_NODE *p_token_list_tail)
+_VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_list_head)
+{
+    S_V_ASSERT(p_token_list_head != NULL);
+    STRU_C_TOKEN_NODE *p_token_temp;
+    struct list_head *pos, *next;
+    
+    list_for_each_all_safe(pos, next, &p_token_list_head->list)
+    {
+        p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        if(p_token_temp->info.token_type == C_TOKEN_BLANK
+            || p_token_temp->info.token_type == C_TOKEN_NEWLINE_LINUX
+            || p_token_temp->info.token_type == C_TOKEN_NEWLINE_MAC
+            || p_token_temp->info.token_type == C_TOKEN_NEWLINE_WINDOWS)
+        {
+            list_del_init(pos);
+            s_ctoken_free_node(p_token_temp);
+        }
+    }
+}
+
+_VOID s_ctoken_print_list(
+    FILE *fpw,
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_start, 
+    STRU_C_TOKEN_NODE *p_token_list_end)
 {
 	S_V_ASSERT(p_token_list_head != NULL);
-	S_V_ASSERT(p_token_list_tail != NULL);
+    S_V_ASSERT(p_token_list_start != NULL);
+    S_V_ASSERT(p_token_list_end != NULL);
 
-	printf("token list:\n");
-	while(p_token_list_head != NULL)
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node;
+
+    list_for_each(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
 	{
-		printf("%s ", p_token_list_head->info.p_string);
-		if(p_token_list_head == p_token_list_tail)
-		{
-			break;
-		}
-		
-		p_token_list_head = p_token_list_head->next;
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+		CPP_PRINT(fpw, "%s ", p_token_list_node->info.p_string);
 	}
 
-	printf("\n");
-
+	CPP_PRINT(fpw, "\n");
 }
 
-_VOID debug_print_token_list(
-    STRU_C_TOKEN_NODE *p_token_list_head, 
-    STRU_C_TOKEN_NODE *p_token_list_tail)
+_VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head    )
 {
-	S_V_ASSERT(p_token_list_head != NULL);
-	S_V_ASSERT(p_token_list_tail != NULL);
+    S_V_ASSERT(p_token_list_head != NULL);
+    STRU_C_TOKEN_NODE *p_token_list_node; 
+    struct list_head *pos;
 
+    
 	printf("token list:\n");
-	while(p_token_list_head != NULL)
-	{
-		printf("\033[7m%s"NONE, p_token_list_head->info.p_string);
-		size_t len = strlen(p_token_list_head->info.p_string);
+    list_for_each_all(pos, &p_token_list_head->list)
+    {
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+		printf("\033[7m%s"NONE, p_token_list_node->info.p_string);
+		size_t len = strlen(p_token_list_node->info.p_string);
 		_S32 print_space_num = (len > 20)?0:(20 - len);
 		for(_S32 i = 0; i < print_space_num; i++)
 		{
 			printf(" ");
 		}
 
-		printf(" %s\n", get_dcl_token_str(p_token_list_head->info.token_type));
-		
-		if(p_token_list_head == p_token_list_tail)
-		{
-			break;
-		}
-		
-		p_token_list_head = p_token_list_head->next;
+		printf(" %s\n", s_ctoken_get_str(p_token_list_node->info.token_type));
 	}
 
 	printf("\n");

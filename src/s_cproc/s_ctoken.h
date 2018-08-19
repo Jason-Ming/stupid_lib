@@ -3,7 +3,7 @@
 #include "s_clinkage.h"
 #include "s_defines.h"
 #include "s_type.h"
-
+#include "s_list.h"
 #include "s_cproc.h"
 
 #define MAX_TOKEN_LEN 1024
@@ -105,6 +105,8 @@ typedef enum TAG_ENUM_C_TOKEN
     C_TOKEN_PP_HEADER_NAME,                                   /* Preprocessing: header name */
     C_TOKEN_PP_HEADER_H_START,                                /* Preprocessing: header < */
     C_TOKEN_PP_HEADER_H_FINISH,                               /* Preprocessing: header > */
+    C_TOKEN_PP_HEADER_Q_START,                                /* Preprocessing: header " */
+    C_TOKEN_PP_HEADER_Q_FINISH,                               /* Preprocessing: header " */
     C_TOKEN_PP_IDENTIFIER,                                    /* Preprocessing: identifier */
     C_TOKEN_PP_NUMBER,                                        /* Preprocessing: number */
     C_TOKEN_PP_CHARACTER_CONSTANT,                            /* Preprocessing: character constant */
@@ -142,7 +144,7 @@ typedef enum TAG_ENUM_C_TOKEN
 	C_TOKEN_OPERATOR_BIT_RIGHT_SHIFT,                         /* >> */
 	C_TOKEN_OPERATOR_BIT_RIGHT_SHIFT_ASSIGN,                  /* >>= */
 	C_TOKEN_OPERATOR_LOGICAL_LESS,                            /* < */
-	C_TOKEN_OPERATOR_LOGICAL_LESS_QEUAL,                      /* <= */
+	C_TOKEN_OPERATOR_LOGICAL_LESS_EQUAL,                      /* <= */
 	C_TOKEN_OPERATOR_BIT_LEFT_SHIFT,                          /* << */
 	C_TOKEN_OPERATOR_BIT_LEFT_SHIFT_ASSIGN,                   /* <<= */
 	C_TOKEN_OPERATOR_ASSIGN,                                  /* = */
@@ -196,6 +198,7 @@ typedef struct TAG_STRU_C_TYPE_QUALIFIER
 typedef struct TAG_STRU_C_TOKEN
 {
     _S8 *p_string;
+    _SL inode;
     STRU_C_TOKEN_POSITION line_position;
     ENUM_C_TOKEN token_type;
     STRU_C_TYPE_QUALIFIER qualifier;
@@ -204,55 +207,50 @@ typedef struct TAG_STRU_C_TOKEN
 typedef struct TAG_STRU_C_TOKEN_NODE
 {
 	STRU_C_TOKEN info;
-    struct TAG_STRU_C_TOKEN_NODE *next;
-    struct TAG_STRU_C_TOKEN_NODE *previous;
+    struct list_head list;
 }STRU_C_TOKEN_NODE;
 
 __BEGIN_C_DECLS
-ENUM_BOOLEAN is_keyword_type(_S8 *string);
-ENUM_BOOLEAN is_keyword_control(_S8 *string);
-ENUM_BOOLEAN is_keyword(_S8 *string);
-ENUM_BOOLEAN is_identifier(_S8 *string);
-const _S8 * get_dcl_token_str(ENUM_C_TOKEN token);
-ENUM_RETURN s_cproc_token_copy(
+
+ENUM_C_TOKEN s_ctoken_parse_identifier(_S8 *string);
+
+const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token);
+ENUM_RETURN s_ctoken_copy(
     const STRU_C_TOKEN_NODE *p_token_node_source, 
     STRU_C_TOKEN_NODE **pp_token_node_dest);
 
-ENUM_RETURN add_token_to_list(
+ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
     size_t text_offset,
     size_t line_index,
-    size_t line_column,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail);
+    size_t line_column);
 
-ENUM_RETURN s_cproc_token_add_node_to_list(
-    STRU_C_TOKEN_NODE *p_new_token_node,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail);
+ENUM_RETURN s_ctoken_add_node_to_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_new_token_node);
 
-ENUM_RETURN delete_token_from_list(
-    STRU_C_TOKEN_NODE *p_token_to_be_deleted,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail);
+ENUM_RETURN s_ctoken_delete_node_from_list(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_to_be_deleted);
 
-ENUM_RETURN get_token_type(const _S8 *p_string, ENUM_C_TOKEN *p_type);
-ENUM_RETURN s_cget_token(
+ENUM_RETURN s_ctoken_get_token_type(const _S8 *p_string, ENUM_C_TOKEN *p_type);
+ENUM_RETURN s_ctoken_get_token(
 	const _S8 *p_text_buffer, 
 	size_t *len, 
 	ENUM_C_TOKEN *token);
+_VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_list_head);
 
-ENUM_RETURN release_token_list(
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail);
+_VOID s_ctoken_release_list(STRU_C_TOKEN_NODE *p_token_list_head);
+_VOID s_ctoken_free_node(STRU_C_TOKEN_NODE *p_token_to_be_deleted);
 
-_VOID print_token_list(
-    STRU_C_TOKEN_NODE *p_token_list_head, 
-    STRU_C_TOKEN_NODE *p_token_list_tail);
-_VOID debug_print_token_list(
-    STRU_C_TOKEN_NODE *p_token_list_head, 
-    STRU_C_TOKEN_NODE *p_token_list_tail);
+_VOID s_ctoken_print_list(
+    FILE *fpw,
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_start, 
+    STRU_C_TOKEN_NODE *p_token_list_end);
+_VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head);
 
 __END_C_DECLS
 #endif

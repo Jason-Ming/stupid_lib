@@ -12,6 +12,7 @@ typedef ENUM_RETURN (*STM_PROC)(void);
 __BEGIN_C_DECLS
 ENUM_RETURN stm_create(STM *p_stm, unsigned int state_num);
 ENUM_RETURN stm_delete(STM *p_stm);
+ENUM_RETURN stm_copy(STM *p_stm_dest, STM stm_source);
 
 ENUM_RETURN add_stm_state_handler(STM p_stm, STM_STATE state, STM_PROC handler, const char *info);
 ENUM_RETURN add_stm_preproc_handler(STM p_stm, STM_PROC handler);

@@ -3,6 +3,21 @@
 #include "s_clinkage.h"
 #include "s_defines.h"
 #include "s_type.h"
+#include "s_stack.h"
+#include "s_ctoken.h"
+
+#define CPP_PRINT(fpw, fmt, args...)\
+    do\
+    {\
+        if(fpw != NULL)\
+        {\
+            fprintf(fpw, fmt, ##args);\
+        }\
+        else\
+        {\
+            printf(fmt, ##args);\
+        }\
+    }while(0);
 
 
 __BEGIN_C_DECLS
@@ -18,17 +33,7 @@ the text after transform is output to a file.
 if the file pointer is NULL, it will be output to a buffer which is allocated by this function. 
 if the buffer is NULL, it will be output to the standard IO.
 */
-ENUM_RETURN s_cpp(
-    FILE *pfr,
-    _S8 **pp_text_buffer, 
-    size_t *p_text_buffer_size, 
-    STRU_C_TOKEN_NODE **pp_token_list_head,
-    STRU_C_TOKEN_NODE **pp_token_list_tail);
-
-_VOID s_cpp_print(
-    FILE *pfw,
-    STRU_C_TOKEN_NODE *p_token_list_head,
-    STRU_C_TOKEN_NODE *p_token_list_tail);
+ENUM_RETURN s_cpp(  const _S8 * file_name, STACK stack);
 
 __END_C_DECLS
 #endif

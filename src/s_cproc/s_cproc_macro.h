@@ -7,12 +7,14 @@
 #include "s_cproc.h"
 
 __BEGIN_C_DECLS
-_VOID s_cproc_macro_print_list_debug(_VOID);
+_VOID s_cproc_macro_list_init(_VOID);
+
+_VOID s_cproc_macro_print_list_debug_info(_VOID);
 
 ENUM_RETURN s_cproc_macro_name_exist(_S8 *p_macro_name, ENUM_BOOLEAN *exist);
 ENUM_BOOLEAN s_cproc_macro_parameter_part_exist();
 
-ENUM_RETURN s_cproc_macro_release_list(_VOID);
+_VOID s_cproc_macro_release_list(_VOID);
 
 ENUM_RETURN s_cproc_macro_add_name(
     const STRU_C_TOKEN_NODE* p_macro_name_token_node);

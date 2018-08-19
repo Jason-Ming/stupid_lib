@@ -20,10 +20,7 @@ typedef enum TAG_ENUM_DCL_TYPE
 __BEGIN_C_DECLS
 const _S8 * get_dcl_type_str(ENUM_DCL_TYPE type);
 
-ENUM_RETURN s_cdcl(
-	_S8 *p_text_buffer,
-	STRU_C_TOKEN_NODE *p_token_list_head,
-    STRU_C_TOKEN_NODE *p_token_list_tail);
+ENUM_RETURN s_cdcl();
 
 __END_C_DECLS
 #endif

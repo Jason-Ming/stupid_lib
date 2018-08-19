@@ -34,6 +34,22 @@ typedef struct TAG_STRU_STM
     STRU_STM_PROC *state_handlers;
 }STRU_STM;
 
+ENUM_RETURN stm_copy(STM *p_stm_dest, STM stm_source)
+{
+    R_ASSERT(p_stm_dest != NULL, RETURN_FAILURE);
+    R_ASSERT(stm_source != NULL, RETURN_FAILURE);
+    STRU_STM *p_stm_source_temp = (STRU_STM*)stm_source;
+    ENUM_RETURN ret_val = stm_create(p_stm_dest, p_stm_source_temp->state_num);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT(*p_stm_dest != NULL, RETURN_FAILURE);
+
+    memcpy((_VOID*)(*p_stm_dest), (_VOID*)(p_stm_source_temp), sizeof(STRU_STM));
+    memcpy((_VOID*)(((STRU_STM*)(*p_stm_dest))->state_handlers), 
+        (_VOID*)(p_stm_source_temp->state_handlers), sizeof(STRU_STM_PROC) * p_stm_source_temp->state_num);
+
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN stm_create(STM *p_stm, unsigned int state_num)
 {
     R_ASSERT(p_stm != NULL, RETURN_FAILURE);

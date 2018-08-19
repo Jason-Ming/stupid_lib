@@ -13,6 +13,7 @@
 #include "s_ctoken.h"
 #include "s_cproc_stm.h"
 #include "s_cerror.h"
+#include "s_cproc_token.h"
 #include "s_cproc_ctoken_pp.h"
 #include "s_cproc_macro.h"
 #include "s_cproc_include_file.h"
@@ -41,6 +42,8 @@ typedef enum TAG_ENUM_CPROC_STM
     CPROC_STM_PAIR_COMMENT,
     CPROC_STM_NEWLINE,
     CPROC_STM_BLANK,
+    CPROC_STM_IDENTIFIER,
+    CPROC_STM_NUMBER,
     CPROC_STM_PP,
     CPROC_STM_PP_DIRECTIVE,
     CPROC_STM_PP_IF_GROUP,
@@ -54,6 +57,7 @@ typedef enum TAG_ENUM_CPROC_STM
     CPROC_STM_PP_ERROR,
     CPROC_STM_PP_PRAGMA,
     CPROC_STM_PP_INCLUDE_H_HEADER,
+    CPROC_STM_PP_INCLUDE_Q_HEADER,
     CPROC_STM_PP_INCLUDE_FINISH,
     CPROC_STM_PP_DEFINE_MACRO,
     CPROC_STM_PP_DEFINE_PARAMETER_START,
@@ -84,16 +88,12 @@ typedef enum TAG_ENUM_CPROC_STM_CHAR_DIRECTION
     
 typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 {
+    STM stm;
+    
     //input and output data
-    void *p_user_data;
     const _S8 *filename;
     const _S8 *p_text_buffer;
-    size_t text_buffer_size;
 
-    //build data
-    STRU_C_TOKEN_NODE **pp_token_list_head;
-    STRU_C_TOKEN_NODE **pp_token_list_tail;
-    
     //running data
     ENUM_CPROC_STM_CHAR_DIRECTION  c_direction;
     size_t c_step;
@@ -120,12 +120,14 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 #define CURRENT_C (g_cproc_stm_run_data.c)
 #define LAST_C (g_cproc_stm_run_data.last_c)
 #define NEXT_C (TEXT_BUFFER[g_cproc_stm_run_data.offset + 1])
+#define NEXT_NEXT_C (TEXT_BUFFER[g_cproc_stm_run_data.offset + 2])
+
 #define CURRENT_C_OFFSET (g_cproc_stm_run_data.offset)
 #define CURRENT_C_LINE (g_cproc_stm_run_data.current_line_index)
 #define CURRENT_C_COLUMN (g_cproc_stm_run_data.current_char_position_in_line)
 
 #define LAST_TOKEN_STRING (LAST_TOKEN_POINTER?LAST_TOKEN_POINTER->info.p_string:"NULL")
-#define LAST_TOKEN_POINTER (*(g_cproc_stm_run_data.pp_token_list_tail))
+#define LAST_TOKEN_POINTER (s_cproc_token_get_last_token())
 #define CURRENT_TOKEN_STR_BUFFER g_cproc_stm_run_data.current_token
 #define CURRENT_TOKEN_STR_BUFFER_POINTER_TO_WRITE (g_cproc_stm_run_data.p_current_token)
 #define CURRENT_TOKEN_STR_BUFFER_LEFT_SIZE_TO_WRITE (g_cproc_stm_run_data.current_token_size)
@@ -175,19 +177,19 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 #define STATE_BACK\
     do{\
         ENUM_RETURN ___ret_val;\
-        STM_STATE ___state = get_last_stm_state(g_cproc_stm);\
+        STM_STATE ___state = get_last_stm_state(g_cproc_stm_run_data.stm);\
         if(___state == CPROC_STM_PP_DEFINE_REPLACEMENT)\
         {\
             ___ret_val = s_cproc_macro_add_replacement(LAST_TOKEN_POINTER);\
             S_R_ASSERT(___ret_val == RETURN_SUCCESS, RETURN_FAILURE);\
         }\
-        ___ret_val = set_current_stm_state(g_cproc_stm, ___state);\
+        ___ret_val = set_current_stm_state(g_cproc_stm_run_data.stm, ___state);\
         S_R_ASSERT(___ret_val == RETURN_SUCCESS, RETURN_FAILURE);\
     }while(0);
 
 #define STATE_TO(state)\
     do{\
-        ENUM_RETURN ___ret_val = set_current_stm_state(g_cproc_stm, state);\
+        ENUM_RETURN ___ret_val = set_current_stm_state(g_cproc_stm_run_data.stm, state);\
         S_R_ASSERT(___ret_val == RETURN_SUCCESS, RETURN_FAILURE);\
     }while(0);
 
@@ -269,23 +271,21 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
         }\
         END_TOKEN;\
         REPLACE_TOKEN;\
-        ENUM_RETURN ___ret_val = add_token_to_list(CURRENT_TOKEN_STR_BUFFER,\
+        ENUM_RETURN ___ret_val = s_cproc_token_add_node_to_list(CURRENT_TOKEN_STR_BUFFER,\
             CURRENT_TOKEN_TYPE, \
             CURRENT_TOKEN_OFFSET,\
             CURRENT_TOKEN_LINE, \
-            CURRENT_TOKEN_COLUMN, \
-            g_cproc_stm_run_data.pp_token_list_head,\
-            g_cproc_stm_run_data.pp_token_list_tail);\
+            CURRENT_TOKEN_COLUMN);\
         S_R_ASSERT(___ret_val == RETURN_SUCCESS, RETURN_FAILURE);\
         DEBUG_PRINT("add token: "LIGHT_GREEN"%s"NONE", offset: %zd, line: %zd, column: %zd, type: %s", \
             CURRENT_TOKEN_STR_BUFFER, \
             CURRENT_TOKEN_OFFSET,\
             CURRENT_TOKEN_LINE,\
             CURRENT_TOKEN_COLUMN,\
-            get_dcl_token_str(CURRENT_TOKEN_TYPE));\
+            s_ctoken_get_str(CURRENT_TOKEN_TYPE));\
         LAST_TOKEN_TYPE = CURRENT_TOKEN_TYPE;\
         RESET_TOKEN;\
-        STM_STATE ___state = get_current_stm_state(g_cproc_stm);\
+        STM_STATE ___state = get_current_stm_state(g_cproc_stm_run_data.stm);\
         if(___state == CPROC_STM_PP_DEFINE_REPLACEMENT)\
         {\
             ___ret_val = s_cproc_macro_add_replacement(LAST_TOKEN_POINTER);\
@@ -301,11 +301,11 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
         {\
             break;\
         }\
-        if(get_current_stm_state(g_cproc_stm) == CPROC_STM_ONELINE_COMMENT)\
+        if(get_current_stm_state(g_cproc_stm_run_data.stm) == CPROC_STM_ONELINE_COMMENT)\
         {\
             CPROC_GEN_WARNING(NULL, "multi-line comment [-Wcomment]");\
         }\
-        if(space_num > 0 && get_current_stm_state(g_cproc_stm) != CPROC_STM_PAIR_COMMENT && get_current_stm_state(g_cproc_stm) != CPROC_STM_ONELINE_COMMENT)\
+        if(space_num > 0 && get_current_stm_state(g_cproc_stm_run_data.stm) != CPROC_STM_PAIR_COMMENT && get_current_stm_state(g_cproc_stm_run_data.stm) != CPROC_STM_ONELINE_COMMENT)\
         {\
             CPROC_GEN_WARNING(NULL, "backslash and newline separated by space");\
         }\
@@ -325,7 +325,6 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
         CURRENT_C_COLUMN = 0;\
     }while(0);
 
-PRIVATE STM g_cproc_stm = NULL;
 PRIVATE STRU_CPROC_STM_RUN_DATA g_cproc_stm_run_data;
 PRIVATE ENUM_RETURN cproc_stm_postproc();
 
@@ -361,11 +360,13 @@ size_t s_cproc_get_current_column()
 
 PRIVATE ENUM_BOOLEAN cproc_all_blank_at_begin_of_line(_VOID)
 {
-    STRU_C_TOKEN_NODE *p_token_list_tail = *(g_cproc_stm_run_data.pp_token_list_tail);
+    STRU_C_TOKEN_NODE *p_token_list_tail;
     ENUM_BOOLEAN all_blank_at_begin_of_line = BOOLEAN_TRUE;
-    
-    while(p_token_list_tail != NULL)
+
+    struct list_head *pos;
+    list_for_each_all_reverse(pos, &s_cproc_token_get_list_head()->list)
     {
+        p_token_list_tail = list_entry(pos, STRU_C_TOKEN_NODE, list);
         if(p_token_list_tail->info.token_type == C_TOKEN_NEWLINE_LINUX
             || p_token_list_tail->info.token_type == C_TOKEN_NEWLINE_WINDOWS
             || p_token_list_tail->info.token_type == C_TOKEN_NEWLINE_MAC)
@@ -378,7 +379,6 @@ PRIVATE ENUM_BOOLEAN cproc_all_blank_at_begin_of_line(_VOID)
 			all_blank_at_begin_of_line = BOOLEAN_FALSE;
 			break;
 		}
-		p_token_list_tail = p_token_list_tail->previous;
     }
 
     return all_blank_at_begin_of_line;
@@ -535,8 +535,9 @@ PRIVATE ENUM_RETURN cproc_stm_state_notifier()
 PRIVATE ENUM_RETURN cproc_stm_proc_normal()
 {
     TYPE_TOKEN(C_TOKEN_NORMAL);
-
-    switch (CURRENT_C)
+    _S8 c = CURRENT_C;
+    
+    switch (c)
     {
         case '"'://this is a test comment
         {/* this is a test comment */
@@ -571,12 +572,326 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
                 OUTPUT_TOKEN_C;
                 STATE_TO(CPROC_STM_PAIR_COMMENT);
             }
+            else if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_DIVIDE_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+                ADD_TOKEN;
+            }
             else
             {
                 TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_DIVIDE);
                 OUTPUT_TOKEN_C;
                 ADD_TOKEN;
             }                
+            break;
+        }
+        case '(':
+        {
+            TYPE_TOKEN(C_TOKEN_PARENTHESIS_LEFT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case ')':
+        {
+            TYPE_TOKEN(C_TOKEN_PARENTHESIS_RIGHT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case '[':
+        {
+            TYPE_TOKEN(C_TOKEN_BRACKET_LEFT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case ']':
+        {
+            TYPE_TOKEN(C_TOKEN_BRACKET_RIGHT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case '{':
+        {
+            TYPE_TOKEN(C_TOKEN_BRACE_LEFT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case '}':
+        {
+            TYPE_TOKEN(C_TOKEN_BRACE_RIGHT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+		case '.':
+        {
+            if(NEXT_C == '.' && NEXT_NEXT_C == '.')
+            {
+                TYPE_TOKEN(C_TOKEN_VA_ARGS);
+                OUTPUT_TOKEN_STR(3);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_MEMBER);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+            break;
+        }
+        case ',':
+        {
+            TYPE_TOKEN(C_TOKEN_COMMA);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case ';':
+        {
+            TYPE_TOKEN(C_TOKEN_SEMICOLON);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+		case '+':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_ADD_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '+')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_INCREASE);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_ADD);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '-':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_SUBTRACT_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '-')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_DECREASE);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '>')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_MEMBER_POINTER);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_SUBTRACT);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+            break;
+		}
+        case '*':
+        {
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+            break;
+        }
+        case '%':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_MOD_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_MOD);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '>':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_GREATER_EQUAL);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '>')
+            {
+                if(NEXT_NEXT_C == '=')
+                {
+                    TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_RIGHT_SHIFT_ASSIGN);
+                    OUTPUT_TOKEN_STR(3);
+                }
+                else
+                {
+                    TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_RIGHT_SHIFT);
+                    OUTPUT_TOKEN_STR(2);
+                }
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_GREATER);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '<':
+		{
+			if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_LESS_EQUAL);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '<')
+            {
+                if(NEXT_NEXT_C == '=')
+                {
+                    TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_LEFT_SHIFT_ASSIGN);
+                    OUTPUT_TOKEN_STR(3);
+                }
+                else
+                {
+                    TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_LEFT_SHIFT);
+                    OUTPUT_TOKEN_STR(2);
+                }
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_LESS);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '=':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_EQUAL);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ASSIGN);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '&':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_AND_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '&')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_AND);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_AND);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '|':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_OR_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else if(NEXT_C == '|')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_OR);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_OR);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+        case '^':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_XOR_ASSIGN);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_XOR);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+		case '~':
+		{
+            TYPE_TOKEN(C_TOKEN_OPERATOR_BIT_NOT);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+			break;
+		}
+		case '!':
+		{
+            if(NEXT_C == '=')
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_NOT_EQUAL);
+                OUTPUT_TOKEN_STR(2);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_NOT);
+                OUTPUT_TOKEN_C;
+            }
+            ADD_TOKEN;
+			break;
+		}
+        case '?':
+        {
+            TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_QUESTION);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            break;
+        }
+        case ':':
+        {
+            TYPE_TOKEN(C_TOKEN_OPERATOR_LOGICAL_COLON);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
             break;
         }
         case '\\':
@@ -625,11 +940,25 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
         }
         default:
         {
-            OUTPUT_TOKEN_C;
-            if(CURRENT_C == '_' || CURRENT_C == '$' || IS_ALPHABET(CURRENT_C))
+            if(IS_DEC(c))
             {
-                
+                ADD_TOKEN;
+                STATE_TO(CPROC_STM_NUMBER);
             }
+            else if(C_TOKEN_IS_IDENTIFIER_STARTER(c))
+            {
+                ADD_TOKEN;
+                TYPE_TOKEN(C_TOKEN_IDENTIFIER);
+                OUTPUT_TOKEN_C;
+                STATE_TO(CPROC_STM_IDENTIFIER);
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_UNKNOWN);
+                OUTPUT_TOKEN_C;
+                ADD_TOKEN;
+            }
+            break;
             break;
         }
     }
@@ -817,6 +1146,36 @@ PRIVATE ENUM_RETURN cproc_stm_proc_blank()
         }
     }
 
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
+{
+    _S8 c = CURRENT_C;
+    if(C_TOKEN_IS_IDENTIFIER_CHAR(c))
+    {
+        OUTPUT_TOKEN_C;
+        return RETURN_SUCCESS;
+    }
+
+    END_TOKEN;
+
+    TYPE_TOKEN(s_ctoken_parse_identifier(CURRENT_TOKEN_STR_BUFFER));
+    ADD_TOKEN;
+    STATE_BACK;
+    return RETURN_SUCCESS;
+}
+PRIVATE ENUM_RETURN cproc_stm_proc_number()
+{
+    _S8 c = CURRENT_C;
+    TYPE_TOKEN(C_TOKEN_CONSTANT_INTEGER);
+    if(IS_DEC(c))
+    {
+        OUTPUT_TOKEN_C;
+        return RETURN_SUCCESS;
+    }
+    ADD_TOKEN;
+    STATE_BACK;
     return RETURN_SUCCESS;
 }
 
@@ -1036,6 +1395,10 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include()
         }
         case '\"':
         {
+            TYPE_TOKEN(C_TOKEN_PP_HEADER_Q_START);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;
+            STATE_TO(CPROC_STM_PP_INCLUDE_Q_HEADER)
             break;
         }
         default:
@@ -1092,6 +1455,47 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_h_header()
     return RETURN_SUCCESS;
 }
 
+
+PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_q_header()
+{
+    _S8 c = CURRENT_C;
+    
+    switch(c)
+    {
+        case '\r':
+        case '\n':
+        {
+            ADD_TOKEN;
+            CPROC_GEN_ERROR(LAST_TOKEN_POINTER, "missing terminating \" character");
+            break;
+        }
+        case '\"':
+        {
+            ADD_TOKEN;
+            if(LAST_TOKEN_TYPE == C_TOKEN_PP_HEADER_Q_START)
+            {
+                CPROC_GEN_ERROR(LAST_TOKEN_POINTER, "empty filename in #include");
+            }
+            else
+            {
+                TYPE_TOKEN(C_TOKEN_PP_HEADER_Q_FINISH);
+                OUTPUT_TOKEN_C;
+                ADD_TOKEN;
+                STATE_TO(CPROC_STM_PP_INCLUDE_FINISH)
+            }
+            
+            break;
+        }
+        default:
+        {
+            TYPE_TOKEN(C_TOKEN_PP_HEADER_NAME);
+            OUTPUT_TOKEN_C;
+            break;
+        }
+    }
+
+    return RETURN_SUCCESS;
+}
 
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_finish()
 {
@@ -1455,7 +1859,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter()
         CPROC_GEN_ERROR(LAST_TOKEN_POINTER, "macro parameters must be comma-separated");
         return RETURN_SUCCESS;
     }
-    ADD_TOKEN;
+
     STATE_BACK;
     return RETURN_SUCCESS;
 }
@@ -1655,7 +2059,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_end()
         }
         default:
         {
-            CPROC_GEN_ERROR(LAST_TOKEN_POINTER, "unterminated %s", get_dcl_token_str(LAST_TOKEN_TYPE));
+            CPROC_GEN_ERROR(LAST_TOKEN_POINTER, "unterminated %s", s_ctoken_get_str(LAST_TOKEN_TYPE));
             break;
         }
     }
@@ -1672,6 +2076,8 @@ PRIVATE STRU_CPROC_STM_PROC cproc_stm_proc[CPROC_STM_MAX] =
     {CPROC_STM_PAIR_COMMENT, cproc_stm_proc_pair_comment, "pair comment"},
     {CPROC_STM_NEWLINE, cproc_stm_proc_newline, "newline"},
     {CPROC_STM_BLANK, cproc_stm_proc_blank, "blank"},
+    {CPROC_STM_IDENTIFIER, cproc_stm_proc_identifier, "identifier"},
+    {CPROC_STM_NUMBER, cproc_stm_proc_number, "number"},
     {CPROC_STM_PP, cproc_stm_proc_pp, "PP: #"},
     {CPROC_STM_PP_DIRECTIVE, cproc_stm_proc_pp_directive, "PP: directive"},
     {CPROC_STM_PP_IF_GROUP, cproc_stm_proc_pp_if_group, "PP: if-group"},
@@ -1685,6 +2091,7 @@ PRIVATE STRU_CPROC_STM_PROC cproc_stm_proc[CPROC_STM_MAX] =
     {CPROC_STM_PP_ERROR, cproc_stm_proc_pp_error, "PP: error"},
     {CPROC_STM_PP_PRAGMA, cproc_stm_proc_pp_pragma, "PP: pragma"},
     {CPROC_STM_PP_INCLUDE_H_HEADER, cproc_stm_proc_pp_include_h_header, "PP: include-h-header"},
+    {CPROC_STM_PP_INCLUDE_Q_HEADER, cproc_stm_proc_pp_include_q_header, "PP: include-h-header"},
     {CPROC_STM_PP_INCLUDE_FINISH, cproc_stm_proc_pp_include_finish, "PP: include-finish"},
     {CPROC_STM_PP_DEFINE_MACRO, cproc_stm_proc_pp_define_macro, "PP: define-macro"},
     {CPROC_STM_PP_DEFINE_PARAMETER_START, cproc_stm_proc_pp_define_parameter_start, "PP: define-("},
@@ -1700,34 +2107,34 @@ PRIVATE STRU_CPROC_STM_PROC cproc_stm_proc[CPROC_STM_MAX] =
 PRIVATE ENUM_RETURN cproc_stm_init(void)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    ret_val = stm_create(&g_cproc_stm, CPROC_STM_MAX);
+    ret_val = stm_create(&g_cproc_stm_run_data.stm, CPROC_STM_MAX);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = set_stm_start_state(g_cproc_stm, CPROC_STM_NORMAL);
+    ret_val = set_stm_start_state(g_cproc_stm_run_data.stm, CPROC_STM_NORMAL);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = set_stm_end_state(g_cproc_stm, CPROC_STM_END);
+    ret_val = set_stm_end_state(g_cproc_stm_run_data.stm, CPROC_STM_END);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_prepare_handler(g_cproc_stm, cproc_stm_prepare_proc);
+    ret_val = add_stm_prepare_handler(g_cproc_stm_run_data.stm, cproc_stm_prepare_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_clear_handler(g_cproc_stm, cproc_stm_clear_proc);
+    ret_val = add_stm_clear_handler(g_cproc_stm_run_data.stm, cproc_stm_clear_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_preproc_handler(g_cproc_stm, cproc_stm_preproc);
+    ret_val = add_stm_preproc_handler(g_cproc_stm_run_data.stm, cproc_stm_preproc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_postproc_handler(g_cproc_stm, cproc_stm_postproc);
+    ret_val = add_stm_postproc_handler(g_cproc_stm_run_data.stm, cproc_stm_postproc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_state_notifier(g_cproc_stm, cproc_stm_state_notifier);
+    ret_val = add_stm_state_notifier(g_cproc_stm_run_data.stm, cproc_stm_state_notifier);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     for(int i = 0; i < SIZE_OF_ARRAY(cproc_stm_proc); i++)
     {
         ret_val = add_stm_state_handler(
-            g_cproc_stm, 
+            g_cproc_stm_run_data.stm, 
             cproc_stm_proc[i].state, 
             cproc_stm_proc[i].handler, 
             cproc_stm_proc[i].info);
@@ -1745,36 +2152,54 @@ PRIVATE ENUM_RETURN cproc_stm_init(void)
 
 PRIVATE _VOID cproc_stm_clear(_VOID)
 {
-    ENUM_RETURN ret_val = stm_delete(&g_cproc_stm);
+    ENUM_RETURN ret_val = stm_delete(&g_cproc_stm_run_data.stm);
     V_ASSERT(ret_val == RETURN_SUCCESS);
 }
 
+ENUM_RETURN s_cproc_save_run_data_to_stack(STACK stack)
+{
+    R_ASSERT(stack != NULL, RETURN_FAILURE);
+    ENUM_RETURN ret_val = stack_push(stack, (_VOID *) &g_cproc_stm_run_data, sizeof(STRU_CPROC_STM_RUN_DATA));
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_cproc_restore_run_data_from_stack(STACK stack)
+{
+    R_ASSERT(stack != NULL, RETURN_FAILURE);
+    size_t size_out = 0;
+    ENUM_RETURN ret_val = stack_pop(stack, 
+        (_VOID *) &g_cproc_stm_run_data,
+        &size_out,
+        sizeof(STRU_CPROC_STM_RUN_DATA));
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(size_out == sizeof(STRU_CPROC_STM_RUN_DATA), RETURN_FAILURE);
+    
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN s_cproc_stm(
+    STACK stack,
     const _S8 *filename, 
-    const _S8 *p_text_buffer, 
-    const size_t text_buffer_size,
-    STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail,
+    _S8 *p_text_buffer, 
     ENUM_RETURN *check_result)
 {
+    R_ASSERT(stack != NULL, RETURN_FAILURE);
+    R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
     R_ASSERT(check_result != NULL, RETURN_FAILURE);
-    
     R_ASSERT(filename != NULL, RETURN_FAILURE);
+    
     ENUM_RETURN ret_val;
     *check_result = RETURN_SUCCESS;
 
-    char p[] = join(x, y); 
-    printf("%s", in_between(MACRO));
     ret_val = cproc_stm_init();
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, cproc_stm_clear());
 
     g_cproc_stm_run_data.filename = filename;
     TEXT_BUFFER = p_text_buffer;
-    g_cproc_stm_run_data.text_buffer_size = text_buffer_size;
-    g_cproc_stm_run_data.pp_token_list_head = pp_token_list_head;
-    g_cproc_stm_run_data.pp_token_list_tail = pp_token_list_tail;
     
-    ret_val = stm_run(g_cproc_stm);
+    ret_val = stm_run(g_cproc_stm_run_data.stm);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, cproc_stm_clear());
 
     if(g_cproc_stm_run_data.whether_any_error_exists)

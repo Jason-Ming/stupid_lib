@@ -10,12 +10,10 @@
 __BEGIN_C_DECLS
 
 ENUM_RETURN s_cproc_stm(
-	const _S8 *filename, 
-	const _S8 *p_text_buffer, 
-	const size_t text_buffer_size,
-	STRU_C_TOKEN_NODE **pp_token_list_head, 
-    STRU_C_TOKEN_NODE **pp_token_list_tail,
-	ENUM_RETURN *check_result);
+    STACK stack,
+    const _S8 *filename, 
+    _S8 *p_text_buffer, 
+    ENUM_RETURN *check_result);
 
 _VOID s_cproc_generate_error();
 const _S8 *s_cproc_get_text_buffer();
