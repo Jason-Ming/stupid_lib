@@ -106,7 +106,7 @@ ENUM_RETURN s_cproc_text_read_file_to_buffer(
 	}
 
     _SL inode = s_get_inode_by_filename(p_filename);
-    S_R_ASSERT(inode != SL_INVALID, RETURN_FAILURE);
+    S_R_ASSERT_DO(inode != SL_INVALID, RETURN_FAILURE, FCLOSE(pfr));
     
     ret_val = s_save_file_to_text_buffer(pfr, &p_text_buffer, &text_buffer_size);
     FCLOSE(pfr);
