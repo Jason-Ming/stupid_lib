@@ -93,7 +93,7 @@ typedef struct TAG_STRU_DCL_VAR
 #define DCL_PRINT(fmt, args...)\
     printf(LIGHT_BLUE""fmt""NONE, ##args);
 
-#define DCL_DBG 1
+#define DCL_DBG 0
 #if DCL_DBG
 #define DCL_DBG_PRINT(head, tail)\
     printf("\n%s:\n", __FUNCTION__);\
@@ -190,7 +190,7 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
     }
     else
     {
-        *pp_direct_dcl_list_head = p_token_list_head;
+        *pp_direct_dcl_list_head = p_token_list_node;
         *pp_direct_dcl_list_tail = p_token_list_tail;
     }
     
@@ -503,8 +503,15 @@ PRIVATE ENUM_RETURN proc_function_parameters(
         p_token_list_head_temp = list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE, list);
         p_token_list_tail_temp = list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE, list);
 
+        ENUM_BOOLEAN first_parameter = BOOLEAN_TRUE;
+        
         while(RETURN_SUCCESS == dcl_get_next_parameter(p_token_list_head_temp, p_token_list_tail_temp, &p_token_list_head_parameter, &p_token_list_tail_parameter))
         {
+            if(!first_parameter)
+            {
+                DCL_PRINT(", ");
+            }
+            first_parameter = BOOLEAN_FALSE;
             ret_val = proc_dcl_list(p_token_list_head_parameter, p_token_list_tail_parameter, BOOLEAN_TRUE, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
@@ -845,8 +852,8 @@ ENUM_RETURN s_cdcl(_VOID)
     ENUM_BOOLEAN need_type = BOOLEAN_FALSE;
     
     ret_val = proc_dcl_list(
-        s_cproc_token_get_list_head(), 
-        s_cproc_token_get_list_head(), 
+        list_entry(s_cproc_token_get_list_head()->list.next, STRU_C_TOKEN_NODE, list), 
+        list_entry(s_cproc_token_get_list_head()->list.prev, STRU_C_TOKEN_NODE, list), 
         BOOLEAN_FALSE, 
         &need_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);

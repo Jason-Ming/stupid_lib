@@ -900,7 +900,11 @@ _VOID s_ctoken_print_list(
 
     struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node;
-
+    DEBUG_PRINT("head: %p, %s\nstart: %p, %s\nend: %p, %s", 
+        p_token_list_head, p_token_list_head->info.p_string,
+        p_token_list_start, p_token_list_start->info.p_string,
+        p_token_list_end, p_token_list_end->info.p_string);
+    
     list_for_each(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
 	{
         p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
