@@ -844,16 +844,16 @@ PRIVATE ENUM_RETURN proc_dcl_list(
 ENUM_RETURN s_cdcl(_VOID)
 {
     ENUM_RETURN ret_val;
-
+    STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
     printf(LIGHT_CYAN"declaration: ");
-	s_cproc_token_print_list(NULL);
+	s_ctoken_print_list(NULL, p_token_list_head, p_token_list_head, p_token_list_head);
 	printf(NONE"\n");
 	
     ENUM_BOOLEAN need_type = BOOLEAN_FALSE;
     
     ret_val = proc_dcl_list(
-        list_entry(s_cproc_token_get_list_head()->list.next, STRU_C_TOKEN_NODE, list), 
-        list_entry(s_cproc_token_get_list_head()->list.prev, STRU_C_TOKEN_NODE, list), 
+        list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE, list), 
+        list_entry(p_token_list_head->list.prev, STRU_C_TOKEN_NODE, list), 
         BOOLEAN_FALSE, 
         &need_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -862,7 +862,7 @@ ENUM_RETURN s_cdcl(_VOID)
 
     if(need_type == BOOLEAN_TRUE)
     {
-        display_dcl_error(s_cproc_token_get_list_head(), s_cproc_token_get_list_head(), "missing type");
+        display_dcl_error(p_token_list_head, p_token_list_head, "missing type");
         return RETURN_FAILURE;
     }
 

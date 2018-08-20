@@ -50,7 +50,9 @@ _VOID s_cproc_token_print_list_debug_info(_VOID)
 
 _VOID s_cproc_token_print_list(    FILE *pfw)
 {
+    printf("\n\nprint tokens to output file%s start...\n", pfw==NULL?"(NULL)":"");
 	s_ctoken_print_list(pfw, &g_c_token_list_head,&g_c_token_list_head,&g_c_token_list_head);
+    printf("print tokens to output file finish.\n");
 }
 
 _VOID s_cproc_token_release_list(_VOID)

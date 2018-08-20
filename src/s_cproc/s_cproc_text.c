@@ -170,8 +170,7 @@ PRIVATE _VOID s_cproc_text_print_node_debug_info(STRU_C_TEXT_NODE *p_c_text_node
 {
     S_V_ASSERT(p_c_text_node != NULL);
 
-    printf("---------------------------------------------------------\n"
-        "    %-10s: %s\n", "filename", p_c_text_node->data.p_filename);
+    printf(" >>>%-10s: %s\n", "filename", p_c_text_node->data.p_filename);
     printf("    %-10s: %ld\n", "inode", p_c_text_node->data.inode);
     printf("    %-10s: %p\n", "buffer", p_c_text_node->data.p_buffer);
     printf("    %-10s: %zd\n", "size", p_c_text_node->data.buffer_size);
@@ -180,11 +179,13 @@ ENUM_RETURN s_cproc_text_print_list_debug_info(_VOID)
 {
     STRU_C_TEXT_NODE *p_c_text_node_temp;
     struct list_head *pos;
+    printf("\n\n--TEXT LIST DEBUG INFO BEGIN-------------------------------------------------------\n");
     list_for_each_all(pos, &g_c_text_list_head.list)
     {
         p_c_text_node_temp = list_entry(pos, STRU_C_TEXT_NODE, list); 
         s_cproc_text_print_node_debug_info(p_c_text_node_temp);
     }
+    printf("--TEXT LIST DEBUG INFO END---------------------------------------------------------\n");
 
     return RETURN_SUCCESS;
 }

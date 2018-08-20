@@ -873,7 +873,9 @@ _VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_li
     S_V_ASSERT(p_token_list_head != NULL);
     STRU_C_TOKEN_NODE *p_token_temp;
     struct list_head *pos, *next;
-    
+
+    printf("\n\ndelete blank tokens start...\n");
+    size_t token_num = 0;
     list_for_each_all_safe(pos, next, &p_token_list_head->list)
     {
         p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
@@ -882,10 +884,12 @@ _VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_li
             || p_token_temp->info.token_type == C_TOKEN_NEWLINE_MAC
             || p_token_temp->info.token_type == C_TOKEN_NEWLINE_WINDOWS)
         {
+            token_num++;
             list_del_init(pos);
             s_ctoken_free_node(p_token_temp);
         }
     }
+    printf("%zd blank tokens had been deleted.\n", token_num);
 }
 
 _VOID s_ctoken_print_list(
@@ -897,6 +901,8 @@ _VOID s_ctoken_print_list(
 	S_V_ASSERT(p_token_list_head != NULL);
     S_V_ASSERT(p_token_list_start != NULL);
     S_V_ASSERT(p_token_list_end != NULL);
+    
+    
 
     struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node;
@@ -904,7 +910,7 @@ _VOID s_ctoken_print_list(
         p_token_list_head, p_token_list_head->info.p_string,
         p_token_list_start, p_token_list_start->info.p_string,
         p_token_list_end, p_token_list_end->info.p_string);
-    
+
     list_for_each(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
 	{
         p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
@@ -912,6 +918,7 @@ _VOID s_ctoken_print_list(
 	}
 
 	CPP_PRINT(fpw, "\n");
+    
 }
 
 _VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head    )
@@ -921,7 +928,7 @@ _VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head    )
     struct list_head *pos;
 
     
-	printf("token list:\n");
+	printf("\n\n--TOKEN LIST DEBUG INFO BEGIN------------------------------------------------------\n");
     list_for_each_all(pos, &p_token_list_head->list)
     {
         p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
@@ -937,7 +944,7 @@ _VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head    )
 		printf(" %s\n", s_ctoken_get_str(p_token_list_node->info.token_type));
 	}
 
-	printf("\n");
+    printf("--TOKEN LIST DEBUG INFO END--------------------------------------------------------\n");
 
 }
 

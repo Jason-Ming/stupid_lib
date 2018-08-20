@@ -30,10 +30,10 @@ PRIVATE STRU_MACRO_NODE g_macro_node_list_head;
 
 _VOID s_cproc_macro_print_list_debug_info(_VOID)
 {
-	printf("macro list:\n");
+
 	STRU_MACRO_NODE *p_macro_temp;
     struct list_head *pos_macro;
-    
+    printf("\n\n--MACRO LIST DEBUG INFO BEGIN------------------------------------------------------\n");
     list_for_each_all(pos_macro, &g_macro_node_list_head.list)
 	{
         p_macro_temp = list_entry(pos_macro, STRU_MACRO_NODE, list);
@@ -70,7 +70,7 @@ _VOID s_cproc_macro_print_list_debug_info(_VOID)
 		printf("\n");
 	}
 
-	printf("\n");
+    printf("--MACRO LIST DEBUG INFO END--------------------------------------------------------\n");
 
 }
 
