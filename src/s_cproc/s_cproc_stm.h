@@ -10,9 +10,8 @@
 __BEGIN_C_DECLS
 
 ENUM_RETURN s_cproc_stm(
-    STACK stack,
     const _S8 *filename, 
-    _S8 *p_text_buffer, 
+    const _S8 *p_text_buffer, 
     ENUM_RETURN *check_result);
 
 _VOID s_cproc_generate_error();

@@ -117,23 +117,15 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 {
 	R_ASSERT(file_name != NULL, RETURN_FAILURE);
 
-	ENUM_RETURN ret_val = RETURN_SUCCESS;
-
-    STACK stack = NULL;
-    ret_val = stack_create(&stack);
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    S_R_ASSERT(stack != NULL, RETURN_FAILURE);
-
+	ENUM_RETURN ret_val = RETURN_FAILURE;
+    ENUM_RETURN result = RETURN_FAILURE;
     s_cproc_text_list_init();
     s_cproc_macro_list_init();
     s_cproc_token_list_init();
     
-    ret_val = s_cpp(file_name, stack);
+    ret_val = s_cpp(file_name, &result);
     S_ASSERT(ret_val == RETURN_SUCCESS);
     
-    ret_val = stack_delete(&stack);
-    S_ASSERT(ret_val == RETURN_SUCCESS);
-
     s_cproc_text_print_list_debug_info();
     s_cproc_token_print_list_debug_info();
     s_cproc_macro_print_list_debug_info();
@@ -142,10 +134,13 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 
     s_cproc_token_delete_blanks_and_newline();
     s_cproc_token_print_list_debug_info();
-    
-	ret_val = s_cdcl();
-    S_ASSERT(ret_val == RETURN_SUCCESS);
 
+    if(result == RETURN_SUCCESS)
+    {
+    	ret_val = s_cdcl();
+        S_ASSERT(ret_val == RETURN_SUCCESS);
+    }
+    
 	s_cproc_text_release_list();
     s_cproc_token_release_list();
     s_cproc_macro_release_list();

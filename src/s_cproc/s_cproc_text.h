@@ -7,7 +7,7 @@
 __BEGIN_C_DECLS
 _VOID s_cproc_text_list_init(_VOID);
 
-ENUM_RETURN s_cproc_text_read_file_to_buffer(const _S8 *p_filename, _S8 **pp_text_buffer);
+ENUM_RETURN s_cproc_text_read_file_to_buffer(const _S8 *p_filename, const _S8 **pp_text_buffer);
 const _S8 * s_cproc_text_get_buffer_by_filename(const _S8 *p_filename);
 _VOID s_cproc_text_release_list(_VOID);
 ENUM_RETURN s_cproc_text_print_list_debug_info(_VOID);

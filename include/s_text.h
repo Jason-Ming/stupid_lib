@@ -306,6 +306,14 @@ ENUM_RETURN s_save_file_to_text_buffer(
     _S8 **pp_text_buffer, 
     size_t *p_buffer_size);
 
+/**
+ * @author: Jason Ming
+ * @description: alloc memory to copy source string
+ * @param p_source: pointer to string
+ * @return: pointer to new string or NULL if failed
+ */
+_S8 *s_duplicate_string(const _S8 *p_source);
+
 __END_C_DECLS
 
 #endif

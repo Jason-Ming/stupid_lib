@@ -77,13 +77,11 @@ _VOID s_cproc_macro_print_list_debug_info(_VOID)
 _VOID s_cproc_macro_list_init(_VOID)
 {
     INIT_LIST_HEAD(&g_macro_node_list_head.list);
-    g_macro_node_list_head.info.name_head.info.p_string = "token-list-head";
-    g_macro_node_list_head.info.parameter_list_head.info.p_string = "token-list-head";
-    g_macro_node_list_head.info.replacement_list_head.info.p_string = "token-list-head";
-    INIT_LIST_HEAD(&g_macro_node_list_head.info.name_head.list);
-    INIT_LIST_HEAD(&g_macro_node_list_head.info.parameter_list_head.list);
-    INIT_LIST_HEAD(&g_macro_node_list_head.info.replacement_list_head.list);
+    s_ctoken_init_head(&g_macro_node_list_head.info.name_head, "macro-name-head");
+    s_ctoken_init_head(&g_macro_node_list_head.info.parameter_list_head, "macro-parameter-head");
+    s_ctoken_init_head(&g_macro_node_list_head.info.replacement_list_head, "macro-replacement_head");
 }
+
 PRIVATE size_t s_cproc_macro_get_parameter_num(STRU_MACRO *macro)
 {
     size_t parameter_num = 0;
@@ -188,12 +186,10 @@ PRIVATE ENUM_RETURN s_cproc_macro_make_new(
     p_macro_node_temp->info.parameter_separator_num = 0;
     p_macro_node_temp->info.parameter_part_exist = BOOLEAN_FALSE;
     INIT_LIST_HEAD(&p_macro_node_temp->list);
-    p_macro_node_temp->info.name_head.info.p_string = "token-list-head";
-    p_macro_node_temp->info.parameter_list_head.info.p_string = "token-list-head";
-    p_macro_node_temp->info.replacement_list_head.info.p_string = "token-list-head";
-    INIT_LIST_HEAD(&p_macro_node_temp->info.name_head.list);
-    INIT_LIST_HEAD(&p_macro_node_temp->info.parameter_list_head.list);
-    INIT_LIST_HEAD(&p_macro_node_temp->info.replacement_list_head.list);
+
+    s_ctoken_init_head(&p_macro_node_temp->info.name_head, "macro-name-head");
+    s_ctoken_init_head(&p_macro_node_temp->info.parameter_list_head, "macro-parameter-head");
+    s_ctoken_init_head(&p_macro_node_temp->info.replacement_list_head, "macro-replacement_head");
 
     s_ctoken_add_node_to_list(&p_macro_node_temp->info.name_head,
         p_macro_token_node);
@@ -311,8 +307,6 @@ ENUM_RETURN s_cproc_macro_add_parameter(
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, RETURN_FAILURE);
     DEBUG_PRINT("macro name: %s", 
         list_entry(p_macro_node->info.name_head.list.next, STRU_C_TOKEN_NODE, list)->info.p_string);
-
-        s_cproc_macro_print_list_debug_info();
         
     if(p_macro_node->info.parameter_separator_num != s_cproc_macro_get_parameter_num(&p_macro_node->info))
     {
@@ -418,7 +412,8 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     STRU_MACRO_NODE *p_macro_node = list_entry(g_macro_node_list_head.list.prev, STRU_MACRO_NODE, list);
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
 
-    //delete blanks at the begining and end 
+    //delete blanks at the begining and end
+    DEBUG_PRINT("delete blanks at the begining and end");
     STRU_C_TOKEN_NODE *p_replacement_token;
     struct list_head *pos, *next, *prev;
     
@@ -438,7 +433,7 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
         }
     };
 
-    list_for_each_all_safe_reverse(pos, prev, &p_macro_node->info.replacement_list_head.list)
+    list_for_each_all_reverse_safe(pos, prev, &p_macro_node->info.replacement_list_head.list)
     {
         p_replacement_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
         if(p_replacement_token->info.token_type == C_TOKEN_BLANK)

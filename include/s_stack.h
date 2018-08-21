@@ -20,6 +20,7 @@ ENUM_RETURN stack_swap_top2(STACK p_stack);
 ENUM_RETURN stack_clear(STACK p_stack);
 
 ENUM_RETURN stack_get_element_count(STACK p_stack, size_t *count);
+ENUM_BOOLEAN stack_is_empty(STACK p_stack);
 
 __END_C_DECLS
 

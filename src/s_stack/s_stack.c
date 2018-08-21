@@ -223,3 +223,16 @@ ENUM_RETURN stack_get_element_count(STACK p_stack, size_t *count)
     return RETURN_SUCCESS;
 }
 
+ENUM_BOOLEAN stack_is_empty(STACK p_stack)
+{
+    R_ASSERT(p_stack != NULL, BOOLEAN_TRUE);
+
+    STRU_STACK *p_stack_temp = (STRU_STACK*)(p_stack);
+    if(p_stack_temp->data_count > 0)
+    {
+        return BOOLEAN_FALSE;
+    }
+
+    return BOOLEAN_TRUE;
+}
+

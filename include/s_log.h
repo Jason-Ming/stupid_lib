@@ -37,7 +37,7 @@ char* log_getfn(void);
 
 #define DEBUG_SWITCH 1
 
-#ifdef DEBUG_SWITCH
+#if (DEBUG_SWITCH == 1)
 #define DEBUG_PRINT(fmt, args...)\
     LOG_PRINT(LIGHT_GRAY"[%s] [file: %s, line: %ld] [function: %s]\n"NONE"   debuginfo: "fmt""NONE"\n", \
         get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__, ##args);

@@ -1639,6 +1639,11 @@ ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, S
 _UL s_get_inode_by_filename(const _S8 *p_filename)
 {
     S_R_ASSERT(p_filename != NULL, SL_INVALID);
+
+    FILE *f = fopen(p_filename, "r");
+    S_R_FALSE(f != NULL, SL_INVALID);
+    FCLOSE(f);
+    
     struct stat *buf=NULL;
     buf=(struct stat *)malloc(sizeof(struct stat));
     S_R_ASSERT(buf != NULL, SL_INVALID);
@@ -1647,7 +1652,7 @@ _UL s_get_inode_by_filename(const _S8 *p_filename)
     
     _UL inode = buf->st_ino;
     FREE(buf);
-
+    //printf("file: %s, inode: %ld\n", p_filename, inode);
     return inode;
 }
 
@@ -1660,7 +1665,9 @@ ENUM_RETURN s_save_file_to_text_buffer(
     R_ASSERT(pp_text_buffer != NULL, RETURN_FAILURE);
     R_ASSERT(p_buffer_size != NULL, RETURN_FAILURE);
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    
+    *pp_text_buffer = NULL;
+    *p_buffer_size = 0;
+        
     /* 获取文件大小 */  
     ret_val = fseek (pfr , 0 , SEEK_END);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -1685,5 +1692,17 @@ ENUM_RETURN s_save_file_to_text_buffer(
 	(*pp_text_buffer)[len] = '\n';
 	(*pp_text_buffer)[len + 1] = '\0';
     return RETURN_SUCCESS;
+}
+
+_S8 *s_duplicate_string(const _S8 *p_source)
+{
+    S_R_ASSERT(p_source != NULL, NULL);
+
+    _S8*p_temp = (_S8*)malloc(strlen(p_source) + 1);
+    S_R_ASSERT(p_temp != NULL, NULL);
+
+    strcpy(p_temp, p_source);
+
+    return p_temp;
 }
 

@@ -7,7 +7,8 @@
 #include "s_cproc.h"
 
 #define MAX_TOKEN_LEN 1024
-
+#define TOKEN_INFO_FORMAT "[%p-"REVERSE"%s"NONE"-%s]"
+#define TOKEN_INFO_VALUE(p_token) p_token, p_token->info.p_string, s_ctoken_get_str(p_token->info.token_type)
 typedef enum TAG_ENUM_C_TOKEN
 {
     C_TOKEN_NORMAL = 0,                                           /* normal */
@@ -174,6 +175,7 @@ typedef enum TAG_ENUM_C_TOKEN
 
     C_TOKEN_END,                                              /* END */
     C_TOKEN_UNKNOWN,                                          /* UNKNOWN */
+    C_TOKEN_LIST_HEAD,                                        /* LIST HEAD */
     C_TOKEN_INVALID,                                          /* INVALID */
     C_TOKEN_MAX,
 }ENUM_C_TOKEN;
@@ -212,6 +214,8 @@ typedef struct TAG_STRU_C_TOKEN_NODE
 
 __BEGIN_C_DECLS
 
+_VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name);
+
 ENUM_C_TOKEN s_ctoken_parse_identifier(_S8 *string);
 
 const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token);
@@ -243,6 +247,9 @@ ENUM_RETURN s_ctoken_get_token(
 _VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_list_head);
 
 _VOID s_ctoken_release_list(STRU_C_TOKEN_NODE *p_token_list_head);
+_VOID s_ctoken_release_list_after_node(STRU_C_TOKEN_NODE *p_token_list_head, 
+    STRU_C_TOKEN_NODE *p_token_list_node);
+
 _VOID s_ctoken_free_node(STRU_C_TOKEN_NODE *p_token_to_be_deleted);
 
 _VOID s_ctoken_print_list(
@@ -250,7 +257,17 @@ _VOID s_ctoken_print_list(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_token_list_start, 
     STRU_C_TOKEN_NODE *p_token_list_end);
-_VOID s_ctoken_print_list_debug_info(STRU_C_TOKEN_NODE *p_token_list_head);
+
+_VOID s_ctoken_print_list_debug_info(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_start, 
+    STRU_C_TOKEN_NODE *p_token_list_end);
+
+STRU_C_TOKEN_NODE * s_ctoken_get_last_node_by_type(
+    ENUM_C_TOKEN token_type,
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_start, 
+    STRU_C_TOKEN_NODE *p_token_list_end);
 
 __END_C_DECLS
 #endif

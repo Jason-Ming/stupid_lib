@@ -6,7 +6,7 @@
 
 __BEGIN_C_DECLS
 
-ENUM_RETURN s_cproc_include_file();
+ENUM_RETURN s_cproc_include_file(ENUM_RETURN *check_result);
 
 __END_C_DECLS
 #endif

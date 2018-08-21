@@ -48,27 +48,30 @@ PRIVATE _VOID s_cproc_text_release_node(STRU_C_TEXT_NODE **pp_c_text_node)
 
 PRIVATE ENUM_RETURN s_cproc_text_make_new_node(
     STRU_C_TEXT_NODE **pp_c_text_node, 
-    const _S8 *p_filename,
-    _SL inode,
-    _S8 *p_buffer,
-    size_t buffer_size)
+    const _S8 *p_filename)
 {
     S_R_ASSERT(pp_c_text_node != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_filename != NULL, RETURN_FAILURE);
-    S_R_ASSERT(inode != SL_INVALID, RETURN_FAILURE);
-    S_R_ASSERT(p_buffer != NULL, RETURN_FAILURE);
-    S_R_ASSERT(buffer_size > 0, RETURN_FAILURE);
-    
+    *pp_c_text_node = NULL;
+
     STRU_C_TEXT_NODE *p_c_text_node = NULL;
     p_c_text_node = (STRU_C_TEXT_NODE*)malloc(sizeof(STRU_C_TEXT_NODE));
-    p_c_text_node->data.p_filename = NULL;
+    S_R_ASSERT(p_c_text_node != NULL, RETURN_FAILURE);
+    
+    p_c_text_node->data.inode = s_get_inode_by_filename(p_filename);
+    S_R_ASSERT(p_c_text_node->data.inode != SL_INVALID, RETURN_FAILURE);
+    
     p_c_text_node->data.p_filename = (_S8 *)malloc(strlen(p_filename) + 1);
-    S_R_ASSERT_DO(p_c_text_node->data.p_filename != NULL, RETURN_FAILURE, FREE(p_c_text_node));
-
+    S_R_ASSERT(p_c_text_node->data.p_filename != NULL, RETURN_FAILURE);
     strcpy(p_c_text_node->data.p_filename, p_filename);
-    p_c_text_node->data.inode = inode;
-    p_c_text_node->data.p_buffer = p_buffer;
-    p_c_text_node->data.buffer_size = buffer_size;
+
+    FILE *pfr = fopen(p_filename, "r");
+    S_R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    ENUM_RETURN ret_val = s_save_file_to_text_buffer(pfr, &p_c_text_node->data.p_buffer, &p_c_text_node->data.buffer_size);
+    FCLOSE(pfr);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(p_c_text_node->data.p_buffer != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_c_text_node->data.buffer_size > 0, RETURN_FAILURE);
 
     *pp_c_text_node = p_c_text_node;
 
@@ -87,43 +90,20 @@ PRIVATE ENUM_RETURN s_cproc_text_add_node_to_list(
 
 ENUM_RETURN s_cproc_text_read_file_to_buffer(
     const _S8 *p_filename,
-    _S8 **pp_text_buffer)
+    const _S8 **pp_text_buffer)
 {
     S_R_ASSERT(p_filename != NULL, RETURN_FAILURE);
     S_R_ASSERT(pp_text_buffer != NULL, RETURN_FAILURE);
-    *pp_text_buffer = NULL;
-    
-    _S8 *p_text_buffer = NULL;
-    size_t text_buffer_size = 0;
-    ENUM_RETURN ret_val;
 
-    FILE *pfr = fopen(p_filename, "r");
+    //file has already been read to text list
+    *pp_text_buffer = s_cproc_text_get_buffer_by_filename(p_filename);
+    S_R_FALSE(*pp_text_buffer == NULL, RETURN_SUCCESS);
 
-	if(pfr == NULL)
-    {
-        CPROC_GEN_ERROR(NULL, "%s: No such file or directory", p_filename);
-        return RETURN_SUCCESS;
-	}
-
-    _SL inode = s_get_inode_by_filename(p_filename);
-    S_R_ASSERT_DO(inode != SL_INVALID, RETURN_FAILURE, FCLOSE(pfr));
-    
-    ret_val = s_save_file_to_text_buffer(pfr, &p_text_buffer, &text_buffer_size);
-    FCLOSE(pfr);
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    S_R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
-    S_R_ASSERT_DO(text_buffer_size > 0, RETURN_FAILURE, FREE(p_text_buffer));
-    
-    
     STRU_C_TEXT_NODE *p_c_text_node_new = NULL;
-    ret_val = s_cproc_text_make_new_node(
+    ENUM_RETURN ret_val = s_cproc_text_make_new_node(
         &p_c_text_node_new, 
-        p_filename, 
-        inode, 
-        p_text_buffer, 
-        text_buffer_size);
-    S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(p_text_buffer));
-    S_R_ASSERT_DO(p_c_text_node_new != NULL, RETURN_FAILURE, FREE(p_text_buffer));
+        p_filename);
+    S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_cproc_text_release_node(&p_c_text_node_new));
 
     ret_val = s_cproc_text_add_node_to_list(p_c_text_node_new);
     S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_cproc_text_release_node(&p_c_text_node_new));

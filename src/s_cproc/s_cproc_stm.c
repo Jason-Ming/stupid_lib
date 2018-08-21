@@ -73,7 +73,7 @@ typedef enum TAG_ENUM_CPROC_STM
 
 typedef struct TAG_STRU_CPROC_STM_PROC
 {
-    STM_STATE state;\
+    STM_STATE state;
     STM_PROC handler;
     const char *info;
 }STRU_CPROC_STM_PROC;
@@ -89,7 +89,6 @@ typedef enum TAG_ENUM_CPROC_STM_CHAR_DIRECTION
 typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 {
     STM stm;
-    
     //input and output data
     const _S8 *filename;
     const _S8 *p_text_buffer;
@@ -326,7 +325,34 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
     }while(0);
 
 PRIVATE STRU_CPROC_STM_RUN_DATA g_cproc_stm_run_data;
+PRIVATE STACK g_stack = NULL;
 PRIVATE ENUM_RETURN cproc_stm_postproc();
+
+PRIVATE _VOID s_cproc_stm_print_debug_info(_VOID)
+{
+    printf("%-20s:%p\n", "stm", g_cproc_stm_run_data.stm);
+    printf("%-20s:%s\n", "filename", g_cproc_stm_run_data.filename);
+    printf("%-20s:%p\n", "p_text_buffer", g_cproc_stm_run_data.p_text_buffer);
+
+    printf("%-20s:%d\n", "c_direction", g_cproc_stm_run_data.c_direction);
+    printf("%-20s:%zd\n", "c_step", g_cproc_stm_run_data.c_step);
+    printf("%-20s:%d\n", "move_to_next_line", g_cproc_stm_run_data.move_to_next_line);
+    printf("%-20s:%zd\n", "offset", g_cproc_stm_run_data.offset);
+    printf("%-20s:%zd\n", "current_line_index", g_cproc_stm_run_data.current_line_index);
+    printf("%-20s:%zd\n", "current_char_position_in_line", g_cproc_stm_run_data.current_char_position_in_line);
+    printf("%-20s:%c\n", "c", g_cproc_stm_run_data.c);
+    printf("%-20s:%c\n", "last_c", g_cproc_stm_run_data.last_c);
+    printf("%-20s:%p\n", "current_token", g_cproc_stm_run_data.current_token);
+    printf("%-20s:%p\n", "p_current_token", g_cproc_stm_run_data.p_current_token);
+    printf("%-20s:%zd\n", "current_token_size", g_cproc_stm_run_data.current_token_size);
+    printf("%-20s:%zd\n", "current_token_position.offset", g_cproc_stm_run_data.current_token_position.offset);
+    printf("%-20s:%zd\n", "current_token_position.line", g_cproc_stm_run_data.current_token_position.line);
+    printf("%-20s:%zd\n", "current_token_position.column", g_cproc_stm_run_data.current_token_position.column);
+    printf("%-20s:%d\n", "current_token_type", g_cproc_stm_run_data.current_token_type);
+    printf("%-20s:%d\n", "last_token_type", g_cproc_stm_run_data.last_token_type);
+    printf("%-20s:%d\n", "whether_any_error_exists", g_cproc_stm_run_data.whether_any_error_exists);
+    printf("%-20s:%p\n", "g_stack", g_stack);
+}
 
 _VOID s_cproc_generate_error()
 {
@@ -438,7 +464,7 @@ PRIVATE ENUM_RETURN cproc_continued_newline(size_t *skip, size_t *space_num)
 
 PRIVATE void display_check_correct_info(void)
 {
-    printf(LIGHT_GREEN"Correct!\n"NONE);
+    //printf(LIGHT_GREEN"Correct!\n"NONE);
 }
 
 PRIVATE ENUM_RETURN cproc_stm_prepare_proc()
@@ -486,7 +512,7 @@ PRIVATE ENUM_RETURN cproc_stm_preproc()
         STATE_TO(CPROC_STM_END);
         return RETURN_SUCCESS;
     }
-    DEBUG_PRINT("c = \033[7m%c"NONE", offset = %zd, line = %zd, column = %zd\n", CURRENT_C, CURRENT_C_OFFSET, CURRENT_C_LINE, CURRENT_C_COLUMN);
+    DEBUG_PRINT("current c = \033[7m%c"NONE", offset = %zd, line = %zd, column = %zd\n", CURRENT_C, CURRENT_C_OFFSET, CURRENT_C_LINE, CURRENT_C_COLUMN);
 
     size_t skip = 0;
     size_t space_num = 0;
@@ -1525,8 +1551,13 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_finish()
             {
                 CPROC_GEN_WARNING(LAST_TOKEN_POINTER, "extra tokens at end of #include directive");
             }
-            ret_val = s_cproc_include_file();
+            ENUM_RETURN result = RETURN_FAILURE;
+            ret_val = s_cproc_include_file(&result);
             S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            if(result == RETURN_FAILURE)
+            {
+                g_cproc_stm_run_data.whether_any_error_exists = BOOLEAN_TRUE;
+            }
             STATE_TO(CPROC_STM_NEWLINE);
             break;
         }
@@ -1863,6 +1894,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter()
     STATE_BACK;
     return RETURN_SUCCESS;
 }
+#if 0
 #def\
 ine MAC\
 RO    this is a valid\
@@ -1876,6 +1908,7 @@ RO    this is a valid\
 
 #define hash #
 #define STRSS(sd,sd2) #sd##"abc"###sd #sd###sd  
+#endif
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_replacement()
 {
     _S8 c = CURRENT_C;
@@ -1938,6 +1971,9 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_replacement()
             ENUM_RETURN ret_val;
             ret_val = s_cproc_macro_finish_replacement();
             S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+            s_cproc_token_release_list_after_last_newline();
+
             STATE_TO(CPROC_STM_NEWLINE);
             break;
         }
@@ -2146,54 +2182,74 @@ PRIVATE ENUM_RETURN cproc_stm_init(void)
             i, 
             cproc_stm_proc[i].state);
     }
-
+    
     return RETURN_SUCCESS;
 }
 
 PRIVATE _VOID cproc_stm_clear(_VOID)
 {
     ENUM_RETURN ret_val = stm_delete(&g_cproc_stm_run_data.stm);
-    V_ASSERT(ret_val == RETURN_SUCCESS);
+    S_V_ASSERT(ret_val == RETURN_SUCCESS);
 }
 
-ENUM_RETURN s_cproc_save_run_data_to_stack(STACK stack)
+PRIVATE ENUM_RETURN s_cproc_stm_save_up_level_run_data(_VOID)
 {
-    R_ASSERT(stack != NULL, RETURN_FAILURE);
-    ENUM_RETURN ret_val = stack_push(stack, (_VOID *) &g_cproc_stm_run_data, sizeof(STRU_CPROC_STM_RUN_DATA));
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-
+    ENUM_RETURN ret_val;
+    if(g_stack == NULL)
+    {
+        printf("stack create!\n");
+        ret_val = stack_create(&g_stack);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
+    else
+    {
+        s_cproc_stm_print_debug_info();
+        printf("push up level stm data!\n");
+        ret_val = stack_push(g_stack, (_VOID *) &g_cproc_stm_run_data, sizeof(STRU_CPROC_STM_RUN_DATA));
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_restore_run_data_from_stack(STACK stack)
+PRIVATE ENUM_RETURN s_cproc_stm_restore_up_level_run_data(_VOID)
 {
-    R_ASSERT(stack != NULL, RETURN_FAILURE);
-    size_t size_out = 0;
-    ENUM_RETURN ret_val = stack_pop(stack, 
-        (_VOID *) &g_cproc_stm_run_data,
-        &size_out,
-        sizeof(STRU_CPROC_STM_RUN_DATA));
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    S_R_ASSERT(size_out == sizeof(STRU_CPROC_STM_RUN_DATA), RETURN_FAILURE);
+    S_R_ASSERT(g_stack != NULL, RETURN_FAILURE);
+    
+    ENUM_RETURN ret_val;
+    if(stack_is_empty(g_stack))
+    {
+        printf("stack delete!\n");
+        ret_val = stack_delete(&g_stack);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
+    else
+    {
+        printf("pop up level stm data!\n");
+        size_t size_out = 0;
+        ret_val = stack_pop(g_stack, 
+            (_VOID *) &g_cproc_stm_run_data,
+            &size_out,
+            sizeof(STRU_CPROC_STM_RUN_DATA));
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        S_R_ASSERT(size_out == sizeof(STRU_CPROC_STM_RUN_DATA), RETURN_FAILURE);
+        s_cproc_stm_print_debug_info();
+    }
     
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_stm(
-    STACK stack,
+ENUM_RETURN s_cproc_stm_do(
     const _S8 *filename, 
-    _S8 *p_text_buffer, 
+    const _S8 *p_text_buffer, 
     ENUM_RETURN *check_result)
 {
-    R_ASSERT(stack != NULL, RETURN_FAILURE);
     R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
     R_ASSERT(check_result != NULL, RETURN_FAILURE);
     R_ASSERT(filename != NULL, RETURN_FAILURE);
-    
-    ENUM_RETURN ret_val;
-    *check_result = RETURN_SUCCESS;
 
-    ret_val = cproc_stm_init();
+    *check_result = RETURN_FAILURE;
+
+    ENUM_RETURN ret_val = cproc_stm_init();
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, cproc_stm_clear());
 
     g_cproc_stm_run_data.filename = filename;
@@ -2202,13 +2258,40 @@ ENUM_RETURN s_cproc_stm(
     ret_val = stm_run(g_cproc_stm_run_data.stm);
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, cproc_stm_clear());
 
-    if(g_cproc_stm_run_data.whether_any_error_exists)
+    if(!g_cproc_stm_run_data.whether_any_error_exists)
     {
-        *check_result = RETURN_FAILURE;
+        *check_result = RETURN_SUCCESS;
     }
 
     cproc_stm_clear();
+    
+    return RETURN_SUCCESS;
+}
 
+ENUM_RETURN s_cproc_stm(
+    const _S8 *file_name, 
+    const _S8 *p_text_buffer, 
+    ENUM_RETURN *check_result)
+{
+    R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(check_result != NULL, RETURN_FAILURE);
+    R_ASSERT(file_name != NULL, RETURN_FAILURE);
+
+    *check_result = RETURN_FAILURE;
+
+    ENUM_RETURN ret_val;
+    ret_val = s_cproc_stm_save_up_level_run_data();
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    ret_val = s_cproc_stm_do(
+            file_name,
+            p_text_buffer,
+            check_result);
+    S_ASSERT(ret_val == RETURN_SUCCESS);
+
+    ret_val = s_cproc_stm_restore_up_level_run_data();
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
     return RETURN_SUCCESS;
 }
 //
