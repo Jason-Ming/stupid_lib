@@ -19,22 +19,3 @@
 */
 # include<stdio.h>   得分  /* DSAFASD */ DDD
 //this is a test comment
-//test snippet begin========================================================================================
-#define /*这是单个字啧啧啧啧啧啧*/ STRING "checkpair//\   \ 
-/**/\t  'this //is a string' \" good! \"\n"//a line comment\ 
-#define CALC(x, y, z) (x/y/*this is a comment"a common\ 
-string" 'a' // x/y/z*//z)
-#define STRING1 'this is a single quote// /* lalala\
-*/ \" "hehe" \'sssss\''//a line comment
-//a line comment
-
-#define a\   
-bc "abc /*\  
-*/abc" STRING
-
-#define STR1 "STR1\
-#define STR2 "
-#define STR12 STR1 //STR2
-
-//test snippet end==========================================================================================
-

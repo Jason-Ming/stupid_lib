@@ -890,7 +890,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
             TYPE_TOKEN(C_TOKEN_PUNCTUATOR);
             OUTPUT_TOKEN_C;
             ADD_TOKEN;
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
+            //S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
             break;
         }
         case ' ':
@@ -922,7 +922,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
                 TYPE_TOKEN(C_TOKEN_PUNCTUATOR);
                 OUTPUT_TOKEN_C;
                 ADD_TOKEN;
-                S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
+                //S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
             }
             break;
         }
@@ -972,7 +972,8 @@ PRIVATE ENUM_RETURN cproc_stm_proc_string_double_quote()
         case '\r':
         case '\n':
         {
-            S_CPROC_STM_GEN_WARNING(S_CPROC_STM_CURRENT_TOKEN_C_POSITION, "missing terminating \" character");
+            ADD_TOKEN;
+            S_CPROC_STM_GEN_WARNING(S_CPROC_LAST_TOKEN_C_POSITION, "missing terminating \" character");
             STATE_BACK;
             break;
         }
@@ -1008,6 +1009,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_string_single_quote()
         case '\r':
         case '\n':
         {
+            ADD_TOKEN;
             S_CPROC_STM_GEN_WARNING(S_CPROC_LAST_TOKEN_C_POSITION, "missing terminating ' character");
             STATE_BACK;
             break;
@@ -2428,12 +2430,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_end()
     {
         case C_TOKEN_PAIR_COMMENT:
         {
-            S_CPROC_STM_GEN_ERROR(S_CPROC_STM_CURRENT_TOKEN_C_POSITION, "unterminated comment");
-            break;
-        }
-        case C_TOKEN_STRING:
-        {
-            S_CPROC_STM_GEN_WARNING(S_CPROC_STM_CURRENT_TOKEN_C_POSITION, "missing terminating \" character");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "unterminated comment");
             break;
         }
         default:

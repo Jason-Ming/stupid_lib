@@ -11,9 +11,11 @@
 
 using namespace std;
 
-#define TEST_FILE_DIR001 "test_files/s_cproc/continued_newline/test_001"
-#define TEST_FILE_DIR002 "test_files/s_cproc/continued_newline/test_002"
-#define TEST_FILE_DIR003 "test_files/s_cproc/continued_newline/test_003"
+#define TEST_FILE_DIR001 "test_files/s_cproc/comment_and_blank/test_001"
+#define TEST_FILE_DIR002 "test_files/s_cproc/comment_and_blank/test_002"
+#define TEST_FILE_DIR003 "test_files/s_cproc/comment_and_blank/test_003"
+#define TEST_FILE_DIR004 "test_files/s_cproc/comment_and_blank/test_004"
+#define TEST_FILE_DIR005 "test_files/s_cproc/comment_and_blank/test_005"
 
 #define TEST_FILE_INPUT "/i.input"
 
@@ -23,7 +25,7 @@ using namespace std;
 #define TEST_FILE_OUTPUT_EXPECT "/o_expect.output"
 #define TEST_FILE_ERRORS_EXPECT "/e_expect.output"
 
-TEST_GROUP(s_cc_continued_newline)
+TEST_GROUP(s_cc_comment_and_blank)
 {
     void setup()
     {
@@ -79,11 +81,11 @@ TEST_GROUP(s_cc_continued_newline)
     _S32 file_compare_result;
 };
 
-TEST(s_cc_continued_newline, at_the_end_of_file)
+TEST(s_cc_comment_and_blank, unterminated_pair_comment)
 {
     file_init(TEST_FILE_DIR001);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
-    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(RETURN_FAILURE, ret_val);
 
     ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
     CHECK_EQUAL(RETURN_SUCCESS, ret_val);
@@ -94,7 +96,7 @@ TEST(s_cc_continued_newline, at_the_end_of_file)
     CHECK_EQUAL(0, file_compare_result);
 }
 
-TEST(s_cc_continued_newline, at_the_end_of_line)
+TEST(s_cc_comment_and_blank, unterminated_string)
 {
     file_init(TEST_FILE_DIR002);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
@@ -109,10 +111,54 @@ TEST(s_cc_continued_newline, at_the_end_of_line)
     CHECK_EQUAL(0, file_compare_result);
 }
 
-//` @ # backslash will explained to C_TOKEN_PUNCTUATOR, won't emit any error or warnning
-TEST(s_cc_continued_newline, backslash_at_at_the_end_of_line)
+TEST(s_cc_comment_and_blank, unterminated_char)
 {
     file_init(TEST_FILE_DIR003);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+TEST(s_cc_comment_and_blank, comment_replaced_by_blank)
+{
+    file_init(TEST_FILE_DIR004);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+TEST(s_cc_comment_and_blank, newline_reserved)
+{
+    file_init(TEST_FILE_DIR005);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+TEST(s_cc_comment_and_blank, PPD_is_not_at_begin_of_line)
+{
+    file_init(TEST_FILE_DIR005);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
     CHECK_EQUAL(RETURN_SUCCESS, ret_val);
 

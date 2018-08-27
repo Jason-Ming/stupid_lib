@@ -302,7 +302,7 @@ _VOID s_ctoken_print_list(
 		CPP_PRINT(fpw, "%s", p_token_list_node->info.p_string);
 	}
 
-	CPP_PRINT(fpw, "\n");
+	//CPP_PRINT(fpw, "\n");
     
 }
 
@@ -570,6 +570,14 @@ ENUM_RETURN s_ctoken_move_list_to_another_list(
     S_R_ASSERT(p_source_token_list_end != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_dest_token_list_head != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_dest_token_list_node != NULL, RETURN_FAILURE);
+
+    DEBUG_PRINT("move list: LIST HEAD: "TOKEN_INFO_FORMAT", from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT"\n"
+                "  to list: LIST HEAD: "TOKEN_INFO_FORMAT", after "TOKEN_INFO_FORMAT, 
+            TOKEN_INFO_VALUE(p_source_token_list_head),
+            TOKEN_INFO_VALUE(p_source_token_list_start),
+            TOKEN_INFO_VALUE(p_source_token_list_end),
+            TOKEN_INFO_VALUE(p_dest_token_list_head),
+            TOKEN_INFO_VALUE(p_dest_token_list_node));
 
     //start in the end of the list means the source list is empty, not need to move 
     S_R_FALSE(p_source_token_list_head != p_source_token_list_start, RETURN_SUCCESS);

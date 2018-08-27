@@ -1,0 +1,9 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_003/i.input:1:12: warning: missing terminating ' character
+ char *s =  'this is a unterminated string
+            ^
+/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_003/i.input:2:16: warning: missing terminating ' character
+ #define FILE_B 'b.input\"\'
+                ^
+/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_003/i.input:3:14: warning: missing terminating ' character
+ #define aaaa 'adsf
+              ^

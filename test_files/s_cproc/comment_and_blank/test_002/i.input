@@ -1,0 +1,4 @@
+char *s =  "this is a unterminated string
+#define FILE_B "b.input\"
+#define STRBEGIN "ABC
+#define STREND DEF"

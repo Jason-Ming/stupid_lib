@@ -11,4 +11,7 @@ string" 'a' // x/y/z*//z)
 bc "abc /*\  
 */abc"
 ''\\
+#define STRBEGIN() ` "ABC
+#define STREND @"
+int asdf#
 //test snippet end==========================================================================================

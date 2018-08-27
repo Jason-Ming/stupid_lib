@@ -4,4 +4,7 @@
  
 
 
-''\
+''\#define STRBEGIN() ` "ABC
+
+int asdf#
+ 

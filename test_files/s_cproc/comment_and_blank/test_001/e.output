@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_001/i.input:1:7: error: unterminated comment
+ int a;/* this is a unterminated pair comment
+       ^

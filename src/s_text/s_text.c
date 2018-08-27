@@ -1789,4 +1789,4 @@ _S8* s_concatenate_string(const _S8*p_string1, const _S8*p_string2)
 
     return p_temp;
 }
-\
+

@@ -20,12 +20,8 @@ int fff()
     printf("%s", FILE_B");
 }
 */
-#define FILE_B "b.input\"
-#define VA(...) __VA_ARGS__
-#define aaaa "adsf
-#define a\ \  
-bc "abc /*\  
-*/abc"
-\
 
-int asdf;
+#define VA(...) __VA_ARGS__
+
+
+

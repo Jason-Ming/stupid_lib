@@ -16,6 +16,9 @@
 /home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:10:10: warning: ISO C99 requires whitespace after the macro name
  #define a\ \  
           ^
-/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:13:3: error: stray '\' in program
- ''\\
-   ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:14:22: warning: missing terminating " character
+ #define STRBEGIN() ` "ABC
+                      ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:15:17: warning: missing terminating " character
+ #define STREND @"
+                 ^

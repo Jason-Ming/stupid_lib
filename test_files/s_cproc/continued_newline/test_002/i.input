@@ -1,4 +1,6 @@
 //test snippet begin========================================================================================
+#define X/\
+/line comment
 #define STRING "checkpair//  \ 
 /**/\t  'this is a string' \" good! \"\n"//a line comment\ 
 #define CALC(x, y, z) (x/y/*this is a comment"a common\ 
