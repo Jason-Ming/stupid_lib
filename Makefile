@@ -42,7 +42,7 @@ CPPUTEST_HOME = /usr
 #…Ë÷√±‡“Î∆˜
 CPP     = g++
 CPPFLAGS  += -g -Wall
-#CPPFLAGS  += -D CPPUTEST
+CPPFLAGS  += -D CPPUTEST
 CPPFLAGS  += -I$(CPPUTEST_HOME)/include
 CPPFLAGS  += -I$(ROOT_DIR)/include
 CPPFLAGS  += -I$(ROOT_DIR)/src/include
@@ -50,7 +50,8 @@ CPPFLAGS  += -I$(ROOT_DIR)/src/s_cmd
 #CPPFLAGS  += -I$(LIB_PATH)/include
 #CPPFLAGS works for both .c and .cpp files!
 
-CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+#CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorNewMacros.h
+CXXFLAGS += -include $(CPPUTEST_HOME)/include/CppUTest/MemoryLeakDetectorMallocMacros.h
 
 CPPINCLUDEFLAGS = -I$(ROOT_DIR)/include 
 CPPINCLUDEFLAGS += -I$(ROOT_DIR)/src/include
@@ -64,7 +65,7 @@ CXXLDFLAGS += -L$(CPPUTEST_HOME)/lib -lCppUTest -lCppUTestExt -lm
 #…Ë÷√±‡“Î∆˜
 CC=gcc
 CFLAGS  += -g -Wall
-CFLAGS  += -std=c99
+#CFLAGS  += -std=c99
 CFLAGS   += -I$(ROOT_DIR)/include
 CFLAGS   += -I$(ROOT_DIR)/src/include
 #CFLAGS   += -I$(LIB_PATH)/include

@@ -1,0 +1,14 @@
+//test snippet begin========================================================================================
+#define STRING "checkpair//  \ 
+/**/\t  'this is a string' \" good! \"\n"//a line comment\ 
+#define CALC(x, y, z) (x/y/*this is a comment"a common\ 
+string" 'a' // x/y/z*//z)
+#define STRING1 'this is a single quote// /* lalala\
+*/ \" "hehe" \'sssss\''//a line comment
+//a line comment
+
+#define a\   
+bc "abc /*\  
+*/abc"
+''
+//test snippet end==========================================================================================

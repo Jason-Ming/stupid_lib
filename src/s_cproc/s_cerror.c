@@ -28,7 +28,6 @@ _VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
 
 	size_t column = 0;
 
-    ENUM_BOOLEAN first_newline = BOOLEAN_FALSE;
     while((p_text_buffer + offset - column) != p_text_buffer)
 	{
         if(( *(p_text_buffer + offset - column) == '\r' 
@@ -70,4 +69,56 @@ _VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
 	printf(LIGHT_GREEN"^"NONE"\n");
 	
 }
+
+#ifdef CPPUTEST
+
+_VOID display_token_and_line_to_file(const _S8 *p_text_buffer, size_t offset, FILE *pfw)
+{
+	S_V_ASSERT(p_text_buffer != NULL);
+    S_V_FALSE(pfw != NULL);
+
+	size_t start = 0;
+	size_t column = 0;
+
+    while((p_text_buffer + offset - column) != p_text_buffer)
+	{
+        if(( *(p_text_buffer + offset - column) == '\r' 
+		    || *(p_text_buffer + offset - column) == '\n')
+		    &&(column != 0))
+        {
+            column--;
+            break;
+		}
+		column++;
+	};
+
+	_S8 c;
+    fputc(' ', pfw);
+	for(_S32 i = 0; ; i++)
+	{
+		c = *(p_text_buffer + offset - column + start + i);
+        if(c == '\0')
+        {
+            break;
+        }
+        
+		if(c == '\r' || c == '\n')
+		{
+			break;
+		}
+		
+		fputc(c, pfw);
+	}
+
+	fputc('\n', pfw);
+	fputc(' ', pfw);
+	for(_S32 i = 0; i < column - start; i++)
+	{
+		fputc(' ', pfw);
+	}
+    fputc('^', pfw);
+	fputc('\n', pfw);
+	
+}
+#endif
 

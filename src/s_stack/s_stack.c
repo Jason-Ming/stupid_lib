@@ -74,12 +74,12 @@ ENUM_RETURN stack_delete(STACK *p_stack)
     {
         p_temp = p_head;
         p_head = p_head->next;
-        FREE(p_temp->p_data);
-        FREE(p_temp);
+        S_FREE(p_temp->p_data);
+        S_FREE(p_temp);
     };
     p_stack_temp->p_data_list_head = NULL;
     
-    FREE(p_stack_temp);
+    S_FREE(p_stack_temp);
     
     *p_stack = NULL;
     
@@ -99,7 +99,7 @@ ENUM_RETURN stack_push(STACK p_stack, _VOID * p_data, size_t data_size)
     memcpy(p_data_temp, p_data, data_size);
     
     STRU_STACK_DATA *p_stack_data_temp = (STRU_STACK_DATA*)malloc(sizeof(STRU_STACK_DATA));
-    R_ASSERT_DO(p_stack_data_temp != NULL, RETURN_FAILURE, FREE(p_data_temp););
+    R_ASSERT_DO(p_stack_data_temp != NULL, RETURN_FAILURE, S_FREE(p_data_temp););
 
     p_stack_data_temp->p_data = p_data_temp;
     p_stack_data_temp->data_size = data_size;
@@ -128,11 +128,11 @@ ENUM_RETURN stack_pop(STACK p_stack, _VOID * p_data, size_t *size_out, size_t si
     *size_out = MIN(size_in, p_stack_data_temp->data_size);
     memcpy(p_data, p_stack_data_temp->p_data, *size_out);
 
-    FREE(p_stack_data_temp->p_data);
+    S_FREE(p_stack_data_temp->p_data);
     p_stack_data_temp->data_size = 0;
 
     p_stack_temp->p_data_list_head = p_stack_data_temp->next;
-    FREE(p_stack_data_temp);
+    S_FREE(p_stack_data_temp);
     p_stack_temp->data_count--;
 
     return RETURN_SUCCESS;
@@ -204,8 +204,8 @@ ENUM_RETURN stack_clear(STACK p_stack)
     {
         p_temp = p_head;
         p_head = p_head->next;
-        FREE(p_temp->p_data);
-        FREE(p_temp);
+        S_FREE(p_temp->p_data);
+        S_FREE(p_temp);
     };
     p_stack_temp->p_data_list_head = NULL;
     p_stack_temp->data_count = 0;

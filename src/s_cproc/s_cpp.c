@@ -39,8 +39,9 @@ ENUM_RETURN s_cpp(const _S8 * file_name, ENUM_RETURN *check_result)
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     DEBUG_PRINT(LIGHT_YELLOW"<<<<<=====cpp file name: %s====================check_result: %s\n"NONE, file_name, 
-    check_result?"success":"fail");
-    printf(LIGHT_YELLOW"<<<<<=====cpp file name: %s====================check_result: %s\n"NONE, file_name, check_result?"success":"fail");
+        *check_result == RETURN_SUCCESS?"success":"fail");
+    printf(LIGHT_YELLOW"<<<<<=====cpp file name: %s====================check_result: %s\n"NONE, file_name, *check_result 
+        == RETURN_SUCCESS?"success":"fail");
     return RETURN_SUCCESS;
 }
 

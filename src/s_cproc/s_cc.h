@@ -4,6 +4,7 @@
 #include "s_defines.h"
 #include "s_type.h"
 
+extern FILE *g_pfw_errors;
 
 __BEGIN_C_DECLS
 

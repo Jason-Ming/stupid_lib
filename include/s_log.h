@@ -16,18 +16,18 @@ char* log_getfn(void);
 
 #ifdef LOG_TYPE_FILE
 
-#define LOG_PRINT(fmt, args...)\
+#define LOG_PRINT(fmt, ...)\
     do\
     {\
         FILE *fp = fopen(log_getfn(), "a");\
         if(fp != NULL)\
         {\
-            fprintf(fp, fmt, ##args);\
+            fprintf(fp, fmt, __VA_ARGS__);\
             fclose(fp);\
         }\
         else\
         {\
-            printf(fmt, ##args);\
+            printf(fmt, __VA_ARGS__);\
         }\
     }while(0);
 #else
@@ -38,9 +38,9 @@ char* log_getfn(void);
 #define DEBUG_SWITCH 1
 
 #if (DEBUG_SWITCH == 1)
-#define DEBUG_PRINT(fmt, args...)\
+#define DEBUG_PRINT(fmt, ...)\
     LOG_PRINT(LIGHT_GRAY"[%s] [file: %s, line: %ld] [function: %s]\n"NONE"   debuginfo: "fmt""NONE"\n", \
-        get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__, ##args);
+        get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__, ##__VA_ARGS__);
 #else
 #define DEBUG_PRINT(fmt, args...)
 #endif

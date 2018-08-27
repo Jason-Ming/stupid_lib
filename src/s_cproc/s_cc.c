@@ -41,6 +41,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <limits.h>
 #include <stdlib.h>
 
 #include "s_log.h"
@@ -55,6 +56,9 @@
 #include "s_cproc_text.h"
 #include "s_cproc_token.h"
 
+#ifdef CPPUTEST
+FILE *g_pfw_errors;
+#endif
 
 ENUM_RETURN s_cget_statement(_S8 ** pp_text_buffer, _S8 statement_buffer[], size_t buffer_size, size_t *len)
 {
@@ -112,10 +116,21 @@ ENUM_RETURN s_cget_statement(_S8 ** pp_text_buffer, _S8 statement_buffer[], size
     *len = strlen(temp);
     return RETURN_SUCCESS;
 }
+#ifdef CPPUTEST
+ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw, FILE * pfw_errors)
+{
+    g_pfw_errors = pfw_errors;
 
+#else
 ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 {
+
+#endif
+
 	R_ASSERT(file_name != NULL, RETURN_FAILURE);
+
+    _S8 *path = realpath(file_name, NULL);
+    printf("file name: %s, file real path: %s\n", file_name, path);
 
 	ENUM_RETURN ret_val = RETURN_FAILURE;
     ENUM_RETURN result = RETURN_FAILURE;
@@ -123,7 +138,7 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
     s_cproc_macro_list_init();
     s_cproc_token_list_init();
     
-    ret_val = s_cpp(file_name, &result);
+    ret_val = s_cpp(path, &result);
     S_ASSERT(ret_val == RETURN_SUCCESS);
     
     s_cproc_text_print_list_debug_info();
@@ -144,7 +159,9 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 	s_cproc_text_release_list();
     s_cproc_token_release_list();
     s_cproc_macro_release_list();
-
-	return RETURN_SUCCESS;
+#ifndef CPPUTEST
+    S_FREE(path);
+#endif
+	return result;
 }
 

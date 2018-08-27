@@ -71,7 +71,7 @@ ENUM_RETURN stm_create(STM *p_stm, unsigned int state_num)
     p_stm_temp->preproc_handler = NULL;
     p_stm_temp->postproc_handler = NULL;
     p_stm_temp->state_handlers = (STRU_STM_PROC*)malloc(sizeof(STRU_STM_PROC)*state_num);
-    R_ASSERT_DO(p_stm_temp->state_handlers != NULL, RETURN_FAILURE, FREE(p_stm_temp));
+    R_ASSERT_DO(p_stm_temp->state_handlers != NULL, RETURN_FAILURE, S_FREE(p_stm_temp));
 
     for(int i = 0; i < state_num; i++)
     {
@@ -96,10 +96,10 @@ ENUM_RETURN stm_delete(STM *p_stm)
     for(int i = 0; i < p_stm_temp->state_num; i++)
     {
         R_ASSERT(handlers[i].info != NULL, RETURN_FAILURE);
-        FREE(handlers[i].info);
+        S_FREE(handlers[i].info);
     }
-    FREE(handlers);
-    FREE(p_stm_temp);
+    S_FREE(handlers);
+    S_FREE(p_stm_temp);
     *p_stm = NULL;
 
     return RETURN_SUCCESS;

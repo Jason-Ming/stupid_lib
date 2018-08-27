@@ -18,6 +18,8 @@
 
 void display_mem(void *addr, size_t size, ENUM_BOOLEAN whether_display_bits)
 {
+    printf("----------------------------------------\n");
+    printf("display_mem [addr: %p, size: %zd]\n", addr, size);
     for(size_t i = 0; i < size; i++)
     {
         int x = ((int)*((char*)addr+ i))&(~(~0 << 8));
@@ -34,6 +36,7 @@ void display_mem(void *addr, size_t size, ENUM_BOOLEAN whether_display_bits)
             printf("%d", (x&(0x01 << (sizeof(char)*8 - j - 1)))?1:0);
         }
 
+        printf("    %c", *((char*)addr + i));
         printf("\n");
     }
 }

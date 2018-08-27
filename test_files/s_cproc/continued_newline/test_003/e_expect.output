@@ -1,0 +1,21 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:2:31: warning: backslash and newline separated by space
+ #define STRING "checkpair//  \\ 
+                               ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:3:42: warning: multi-line comment [-Wcomment]
+ /**/\t  'this is a string' \" good! \"\n"//a line comment\ 
+                                          ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:3:42: warning: multi-line comment [-Wcomment]
+ /**/\t  'this is a string' \" good! \"\n"//a line comment\ 
+                                          ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:10:12: warning: backslash and newline separated by space
+ #define a\ \  
+            ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:11:11: warning: backslash and newline separated by space
+ bc "abc /*\  
+           ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:10:10: warning: ISO C99 requires whitespace after the macro name
+ #define a\ \  
+          ^
+/home/jason/github/stupid_lib/test_files/s_cproc/continued_newline/test_003/i.input:13:3: error: stray '\' in program
+ ''\\
+   ^

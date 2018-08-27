@@ -85,9 +85,9 @@ PRIVATE void get_a_new_option_cb_do_error(STRU_OPTION_CONTROL_BLOCK *p_new)
     {
         return;
     }
-    FREE(p_new->subcmd);
-    FREE(p_new->option);
-    FREE(p_new->help_info);
+    S_FREE(p_new->subcmd);
+    S_FREE(p_new->option);
+    S_FREE(p_new->help_info);
     free(p_new);
 }
 

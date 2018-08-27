@@ -17,12 +17,16 @@
 //判断字符是不是16进值的数字
 #define IS_HEX( c ) ( ((c) >= '0' && (c) <= '9') ||((c) >= 'A' && (c) <= 'F') ||((c) >= 'a' && (c) <= 'f') )
 
-#define IS_ALPHABET(c) (((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
+#define IS_ALPHABET(c) ((((c) >= 'a' && (c) <= 'z') || ((c) >= 'A' && (c) <= 'Z'))?(BOOLEAN_TRUE):(BOOLEAN_FALSE))
 
-#define IS_DIR(c) ((IS_ALPHABET(c) || IS_DEC(c) || c == ' ')?BOOLEAN_TRUE:BOOLEAN_FALSE)
+#define IS_DIR(c) ((IS_ALPHABET((c)) || IS_DEC((c)) || (c) == ' ')?BOOLEAN_TRUE:BOOLEAN_FALSE)
 
 #define CONC(x, y) x##y
 #define CONC_(x, y) x##_##y
+#define STR(x) #x
+
+#define CONC_STR(x, y) STR(CONC(x, y))
+
 
 /* c can not be '\0', if you output '\0', please use OUTPUT_END */
 #define OUTPUT_C(c, dest, size)\
@@ -35,6 +39,7 @@
 
 #define OUTPUT_END(dest, size)\
     do{\
+        if(*(dest) == '\0') break;\
 		S_ASSERT_LOG_DO((size) > 0, break, "buffer '"#dest"''s size(%zd) is not enough!", (size));\
         *(dest)++ = '\0';\
         (size)--;\
@@ -213,6 +218,15 @@ ENUM_BOOLEAN s_range(_S8 begin, _S8 end);
 
 /**
  * @author: Jason Ming
+ * @description: compare string in file1 to file2
+ * @param s1: pointer to file1
+ * @param s2: pointer to file2
+ * @return: -1(file1 < file2), 0(file1 == file2), 1(file1 > file2)
+ */
+ENUM_RETURN s_file_compare(FILE *pfr1, FILE *pfr2, _S32 *result);
+
+/**
+ * @author: Jason Ming
  * @description: compare s1 to s2, case insensitive
  * @param s1: pointer to string
  * @param s2: pointer to string
@@ -299,7 +313,17 @@ _S32 numcmp_r(const _S8 * s1, const _S8 * s2);
 
 ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, STRU_TABLE_TEXT_FORMAT format[]);
 
-_UL s_get_inode_by_filename(const _S8 *p_filename);
+ENUM_BOOLEAN s_file_exist(const _S8 * p_filename);
+
+/**
+ * @author: Jason Ming
+ * @description: alloc memory to copy the file real directory
+ * @param p_filename: pointer to file name
+ * @return: pointer to new directory string or NULL if failed
+ */
+_S8* s_get_realdir(const _S8 *p_filename);
+
+_UL s_get_inode(const _S8 *p_filename);
 
 ENUM_RETURN s_save_file_to_text_buffer(
     FILE *pfr, 
@@ -313,6 +337,15 @@ ENUM_RETURN s_save_file_to_text_buffer(
  * @return: pointer to new string or NULL if failed
  */
 _S8 *s_duplicate_string(const _S8 *p_source);
+
+/**
+ * @author: Jason Ming
+ * @description: alloc memory to concatenate two strings
+ * @param p_string1: pointer to string1
+ * @param p_string2: pointer to string2
+ * @return: pointer to new string or NULL if failed
+ */
+_S8* s_concatenate_string(const _S8*p_string1, const _S8*p_string2);
 
 __END_C_DECLS
 

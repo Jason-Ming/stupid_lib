@@ -33,6 +33,7 @@ the text after transform is output to a file.
 if the file pointer is NULL, it will be output to a buffer which is allocated by this function. 
 if the buffer is NULL, it will be output to the standard IO.
 */
+/* make sure the file_name is the realpath */
 ENUM_RETURN s_cpp(const _S8 * file_name, ENUM_RETURN *check_result);
 
 __END_C_DECLS

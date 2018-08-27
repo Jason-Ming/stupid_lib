@@ -128,19 +128,19 @@ static inline int list_empty(const struct list_head * head)
 
 #define list_for_each(pos, head, start, end)							\
 		for (pos = ((start) == (head))?((start)->next):(start); 		\
-		pos != (((end) == (head))?(head):(end)->next); pos = (pos)->next)
+		pos != (head) && pos != (end)->next; pos = (pos)->next)
 
 #define list_for_each_safe(pos, n, head, start, end)					\
 		for (pos = ((start) == (head))?((start)->next):(start), n = pos->next; \
-		pos != (((end) == (head))?(head):(end)->next); pos = n, n = pos->next)
+		pos != (head) && pos != (end)->next; pos = n, n = pos->next)
 
 #define list_for_each_reverse(pos, head, start, end)					\
 		for (pos = ((end) == (head))?((end)->prev):(end);				\
-		pos != (((start) == (head))?(head):(start)->prev); pos = pos->prev)
+		pos != (head) && pos != (start)->prev; pos = pos->prev)
 
 #define list_for_each_reverse_safe(pos, p, head, start, end)			\
 		for (pos = ((end) == (head))?((end)->prev):(end), p = pos->prev; \
-		pos != (((start) == (head))?(head):(start)->prev); pos = p, p = pos->prev)
+		pos != (head) && pos != (start)->prev; pos = p, p = pos->prev)
 
 #define list_entry(ptr, type, member)									\
 		container_of(ptr, type, member)

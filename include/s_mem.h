@@ -20,9 +20,10 @@ __END_C_DECLS
     
 #define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
 
-#define FREE(p) do{ if((p) != NULL){free(p); (p) = NULL;}}while(0)
+#define S_MALLOC 
+#define S_FREE(p) do{ if((p) != NULL){free(p); (p) = NULL;}}while(0)
 
-#define FCLOSE(p) do{ if((p) != NULL){fclose(p); (p) = NULL;}}while(0)
+#define S_FCLOSE(p) do{ if((p) != NULL){fclose(p); (p) = NULL;}}while(0)
 
 #define SWAP(x, y)\
     do\

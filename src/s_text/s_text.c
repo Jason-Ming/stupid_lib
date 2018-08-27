@@ -1317,6 +1317,46 @@ ENUM_BOOLEAN s_range(_S8 begin, _S8 end)
     return BOOLEAN_FALSE;
 }
 
+ENUM_RETURN s_file_compare(FILE *pfr1, FILE *pfr2, _S32 *result)
+{
+    S_R_ASSERT(pfr1 != NULL, RETURN_FAILURE);
+    S_R_ASSERT(pfr2 != NULL, RETURN_FAILURE);
+    S_R_ASSERT(result != NULL, RETURN_FAILURE);
+    *result = 0;
+
+    
+    ENUM_RETURN ret_val;
+    _S8 *p_text1 = NULL;
+    size_t size_text1 = 0;
+    _S8 *p_text2 = NULL;
+    size_t size_text2 = 0;
+
+    ret_val = s_save_file_to_text_buffer(pfr1, &p_text1, &size_text1);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(p_text1 != NULL, RETURN_FAILURE);
+
+    //display_mem(p_text1, size_text1, BOOLEAN_TRUE);
+    ret_val = s_save_file_to_text_buffer(pfr2, &p_text2, &size_text2);
+    S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, S_FREE(p_text1));
+    S_R_ASSERT_DO(p_text2 != NULL, RETURN_FAILURE, S_FREE(p_text1));
+
+    //display_mem(p_text2, size_text2, BOOLEAN_TRUE);
+
+    if(size_text1 != size_text2)
+    {
+        *result = size_text1 < size_text2 ? (-1):(1);
+    }
+    else
+    {
+        *result = strcmp(p_text1, p_text2);
+    }
+    
+    S_FREE(p_text1);
+    S_FREE(p_text2);
+
+    return RETURN_SUCCESS;
+}
+
 PRIVATE _S32	table_case[MAX_CHAR] =
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30,
@@ -1627,22 +1667,51 @@ ENUM_RETURN s_print_text_table(const _S8 *text[], size_t rows, size_t columns, S
     R_ASSERT(print_table_text_elements != NULL, RETURN_FAILURE);
 
     ret_val = build_text_table(print_table_text_elements, text, rows, columns, format);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, S_FREE(print_table_text_elements));
 
     ret_val = print_text_table(print_table_text_elements, rows, columns);
-    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, FREE(print_table_text_elements));
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, S_FREE(print_table_text_elements));
 
-    FREE(print_table_text_elements);
+    S_FREE(print_table_text_elements);
 
     return RETURN_SUCCESS;
 }
-_UL s_get_inode_by_filename(const _S8 *p_filename)
+
+_S8* s_get_realdir(const _S8 *p_filename)
+{
+    S_R_FALSE(BOOLEAN_FALSE != s_file_exist(p_filename), NULL);
+
+    _S8 * p_file_realpath = realpath(p_filename, NULL);
+    S_R_ASSERT(p_file_realpath != NULL, NULL);
+    _S32 index_slash;
+    //_S32 index_backslash;
+    S_R_ASSERT_DO(RETURN_SUCCESS == s_strrindex(p_file_realpath, "/", &index_slash), NULL, S_FREE(p_file_realpath));
+    //S_R_ASSERT_DO(RETURN_SUCCESS == s_strrindex(p_file_realpath, "\\", &index_slash), NULL, S_FREE(p_file_realpath));
+    S_R_ASSERT_DO(-1 != index_slash /*|| -1 != index_backslash*/, NULL, S_FREE(p_file_realpath));
+    S_R_ASSERT_DO(index_slash < strlen(p_file_realpath), NULL, S_FREE(p_file_realpath));
+    p_file_realpath[index_slash + 1] = '\0';
+
+    return p_file_realpath;    
+}
+
+ENUM_BOOLEAN s_file_exist(const _S8 * p_filename)
+{
+    S_R_ASSERT(p_filename != NULL, BOOLEAN_FALSE);
+    DEBUG_PRINT("file name: %s", p_filename);
+    
+    FILE *f = fopen(p_filename, "rt");
+    S_R_FALSE(f != NULL, BOOLEAN_FALSE);
+    S_FCLOSE(f);
+    return BOOLEAN_TRUE;
+}
+
+_UL s_get_inode(const _S8 *p_filename)
 {
     S_R_ASSERT(p_filename != NULL, SL_INVALID);
 
-    FILE *f = fopen(p_filename, "r");
+    FILE *f = fopen(p_filename, "rt");
     S_R_FALSE(f != NULL, SL_INVALID);
-    FCLOSE(f);
+    S_FCLOSE(f);
     
     struct stat *buf=NULL;
     buf=(struct stat *)malloc(sizeof(struct stat));
@@ -1651,7 +1720,7 @@ _UL s_get_inode_by_filename(const _S8 *p_filename)
     stat(p_filename,buf);
     
     _UL inode = buf->st_ino;
-    FREE(buf);
+    S_FREE(buf);
     //printf("file: %s, inode: %ld\n", p_filename, inode);
     return inode;
 }
@@ -1683,14 +1752,16 @@ ENUM_RETURN s_save_file_to_text_buffer(
     R_ASSERT(*pp_text_buffer != NULL, RETURN_FAILURE);
 
     ret_val = fseek (pfr , 0 , SEEK_SET);
-    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, S_FREE(*pp_text_buffer));
 
     size_t len = fread (*pp_text_buffer,1,*p_buffer_size,pfr);
-    R_ASSERT(len + 2 == *p_buffer_size, RETURN_FAILURE);
+    R_ASSERT_DO_LOG(len + 2 <= *p_buffer_size, RETURN_FAILURE, S_FREE(*pp_text_buffer), "len = %zd", len);
 
 	/* append newline at the end of file */
 	(*pp_text_buffer)[len] = '\n';
 	(*pp_text_buffer)[len + 1] = '\0';
+
+    //display_mem(*pp_text_buffer, *p_buffer_size, BOOLEAN_TRUE);
     return RETURN_SUCCESS;
 }
 
@@ -1705,4 +1776,17 @@ _S8 *s_duplicate_string(const _S8 *p_source)
 
     return p_temp;
 }
+_S8* s_concatenate_string(const _S8*p_string1, const _S8*p_string2)
+{
+    S_R_ASSERT(p_string1 != NULL, NULL);
+    S_R_ASSERT(p_string2 != NULL, NULL);
 
+    _S8*p_temp = (_S8*)malloc(strlen(p_string1) + strlen(p_string2) + 1);
+    S_R_ASSERT(p_temp != NULL, NULL);
+
+    strcpy(p_temp, p_string1);
+    strcat(p_temp, p_string2);
+
+    return p_temp;
+}
+\
