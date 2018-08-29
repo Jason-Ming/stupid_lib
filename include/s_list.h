@@ -108,42 +108,38 @@ static inline int list_empty(const struct list_head * head)
 // 根据"结构体(type)变量"中的"域成员变量(member)的指针(ptr)"
 //来获取指向整个结构体变量的指针
 #define container_of(ptr, type, member) ({								\
-		const __typeof( ((type *)0)->member ) *__mptr = (ptr);			\
-		(type *)( (char *)__mptr - s_offsetof(type,member) );})
+	const __typeof( ((type *)0)->member ) *__mptr = (ptr);			\
+	(type *)( (char *)__mptr - s_offsetof(type,member) );})
 
 // 遍历双向链表
 #define list_for_each_all(pos, head)									\
-		for (pos = (head)->next; pos != (head); pos = pos->next)
+	for (pos = (head)->next; pos != (head); pos = pos->next)
 
 #define list_for_each_all_safe(pos, n, head)							\
-		for (pos = (head)->next, n = pos->next; pos != (head);			\
-		pos = n, n = pos->next)
+	for (pos = (head)->next, n = pos->next; pos != (head);			\
+	pos = n, n = pos->next)
 
 #define list_for_each_all_reverse(pos, head)							\
-		for (pos = (head)->prev; pos != (head); pos = pos->prev)
+	for (pos = (head)->prev; pos != (head); pos = pos->prev)
 
 #define list_for_each_all_reverse_safe(pos, p, head)					\
-		for (pos = (head)->prev, p = pos->prev; pos != (head);			\
-		pos = p, p = pos->prev)
+	for (pos = (head)->prev, p = pos->prev; pos != (head);			\
+	pos = p, p = pos->prev)
 
 #define list_for_each(pos, head, start, end)							\
-		for (pos = ((start) == (head))?((start)->next):(start); 		\
-		pos != (head) && pos != (end)->next; pos = (pos)->next)
+	for (pos = (start); (pos != (end)->next) && ((start) != (head)) && ((end) != (head)); pos = (pos)->next)
 
 #define list_for_each_safe(pos, n, head, start, end)					\
-		for (pos = ((start) == (head))?((start)->next):(start), n = pos->next; \
-		pos != (head) && pos != (end)->next; pos = n, n = pos->next)
+	for (pos = (start), n = pos->next;	(pos != (end)->next) && ((start) != (head)) && ((end) != (head)); pos = n, n = pos->next)
 
 #define list_for_each_reverse(pos, head, start, end)					\
-		for (pos = ((end) == (head))?((end)->prev):(end);				\
-		pos != (head) && pos != (start)->prev; pos = pos->prev)
+	for (pos = (end); (pos != (start)->prev) && ((start) != (head)) && ((end) != (head)); pos = pos->prev)
 
 #define list_for_each_reverse_safe(pos, p, head, start, end)			\
-		for (pos = ((end) == (head))?((end)->prev):(end), p = pos->prev; \
-		pos != (head) && pos != (start)->prev; pos = p, p = pos->prev)
+	for (pos = (end), p = pos->prev; (pos != (start)->prev) && ((start) != (head)) && ((end) != (head)); pos = p, p = pos->prev)
 
 #define list_entry(ptr, type, member)									\
-		container_of(ptr, type, member)
+	container_of(ptr, type, member)
 
 #endif
 

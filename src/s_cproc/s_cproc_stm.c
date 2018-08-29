@@ -332,7 +332,7 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
         {\
             S_CPROC_STM_GEN_WARNING(S_CPROC_STM_CURRENT_C_POSITION, "backslash and newline separated by space");\
         }\
-        if(TEXT_BUFFER[CURRENT_C_OFFSET + skip] == '\0')\
+        if(TEXT_BUFFER[CURRENT_C_OFFSET + skip + 1] == '\0')\
         {\
             S_CPROC_STM_GEN_WARNING(S_CPROC_STM_CURRENT_C_POSITION, "backslash-newline at end of file");\
         }\
@@ -1410,7 +1410,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include()
         case '\r':
         case '\n':
         {
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "#include expects \"FILENAME\" or <FILENAME>");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_STM_CURRENT_C_POSITION, "#include expects \"FILENAME\" or <FILENAME>");
             break;
         }
         case '<':
@@ -1458,7 +1458,8 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_h_header()
         case '\n':
         {
             ADD_TOKEN;
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing terminating > character");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_LAST_TOKEN_C_POSITION, "missing terminating > character");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_LAST_TOKEN_C_POSITION, "#include expects \"FILENAME\" or <FILENAME>");
             break;
         }
         case '>':
@@ -1500,7 +1501,8 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_q_header()
         case '\n':
         {
             ADD_TOKEN;
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing terminating \" character");
+            S_CPROC_STM_GEN_WARNING(S_CPROC_LAST_LAST_TOKEN_C_POSITION, "missing terminating \" character");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_LAST_TOKEN_C_POSITION, "#include expects \"FILENAME\" or <FILENAME>");
             break;
         }
         case '\"':

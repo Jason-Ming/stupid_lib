@@ -5,7 +5,7 @@
 3. ´¦Àí×¢ÊÍ
 4. Êä³ötoken: normal string, blank, newline
 */
-#include <stdio.h>
+//#include <stdio.h>
 /*
 #define FILE_B() "s_cproc_include_file.h"
 #include FILE_B()FILE_B()
@@ -22,6 +22,8 @@ int fff()
 */
 
 #define VA(...) __VA_ARGS__
-
-
-
+//#define STD__ "stdio\"
+//#define IO__ .h"
+//#define STDIO STD__ IO__
+//#include STDIO
+//#include STD__

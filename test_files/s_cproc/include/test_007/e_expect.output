@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_007/i.input:1:24: warning: extra tokens at end of #include directive
+ #include"include.input"dsaf
+                        ^

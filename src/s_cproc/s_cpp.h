@@ -13,10 +13,7 @@
         {\
             fprintf(fpw, fmt, ##args);\
         }\
-        else\
-        {\
-            printf(fmt, ##args);\
-        }\
+        printf(LIGHT_BLUE""fmt""NONE, ##args);\
     }while(0);
 
 

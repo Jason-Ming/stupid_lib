@@ -1,0 +1,6 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_004/i.input:1:9: error: missing terminating > character
+ #include<include.input
+         ^
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_004/i.input:1:9: error: #include expects "FILENAME" or <FILENAME>
+ #include<include.input
+         ^

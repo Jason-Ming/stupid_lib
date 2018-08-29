@@ -228,7 +228,7 @@ _VOID s_ctoken_release_list_after_node(
             TOKEN_INFO_VALUE(p_token_list_head),
             TOKEN_INFO_VALUE(p_token_list_node));
     
-    list_for_each_safe(pos, next, &p_token_list_head->list, p_token_list_node->list.next, &p_token_list_head->list)
+    list_for_each_safe(pos, next, &p_token_list_head->list, p_token_list_node->list.next, p_token_list_head->list.prev)
     {
         p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
         list_del_init(pos);
@@ -303,7 +303,6 @@ _VOID s_ctoken_print_list(
 	}
 
 	//CPP_PRINT(fpw, "\n");
-    
 }
 
 _VOID s_ctoken_print_list_debug_info(
@@ -350,7 +349,7 @@ STRU_C_TOKEN_NODE * s_ctoken_get_last_node_by_type_after_node(
     STRU_C_TOKEN_NODE *p_token_list_node)
 {
     return s_ctoken_get_last_node_by_type(token_type, p_token_list_head, 
-        list_entry(p_token_list_node->list.next, STRU_C_TOKEN_NODE, list), p_token_list_head);
+        list_entry(p_token_list_node->list.next, STRU_C_TOKEN_NODE, list), list_entry(p_token_list_head->list.prev, STRU_C_TOKEN_NODE, list));
 }
 
 STRU_C_TOKEN_NODE * s_ctoken_get_last_node_by_type(

@@ -237,7 +237,7 @@ ENUM_RETURN s_getlines_s(const _S8 **source, _S8 *line_ptr[], size_t line_ptr_nu
     };
 
     /* still have lines to be read, the number of line_ptr is not enough */
-    R_ASSERT(*source == '\0', RETURN_FAILURE);
+    R_ASSERT(**source == '\0', RETURN_FAILURE);
     
     return RETURN_SUCCESS;
 }
@@ -1746,7 +1746,7 @@ ENUM_RETURN s_save_file_to_text_buffer(
 
 	DEBUG_PRINT("file size = %ld\n", file_size);
 	
-	*p_buffer_size = file_size + 2;
+	*p_buffer_size = file_size + 3;
 
     *pp_text_buffer = (_S8 *)malloc(*p_buffer_size);
     R_ASSERT(*pp_text_buffer != NULL, RETURN_FAILURE);
@@ -1755,11 +1755,12 @@ ENUM_RETURN s_save_file_to_text_buffer(
     R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, S_FREE(*pp_text_buffer));
 
     size_t len = fread (*pp_text_buffer,1,*p_buffer_size,pfr);
-    R_ASSERT_DO_LOG(len + 2 <= *p_buffer_size, RETURN_FAILURE, S_FREE(*pp_text_buffer), "len = %zd", len);
+    R_ASSERT_DO_LOG(len + 3 <= *p_buffer_size, RETURN_FAILURE, S_FREE(*pp_text_buffer), "len = %zd", len);
 
 	/* append newline at the end of file */
 	(*pp_text_buffer)[len] = '\n';
-	(*pp_text_buffer)[len + 1] = '\0';
+	(*pp_text_buffer)[len + 1] = '\n';
+    (*pp_text_buffer)[len + 2] = '\0';
 
     //display_mem(*pp_text_buffer, *p_buffer_size, BOOLEAN_TRUE);
     return RETURN_SUCCESS;
