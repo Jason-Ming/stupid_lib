@@ -17,5 +17,5 @@
 11. 合并邻近的字符串文字量
 12. 去除分隔记号空白符，生成词法分析token, 宏定义列表(可能嵌套包含供包含者使用)
 */
-# include<stdio.h>   得分  /* DSAFASD */ DDD
+
 //this is a test comment

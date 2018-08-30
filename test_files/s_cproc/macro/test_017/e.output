@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_017/i.input:1:24: error: duplicate macro parameter "A"
+ #define MACRO(A /**/,B,A*&&& ... 123)
+                        ^

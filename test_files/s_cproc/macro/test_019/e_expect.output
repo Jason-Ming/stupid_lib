@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_019/i.input:1:24: error: missing ')' in macro parameter list
+ #define MACRO1(A,  ... 123)
+                        ^

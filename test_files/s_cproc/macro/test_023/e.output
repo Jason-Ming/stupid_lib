@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_023/i.input:1:21: error: '#' is not followed by a macro parameter
+ #define VA(arg...) #__VA_ARGS__
+                     ^

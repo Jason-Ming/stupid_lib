@@ -1,0 +1,1 @@
+#define VA(a)###/__VA_ARGS__

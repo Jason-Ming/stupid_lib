@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_013/i.input:1:16: error: "*" may not appear in macro parameter list
+ #define MACRO(A*&&& ... 123)
+                ^

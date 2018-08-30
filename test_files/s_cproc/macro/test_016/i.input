@@ -1,0 +1,1 @@
+#define MACRO(A /*comment*/B*&&& ... 123)

@@ -1,4 +1,7 @@
-#include <stdio.h>
+#define STD <std
+#define IO io.
+#define H h >
+#include STD IO H </usr/include/stdio.h >asdff
 #include <stdlib.h>
 
 #include "s_log.h"
@@ -17,6 +20,24 @@
         *pp_real_file_name = p_filename_include;\
         return RETURN_SUCCESS;\
     }
+
+/* use cpp -v list 
+#include "..." search starts here:
+#include <...> search starts here:
+ /usr/lib/gcc/x86_64-linux-gnu/7/include
+ /usr/local/include
+ /usr/lib/gcc/x86_64-linux-gnu/7/include-fixed
+ /usr/include/x86_64-linux-gnu
+ /usr/include
+ */
+_S8 *g_p_system_include_path[] = 
+{
+    "/usr/lib/gcc/x86_64-linux-gnu/7/include/"
+    "/usr/local/include/",
+    "/usr/lib/gcc/x86_64-linux-gnu/7/include-fixed/",
+    "/usr/include/x86_64-linux-gnu/",
+    "/usr/include/"
+};
 
 PRIVATE STRU_C_TOKEN_NODE* s_cproc_include_file_get_header_token(_VOID)
 {
@@ -101,16 +122,9 @@ PRIVATE ENUM_RETURN s_cproc_inlude_file_get_token_and_realfilename(
     //TO DO:
 
     //iterate the system include dir
-    //-print-sysroot-headers-suffix
-    _S8 *p_include_path[] = 
+    for(_S32 i = 0; i < SIZE_OF_ARRAY(g_p_system_include_path); i++)
     {
-        "/usr/local/include/",
-        "/usr/include/"
-    };
-
-    for(_S32 i = 0; i < SIZE_OF_ARRAY(p_include_path); i++)
-    {
-        p_filename_include = s_concatenate_string(p_include_path[i], p_token_header->info.p_string);
+        p_filename_include = s_concatenate_string(g_p_system_include_path[i], p_token_header->info.p_string);
         S_R_ASSERT(p_filename_include != NULL, RETURN_FAILURE);
         FILE_EXIST(p_filename_include);
     }

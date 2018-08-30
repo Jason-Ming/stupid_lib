@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_016/i.input:1:28: error: macro parameters must be comma-separated
+ #define MACRO(A /*comment*/B*&&& ... 123)
+                            ^

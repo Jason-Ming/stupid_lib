@@ -1,0 +1,1 @@
+#define VA(arg...) __VA_ARGS__

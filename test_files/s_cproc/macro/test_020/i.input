@@ -1,0 +1,1 @@
+#define VA1(arg...,.) (##arg)

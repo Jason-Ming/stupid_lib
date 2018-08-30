@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_014/i.input:1:16: error: parameter name missing
+ #define MACRO2(,A, *&&& ... 123)
+                ^

@@ -1,0 +1,6 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_028/i.input:1:11: warning: ISO C99 requires whitespace after the macro name
+ #define VA##/__VA_ARGS__
+           ^
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_028/i.input:1:11: error: '##' cannot appear at either end of a macro expansion
+ #define VA##/__VA_ARGS__
+           ^

@@ -215,10 +215,23 @@ ENUM_BOOLEAN s_cproc_macro_identifier_name_in_parameter_list(const _S8 *p_identi
     return BOOLEAN_FALSE;
 }
 
-ENUM_BOOLEAN s_cproc_macro_identifier_in_parameter_list(const STRU_C_TOKEN_NODE *p_replacement_token)
+ENUM_BOOLEAN s_cproc_macro_replacement_identifier_in_parameter_list(const STRU_C_TOKEN_NODE *p_replacement_token)
 {
     S_R_ASSERT(p_replacement_token != NULL, BOOLEAN_FALSE);
-    S_R_FALSE(p_replacement_token->info.token_type == C_TOKEN_PP_IDENTIFIER, BOOLEAN_FALSE);
+    S_R_FALSE(p_replacement_token->info.token_type == C_TOKEN_PP_IDENTIFIER 
+        || p_replacement_token->info.token_type == C_TOKEN_PP_IDENTIFIER_VA, BOOLEAN_FALSE);
+
+    if(p_replacement_token->info.token_type == C_TOKEN_PP_IDENTIFIER_VA)
+    {
+        if(s_cproc_macro_va_in_parameter_list() == BOOLEAN_FALSE)
+        {
+            return BOOLEAN_FALSE;
+        }
+        else
+        {
+            return BOOLEAN_TRUE;
+        }
+    }
 
     STRU_MACRO_NODE *p_macro_node = list_entry(g_macro_node_list_head.list.prev, STRU_MACRO_NODE, list);
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
@@ -228,7 +241,49 @@ ENUM_BOOLEAN s_cproc_macro_identifier_in_parameter_list(const STRU_C_TOKEN_NODE 
     list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
     {
         p_parameter_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
-        if(strcmp(p_parameter_token->info.p_string, p_replacement_token->info.p_string) == 0)
+        DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_parameter_token));
+        
+        if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID
+            && strcmp(p_parameter_token->info.p_string, p_replacement_token->info.p_string) == 0)
+        {
+            return BOOLEAN_TRUE;
+        }
+        else if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID_VA
+            && memcmp(p_parameter_token->info.p_string, p_replacement_token->info.p_string, strlen(p_replacement_token->info.p_string)) == 0)
+        {
+            return BOOLEAN_TRUE;
+        }
+    }
+    
+    return BOOLEAN_FALSE;
+}
+
+
+ENUM_BOOLEAN s_cproc_macro_parameter_identifier_in_parameter_list(const STRU_C_TOKEN_NODE *p_parameter_token)
+{
+    S_R_ASSERT(p_parameter_token != NULL, BOOLEAN_FALSE);
+    S_R_FALSE(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID
+        || p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID_VA, BOOLEAN_FALSE);
+
+    STRU_MACRO_NODE *p_macro_node = list_entry(g_macro_node_list_head.list.prev, STRU_MACRO_NODE, list);
+    S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
+
+    STRU_C_TOKEN_NODE *p_parameter_token_loop;
+    struct list_head *pos;
+    list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
+    {
+        p_parameter_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_parameter_token_loop));
+
+        S_R_ASSERT(p_parameter_token_loop->info.token_type == C_TOKEN_PP_PARAMETER_ID, BOOLEAN_FALSE);
+        
+        if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID
+            && strcmp(p_parameter_token->info.p_string, p_parameter_token_loop->info.p_string) == 0)
+        {
+            return BOOLEAN_TRUE;
+        }
+        else if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID_VA
+            && memcmp(p_parameter_token->info.p_string, p_parameter_token_loop->info.p_string, strlen(p_parameter_token_loop->info.p_string)) == 0)
         {
             return BOOLEAN_TRUE;
         }
@@ -428,11 +483,7 @@ ENUM_RETURN s_cproc_macro_add_parameter(
         return RETURN_SUCCESS;
     }
 
-    if(NULL != s_ctoken_get_last_node_by_name(
-        p_macro_parameter_token_node->info.p_string,
-        &p_last_macro_node->info.parameter_list_head, 
-        &p_last_macro_node->info.parameter_list_head, 
-        &p_last_macro_node->info.parameter_list_head))
+    if(s_cproc_macro_parameter_identifier_in_parameter_list(p_macro_parameter_token_node))
     {
         S_CPROC_STM_GEN_ERROR(&p_macro_parameter_token_node->info.c_position, "duplicate macro parameter \"%s\"", 
             p_macro_parameter_token_node->info.p_string);
@@ -478,37 +529,6 @@ ENUM_RETURN s_cproc_macro_finish_parameter(ENUM_RETURN *result)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_macro_add_replacement(
-    const STRU_C_TOKEN_NODE* p_macro_replacement_token_node)
-{
-    S_R_ASSERT(p_macro_replacement_token_node != NULL, RETURN_FAILURE);
-
-    STRU_MACRO_NODE *p_macro_node = list_entry(g_macro_node_list_head.list.prev, STRU_MACRO_NODE, list);
-    S_R_ASSERT(p_macro_node != &g_macro_node_list_head, RETURN_FAILURE);
-
-    if(p_macro_replacement_token_node->info.token_type == C_TOKEN_PP_IDENTIFIER_VA)
-    {
-        if(s_cproc_macro_va_in_parameter_list() == BOOLEAN_FALSE)
-        {
-            S_CPROC_STM_GEN_WARNING(&p_macro_replacement_token_node->info.c_position, "__VA_ARGS__ can only appear in the expansion of a C99 variadic macro");
-        }
-    }
-    
-    ENUM_RETURN ret_val;
-
-    STRU_C_TOKEN_NODE *p_token_node_new = NULL;
-    ret_val = s_ctoken_copy(p_macro_replacement_token_node, &p_token_node_new);
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    S_R_ASSERT(p_token_node_new != NULL, RETURN_FAILURE);
-    
-    ret_val = s_ctoken_add_node_to_list(
-        &(p_macro_node->info.replacement_list_head),
-        p_token_node_new);
-    S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE,s_ctoken_free_node(p_token_node_new));
-
-    return RETURN_SUCCESS;
-}
-#define XXXXX&
 ENUM_RETURN s_cproc_macro_finish_replacement()
 {
     ENUM_RETURN ret_val;
@@ -519,25 +539,50 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
         &p_macro_node->info.replacement_list_head);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    if(p_macro_node->info.parameter_part_exist == BOOLEAN_FALSE
-        && NEXT_TOKEN(&p_macro_node->info.replacement_list_head)->info.token_type != C_TOKEN_BLANK)
-    {
-        S_CPROC_STM_GEN_WARNING(&NEXT_TOKEN(&p_macro_node->info.replacement_list_head)->info.c_position, "ISO C99 requires whitespace after the macro name");
-    }
-    
     //delete blanks at the begining and end
     DEBUG_PRINT("delete blanks at the begining and end");
-    STRU_C_TOKEN_NODE *p_replacement_token;
+    
+    STRU_C_TOKEN_NODE *p_replacement_token_loop = NULL, *p_replacement_token_first_nonblank = NULL;
+    
     struct list_head *pos, *next, *prev;
+    size_t replacement_token_num = 0;
+    size_t first_blank_replacement_token_num = 0;
     
     list_for_each_all_safe(pos, next, &p_macro_node->info.replacement_list_head.list)
     {
-        p_replacement_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
-        if(p_replacement_token->info.token_type == C_TOKEN_BLANK)
+        replacement_token_num++;
+        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
+        {
+            first_blank_replacement_token_num++;
+            ret_val = s_ctoken_delete_node_from_list(
+                &p_macro_node->info.replacement_list_head,
+                p_replacement_token_loop);
+            S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        }
+        else
+        {
+            p_replacement_token_first_nonblank = p_replacement_token_loop;
+            break;
+        }
+    };
+
+    if(p_macro_node->info.parameter_part_exist == BOOLEAN_FALSE 
+        && replacement_token_num > 0
+        && first_blank_replacement_token_num == 0)
+    {
+        S_CPROC_STM_GEN_WARNING(&p_replacement_token_first_nonblank->info.c_position, "ISO C99 requires whitespace after the macro name");
+    }
+
+    p_replacement_token_loop = NULL;
+    list_for_each_all_reverse_safe(pos, prev, &p_macro_node->info.replacement_list_head.list)
+    {
+        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
         {
             ret_val = s_ctoken_delete_node_from_list(
                 &p_macro_node->info.replacement_list_head,
-                p_replacement_token);
+                p_replacement_token_loop);
             S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
         else
@@ -546,39 +591,41 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
         }
     };
 
-    list_for_each_all_reverse_safe(pos, prev, &p_macro_node->info.replacement_list_head.list)
-    {
-        p_replacement_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
-        if(p_replacement_token->info.token_type == C_TOKEN_BLANK)
-        {
-            ret_val = s_ctoken_delete_node_from_list(
-                &p_macro_node->info.replacement_list_head,
-                p_replacement_token);
-            S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        }
-        else
-        {
-            break;
-        }
-    };
-    
-    //'#' is not followed by a macro parameter
+    p_replacement_token_loop = NULL;
+    replacement_token_num = 0;
     ENUM_BOOLEAN last_stingification = BOOLEAN_FALSE;
     list_for_each_all(pos, &p_macro_node->info.replacement_list_head.list)
     {
-        p_replacement_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+
+        DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_replacement_token_loop));
+        //'#' is not followed by a macro parameter
         if(last_stingification == BOOLEAN_TRUE)
         {
-            if(p_replacement_token->info.token_type != C_TOKEN_BLANK
+            if(p_replacement_token_loop->info.token_type != C_TOKEN_BLANK
                 && p_macro_node->info.parameter_part_exist
-                && !s_cproc_macro_identifier_in_parameter_list(p_replacement_token))
+                && !s_cproc_macro_replacement_identifier_in_parameter_list(p_replacement_token_loop))
             {
-                S_CPROC_STM_GEN_ERROR(&p_replacement_token->info.c_position, "'#' is not followed by a macro parameter");
+                S_CPROC_STM_GEN_ERROR(&p_replacement_token_loop->info.c_position, "'#' is not followed by a macro parameter");
                 return RETURN_SUCCESS;
             }
         }
-        
-        if(p_replacement_token->info.token_type == C_TOKEN_PPD_STRINGIFICATION)
+
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_PPD_CONCATENATE && replacement_token_num == 0)
+        {
+            S_CPROC_STM_GEN_ERROR(&p_replacement_token_loop->info.c_position, "'##' cannot appear at either end of a macro expansion");
+            return RETURN_SUCCESS;
+        }
+
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_PP_IDENTIFIER_VA)
+        {
+            if(s_cproc_macro_va_in_parameter_list() == BOOLEAN_FALSE)
+            {
+                S_CPROC_STM_GEN_WARNING(&p_replacement_token_loop->info.c_position, "__VA_ARGS__ can only appear in the expansion of a C99 variadic macro");
+            }
+        }
+
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_PPD_STRINGIFICATION)
         {
             last_stingification = BOOLEAN_TRUE;
         }
@@ -586,25 +633,15 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
         {
             last_stingification = BOOLEAN_FALSE;
         }
+        replacement_token_num++;
     };
 
-    //'##' cannot appear at either end of a macro expansion
-    p_replacement_token = list_entry(p_macro_node->info.replacement_list_head.list.next, STRU_C_TOKEN_NODE, list);
-    if(p_replacement_token == &p_macro_node->info.replacement_list_head)
-    {
-        return RETURN_SUCCESS;
-    }
+    S_R_FALSE(p_replacement_token_loop != NULL, RETURN_SUCCESS);
     
-    if(p_replacement_token->info.token_type == C_TOKEN_PPD_CONCATENATE)
+    //'##' cannot appear at either end of a macro expansion
+    if(p_replacement_token_loop->info.token_type == C_TOKEN_PPD_CONCATENATE)
     {
-        S_CPROC_STM_GEN_ERROR(&p_replacement_token->info.c_position, "'##' cannot appear at either end of a macro expansion");
-        return RETURN_SUCCESS;
-    }
-
-    p_replacement_token = list_entry(p_macro_node->info.replacement_list_head.list.prev, STRU_C_TOKEN_NODE, list);
-    if(p_replacement_token->info.token_type == C_TOKEN_PPD_CONCATENATE)
-    {
-        S_CPROC_STM_GEN_ERROR(&p_replacement_token->info.c_position, "'##' cannot appear at either end of a macro expansion");
+        S_CPROC_STM_GEN_ERROR(&p_replacement_token_loop->info.c_position, "'##' cannot appear at either end of a macro expansion");
         return RETURN_SUCCESS;
     }
 

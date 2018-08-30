@@ -28,9 +28,6 @@ ENUM_RETURN s_cproc_macro_add_parameter_separator_comma(ENUM_RETURN *result);
 ENUM_RETURN s_cproc_macro_add_parameter(
     STRU_C_TOKEN_NODE* p_macro_parameter_token_node);
 
-ENUM_RETURN s_cproc_macro_add_replacement(
-    const STRU_C_TOKEN_NODE* p_macro_replacement_token_node);
-
 ENUM_RETURN s_cproc_macro_finish_parameter(ENUM_RETURN *p_check_result);
 ENUM_RETURN s_cproc_macro_finish_replacement();
 

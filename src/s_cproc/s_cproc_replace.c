@@ -10,20 +10,39 @@
 #define FILE_B() "s_cproc_include_file.h"
 #include FILE_B()FILE_B()
 
-#define VA1(arg...,.) (##arg)
-#define MACRO(A*&&& ... 123)
-#define MACRO1(A, *&&& ... 123)
-#define MACRO2(,A, *&&& ... 123)
-#define MACRO2(A, a123,)
 int fff()
 {
     printf("%s", FILE_B");
 }
 */
+//#define MACRO(A*&&& ... 123)
+//#define MACRO(A /**/*&&& ... 123)
+//#define MACRO2(,A, *&&& ... 123)
+//#define MACRO(A /**/B*&&& ... 123)
+//#define MACRO(A /**/,B,A*&&& ... 123)
+//#define MACRO2(A, a123,)
+//#define MACRO1(A,  ... 123)
+//#define VA1(arg...,.) (##arg)
+//#define VA(arg...) __VA_ARGS__
+//#define VA(arg...) #arg
 
-#define VA(...) __VA_ARGS__
+//#define VA(arg...) #__VA_ARGS__
+//#define VA(...) #__VA_ARGS__
+//#define VA(a)#/__VA_ARGS__
+//#define VA(a)###/__VA_ARGS__
+//#define VA##/__VA_ARGS__
+//#define VA/##__VA_ARGS__
+//#define VA()/__VA_ARGS__#a
+//#define VA(arg, arg...) __VA_ARGS__
+//#define VA(arg, arg.,..) __VA_ARGS__
+
+
 //#define STD__ "stdio\"
 //#define IO__ .h"
 //#define STDIO STD__ IO__
 //#include STDIO
 //#include STD__
+#define include
+//#define(me)
+//#define macro(/**/
+

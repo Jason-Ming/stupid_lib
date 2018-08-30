@@ -1533,6 +1533,42 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_q_header()
     return RETURN_SUCCESS;
 }
 
+/*
+You must be careful when you define the macro. ¡®#define¡¯ saves tokens, not text. The preprocessor has no way of 
+knowing that the macro will be used as the argument of ¡®#include¡¯, so it generates ordinary tokens, not a header 
+name. This is unlikely to cause problems if you use double-quote includes, which are close enough to string constants
+. If you use angle brackets, however, you may have trouble.
+
+The syntax of a computed include is actually a bit more general than the above. If the first non-whitespace character 
+after ¡®#include¡¯ is not ¡®"¡¯ or ¡®<¡¯, then the entire line is macro-expanded like running text would be.
+
+If the line expands to a single string constant, the contents of that string constant are the file to be included. 
+CPP does not re-examine the string for embedded quotes, but neither does it process backslash escapes in the string. 
+Therefore
+
+#define HEADER "a\"b"
+#include HEADER
+looks for a file named a\"b. CPP searches for the file according to the rules for double-quoted includes.
+
+If the line expands to a token stream beginning with a ¡®<¡¯ token and including a ¡®>¡¯ token, then the tokens 
+between the ¡®<¡¯ and the first ¡®>¡¯ are combined to form the filename to be included. Any whitespace between 
+tokens is reduced to a single space; then any space after the initial ¡®<¡¯ is retained, but a trailing space 
+before the closing ¡®>¡¯ is ignored. CPP searches for the file according to the rules for angle-bracket includes.
+
+#define STD < std
+#define IO io.
+#define H h >
+#include STD IO H </usr/include/stdio.h >asdff
+^^^^^^^^the include directive is right
+
+In either case, if there are any tokens on the line after the file name, an error occurs and the directive is not 
+processed. It is also an error if the result of expansion does not match either of the two expected forms.
+
+These rules are implementation-defined behavior according to the C standard. To minimize the risk of different 
+compilers interpreting your computed includes differently, we recommend you use only a single object-like macro which 
+expands to a string constant. This will also minimize confusion for people reading your program.
+
+*/
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_macro()
 {
     ENUM_RETURN ret_val;
@@ -1730,6 +1766,13 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_macro()
     }
 
     ADD_TOKEN;
+
+    if(strcmp(S_CPROC_LAST_TOKEN_STRING, "defined") == 0)
+    {
+        S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "\"%s\" cannot be used as a macro name", S_CPROC_LAST_TOKEN_STRING);
+        return RETURN_SUCCESS;
+    }
+    
     ENUM_BOOLEAN macro_exist = BOOLEAN_FALSE;
     ret_val = s_cproc_macro_name_exist(S_CPROC_LAST_TOKEN_STRING, &macro_exist);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -1744,7 +1787,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_macro()
     STATE_TO(CPROC_STM_PP_DEFINE_PARAMETER_START);
     return RETURN_SUCCESS;
 }
-#define abc/
+
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_start()
 {
     _S8 c = CURRENT_C;
@@ -1828,7 +1871,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_list()
         case '\r':
         case '\n':
         {
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing ')' in macro parameter list");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_STM_CURRENT_C_POSITION, "missing ')' in macro parameter list");
             break;
         }
         case ',':
@@ -1909,11 +1952,12 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_id_va()
     ENUM_RETURN ret_val;
     _S8 c = CURRENT_C;
 
-    TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
-    OUTPUT_TOKEN_C;
+    
     
     if(c == '.')
     {
+        TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
+        OUTPUT_TOKEN_C;
         return RETURN_SUCCESS;
     }
     
@@ -1944,13 +1988,14 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_va()
 {
     ENUM_RETURN ret_val;
     _S8 c = CURRENT_C;
-    TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
-    OUTPUT_TOKEN_C;
     
     if(c == '.')
     {
+        TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
+        OUTPUT_TOKEN_C;
         return RETURN_SUCCESS;
     }
+    
     ADD_TOKEN;
 
     ENUM_BOOLEAN is_va_suffix = BOOLEAN_FALSE;
@@ -1959,7 +2004,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_va()
     
     if(is_va_suffix == BOOLEAN_TRUE)
     {
-        MOD_LAST_TOKEN_TYPE(C_TOKEN_PP_PARAMETER_ID_VA);
+        MOD_LAST_TOKEN_TYPE(C_TOKEN_PP_PARAMETER_VA);
         
         ret_val = s_cproc_macro_add_parameter(S_CPROC_LAST_TOKEN_POINTER);
         S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -1979,6 +2024,38 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_finish()
     ENUM_RETURN check_result;
     
     _S8 c = CURRENT_C;
+    if(LAST_C == '/')
+    {
+        switch(c)
+        {
+            case '*':
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_MULTIPLY);
+                OUTPUT_TOKEN_C;
+                ADD_TOKEN;
+                MERGE_LAST_2_TOKENS(C_TOKEN_PAIR_COMMENT);
+                STATE_TO(CPROC_STM_PAIR_COMMENT);
+                break;
+            }
+            case '/':
+            {
+                TYPE_TOKEN(C_TOKEN_OPERATOR_ARITHMETIC_DIVIDE);
+                OUTPUT_TOKEN_C;
+                ADD_TOKEN;
+                
+                MERGE_LAST_2_TOKENS(C_TOKEN_LINE_COMMENT);
+                STATE_TO(CPROC_STM_ONELINE_COMMENT);
+                break;
+            }
+            default:
+            {
+                S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing ')' in macro parameter list");
+            }
+        }
+
+        return RETURN_SUCCESS;
+    }
+    
     switch(c)
     {
         case ' ':
@@ -1991,31 +2068,15 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_parameter_finish()
         }
         case '/':
         {
-            if(NEXT_C == '/')
-            {
-                TYPE_TOKEN(C_TOKEN_LINE_COMMENT);
-                OUTPUT_TOKEN_C;
-                STATE_TO(CPROC_STM_ONELINE_COMMENT);
-            }
-            else if(NEXT_C == '*')
-            {
-                TYPE_TOKEN(C_TOKEN_PAIR_COMMENT);
-                OUTPUT_TOKEN_C;
-                STATE_TO(CPROC_STM_PAIR_COMMENT);
-            }
-            else
-            {
-                TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
-                OUTPUT_TOKEN_C;
-                ADD_TOKEN;
-                S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing ')' in macro parameter list");
-            }                
+            TYPE_TOKEN(C_TOKEN_PP_PUNCTUATOR);
+            OUTPUT_TOKEN_C;
+            ADD_TOKEN;  
             break;
         }
         case '\r':
         case '\n':
         {
-            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "missing ')' in macro parameter list");
+            S_CPROC_STM_GEN_ERROR(S_CPROC_STM_CURRENT_C_POSITION, "missing ')' in macro parameter list");
             break;
         }
         case ')':
@@ -2437,7 +2498,9 @@ PRIVATE ENUM_RETURN cproc_stm_proc_end()
         }
         default:
         {
-            S_CPROC_STM_GEN_ERROR(S_CPROC_STM_CURRENT_TOKEN_C_POSITION, "unterminated %s", s_ctoken_get_str(CURRENT_TOKEN_TYPE));
+            ADD_TOKEN;
+            S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "unterminated %s", 
+                s_ctoken_get_str(S_CPROC_LAST_TOKEN_TYPE));
             break;
         }
     }

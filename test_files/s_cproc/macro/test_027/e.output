@@ -1,0 +1,6 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_027/i.input:1:11: warning: ISO C99 requires whitespace after the macro name
+ #define VA/##__VA_ARGS__
+           ^
+/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_027/i.input:1:14: warning: __VA_ARGS__ can only appear in the expansion of a C99 variadic macro
+ #define VA/##__VA_ARGS__
+              ^
