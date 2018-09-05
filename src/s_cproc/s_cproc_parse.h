@@ -113,7 +113,8 @@ typedef enum TAG_ENUM_C_TOKEN
     C_TOKEN_PP_PARAMETER_ID,                                  /* Preprocessing: identifier */
     C_TOKEN_PP_PARAMETER_ID_VA,                               /* Preprocessing: identifier... */
     C_TOKEN_PP_PARAMETER_VA,                                  /* Preprocessing: ... */
-    C_TOKEN_PP_NUMBER,                                        /* Preprocessing: number */
+    C_TOKEN_PP_INTEGER_CONSTANT,                              /* Preprocessing: integer constant */
+    C_TOKEN_PP_FLOATING_CONSTANT,                             /* Preprocessing: floating constant */
     C_TOKEN_PP_CHARACTER_CONSTANT,                            /* Preprocessing: character constant */
     C_TOKEN_PP_STRING_LITERAL,                                /* Preprocessing: string literal */
     C_TOKEN_PP_PUNCTUATOR,                                    /* Preprocessing: punctuator */
@@ -177,7 +178,8 @@ typedef enum TAG_ENUM_C_TOKEN
     C_TOKEN_STRING,                                           /* C constant: string */
     C_TOKEN_CHAR,                                             /* C constant: character */
     C_TOKEN_PUNCTUATOR,                                       /* C punctuator */
-    C_TOKEN_END,                                              /* END */
+    C_TOKEN_OTHER,                                            /* C other: \\, `, @, 0x7F¨C0xFF */
+    C_TOKEN_END,                                              /* END: NUL */
     C_TOKEN_UNKNOWN,                                          /* UNKNOWN */
     C_TOKEN_LIST_HEAD,                                        /* LIST HEAD */
     C_TOKEN_INVALID,                                          /* INVALID */
@@ -191,6 +193,7 @@ __BEGIN_C_DECLS
 ENUM_RETURN s_cproc_parse_pp_directive(const _S8 *p_text_buffer, ENUM_C_TOKEN *token_type);
 ENUM_RETURN s_cproc_parse_pp_is_va_suffix(const _S8* p_text_buffer, ENUM_BOOLEAN *is_va_suffix);
 ENUM_RETURN s_cproc_parse_word(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type);
+ENUM_BOOLEAN s_cproc_has_dot_before_number_or_alphabet(const _S8*p_text);
 
 __END_C_DECLS
 

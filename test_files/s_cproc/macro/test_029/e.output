@@ -1,6 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_029/i.input:1:14: warning: __VA_ARGS__ can only appear in the expansion of a C99 variadic macro
- #define VA()/__VA_ARGS__#a
-              ^
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_029/i.input:1:26: error: '#' is not followed by a macro parameter
- #define VA()/__VA_ARGS__#a
-                          ^

@@ -1,3 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_008/i.input:1:23: error: macro names must be identifiers
- #define/* a comment *//macro"include.input"
-                       ^

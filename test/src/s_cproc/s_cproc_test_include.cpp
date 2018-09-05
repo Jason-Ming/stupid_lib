@@ -19,6 +19,13 @@ using namespace std;
 #define TEST_FILE_DIR006 "test_files/s_cproc/include/test_006"
 #define TEST_FILE_DIR007 "test_files/s_cproc/include/test_007"
 #define TEST_FILE_DIR008 "test_files/s_cproc/include/test_008"
+#define TEST_FILE_DIR009 "test_files/s_cproc/include/test_009"
+#define TEST_FILE_DIR010 "test_files/s_cproc/include/test_010"
+#define TEST_FILE_DIR011 "test_files/s_cproc/include/test_011"
+#define TEST_FILE_DIR012 "test_files/s_cproc/include/test_012"
+#define TEST_FILE_DIR013 "test_files/s_cproc/include/test_013"
+#define TEST_FILE_DIR014 "test_files/s_cproc/include/test_014"
+#define TEST_FILE_DIR015 "test_files/s_cproc/include/test_015"
 
 #define TEST_FILE_INPUT "/i.input"
 
@@ -84,6 +91,14 @@ TEST_GROUP(s_cc_include)
     _S32 file_compare_result;
 };
 
+/*
+#include/"include.input"
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_001/i.input:1:9: error: #include expects "FILENAME" or <FILENAME>
+ #include/"include.input"
+         ^
+
+*/
 TEST(s_cc_include, unexpected_FILENAME_slash)
 {
     file_init(TEST_FILE_DIR001);
@@ -99,6 +114,15 @@ TEST(s_cc_include, unexpected_FILENAME_slash)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include
+"include.input"
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_002/i.input:1:9: error: #include expects "FILENAME" or <FILENAME>
+ #include
+         ^
+
+*/
 TEST(s_cc_include, unexpected_FILENAME_newline)
 {
     file_init(TEST_FILE_DIR002);
@@ -114,6 +138,17 @@ TEST(s_cc_include, unexpected_FILENAME_newline)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include"include.input
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_003/i.input:1:9: warning: missing terminating " character
+ #include"include.input
+         ^
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_003/i.input:1:9: error: #include expects "FILENAME" or <FILENAME>
+ #include"include.input
+         ^
+
+*/
 TEST(s_cc_include, unterminated_q_header)
 {
     file_init(TEST_FILE_DIR003);
@@ -129,6 +164,17 @@ TEST(s_cc_include, unterminated_q_header)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include<include.input
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_004/i.input:1:9: error: missing terminating > character
+ #include<include.input
+         ^
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_004/i.input:1:9: error: #include expects "FILENAME" or <FILENAME>
+ #include<include.input
+         ^
+
+*/
 TEST(s_cc_include, unterminated_h_header)
 {
     file_init(TEST_FILE_DIR004);
@@ -144,6 +190,14 @@ TEST(s_cc_include, unterminated_h_header)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include""
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_005/i.input:1:9: error: empty filename in #include
+ #include""
+         ^
+
+*/
 TEST(s_cc_include, q_header_empty)
 {
     file_init(TEST_FILE_DIR005);
@@ -159,6 +213,14 @@ TEST(s_cc_include, q_header_empty)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include<>
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_006/i.input:1:9: error: empty filename in #include
+ #include<>
+         ^
+
+*/
 TEST(s_cc_include, h_header_empty)
 {
     file_init(TEST_FILE_DIR006);
@@ -174,6 +236,14 @@ TEST(s_cc_include, h_header_empty)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+/*
+#include"include.input"dsaf
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_007/i.input:1:24: warning: extra tokens at end of #include directive
+ #include"include.input"dsaf
+                        ^
+
+*/
 TEST(s_cc_include, extra_tokens)
 {
     file_init(TEST_FILE_DIR007);
@@ -189,6 +259,8 @@ TEST(s_cc_include, extra_tokens)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+//#include/* a comment */"include.input"
+
 TEST(s_cc_include, comment_after_include)
 {
     file_init(TEST_FILE_DIR008);
@@ -203,4 +275,108 @@ TEST(s_cc_include, comment_after_include)
     CHECK_EQUAL(RETURN_SUCCESS, ret_val);
     CHECK_EQUAL(0, file_compare_result);
 }
+
+//#include <x/*y>
+
+///home/jason/github/stupid_lib/test_files/s_cproc/include/test_009/i.input:1:11: error: x/*y: No such file or directory
+// #include <x/*y>
+//           ^
+
+TEST(s_cc_include, filename_has_comment)
+{
+    file_init(TEST_FILE_DIR009);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_FAILURE, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+/*
+#include "x\n\\y"
+
+/home/jason/github/stupid_lib/test_files/s_cproc/include/test_010/i.input:1:11: error: x\n\\y: No such file or directory
+ #include "x\n\\y"
+           ^
+
+*/
+TEST(s_cc_include, filename_has_newline_and_backslash)
+{
+    file_init(TEST_FILE_DIR010);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_FAILURE, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+/*
+all characters in <> will reserved
+#include <stdio.h >
+*/
+TEST(s_cc_include, h_header_has_space)
+{
+    file_init(TEST_FILE_DIR011);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_FAILURE, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
+/*
+Search Path
+
+*/
+
+/*Once-Only Headers*/
+/* File foo.  */
+//#ifndef FILE_FOO_SEEN
+//#define FILE_FOO_SEEN
+//
+//the entire file
+//
+//#endif /* !FILE_FOO_SEEN */
+
+/*
+#define HEADER "a\"b"
+#include HEADER
+
+*/
+
+
+/*
+If the line expands to a token stream beginning with a ¡®<¡¯ token and including a ¡®>¡¯ token, then the tokens between the ¡®<¡¯ 
+and the first ¡®>¡¯ are combined to form the filename to be included. Any whitespace between tokens is reduced to a single space; then 
+any space after the initial ¡®<¡¯ is retained, but a trailing space before the closing ¡®>¡¯ is ignored. CPP searches for the file 
+according to the rules for angle-bracket includes.
+
+#define STD <std
+#define IO io.
+#define H h >
+#include STD IO H </usr/include/stdio.h >asdff
+
+*/
+
+//#define STD__ "stdio\"
+//#define IO__ .h"
+//#define STDIO STD__ IO__
+//#include STDIO
+//#include STD__
+
 

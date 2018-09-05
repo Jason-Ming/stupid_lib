@@ -16,6 +16,8 @@ using namespace std;
 #define TEST_FILE_DIR003 "test_files/s_cproc/comment_and_blank/test_003"
 #define TEST_FILE_DIR004 "test_files/s_cproc/comment_and_blank/test_004"
 #define TEST_FILE_DIR005 "test_files/s_cproc/comment_and_blank/test_005"
+#define TEST_FILE_DIR006 "test_files/s_cproc/comment_and_blank/test_006"
+
 
 #define TEST_FILE_INPUT "/i.input"
 
@@ -156,9 +158,23 @@ TEST(s_cc_comment_and_blank, newline_reserved)
     CHECK_EQUAL(0, file_compare_result);
 }
 
-TEST(s_cc_comment_and_blank, PPD_is_not_at_begin_of_line)
+///*\
+///\
+//*
+//*/
+///*
+////
+///**/
+
+///*
+///home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_006/i.input:7:1: warning: "/*" within comment [-Wcomment]
+// /**/
+// ^
+//
+//*/
+TEST(s_cc_comment_and_blank, comment_in_pair_comment)
 {
-    file_init(TEST_FILE_DIR005);
+    file_init(TEST_FILE_DIR006);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
     CHECK_EQUAL(RETURN_SUCCESS, ret_val);
 

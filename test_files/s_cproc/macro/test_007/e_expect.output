@@ -1,3 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_007/i.input:2:9: warning: "MACRO" redefined
- #define MACRO macro 2
-         ^

@@ -66,6 +66,7 @@ _VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name)
     p_head->info.token_type = C_TOKEN_LIST_HEAD;
     p_head->info.inode = SL_INVALID;
     p_head->info.c_position.offset = 0;
+    p_head->info.c_position.len = strlen(head_name);
     p_head->info.c_position.line = 0;
     p_head->info.c_position.column= 0;
     p_head->info.qualifier.is_const = BOOLEAN_FALSE;
@@ -105,6 +106,7 @@ ENUM_RETURN s_ctoken_make_new(
     p_new_token_temp->info.qualifier.is_static = BOOLEAN_FALSE;
     p_new_token_temp->info.qualifier.is_volatile = BOOLEAN_FALSE;
     p_new_token_temp->info.c_position.offset = text_offset;
+    p_new_token_temp->info.c_position.len = strlen(token_string);
     p_new_token_temp->info.c_position.line = line_index;
     p_new_token_temp->info.c_position.column = line_column;
     p_new_token_temp->list.next = NULL;
@@ -446,6 +448,7 @@ ENUM_RETURN s_ctoken_mod_node_string(STRU_C_TOKEN_NODE *p_token, const _S8*p_new
     S_FREE(p_token->info.p_string);
     p_token->info.p_string = s_duplicate_string(p_new_string);
     S_R_ASSERT(p_token->info.p_string != NULL, RETURN_FAILURE);
+    p_token->info.c_position.len = strlen(p_token->info.p_string);
 
     return RETURN_SUCCESS;
     
@@ -467,6 +470,7 @@ ENUM_RETURN s_ctoken_mod_node_string_and_type(STRU_C_TOKEN_NODE *p_token, const 
     S_FREE(p_token->info.p_string);
     p_token->info.p_string = s_duplicate_string(p_new_string);
     S_R_ASSERT(p_token->info.p_string != NULL, RETURN_FAILURE);
+    p_token->info.c_position.len = strlen(p_token->info.p_string);
 
     return RETURN_SUCCESS;
     

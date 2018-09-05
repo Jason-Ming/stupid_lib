@@ -1,3 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_002/i.input:1:9: error: "defined" cannot be used as a macro name
- #define defined
-         ^

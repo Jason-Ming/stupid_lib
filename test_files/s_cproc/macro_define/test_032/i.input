@@ -1,0 +1,1 @@
+#define const(arg, ...) __VA_ARGS__

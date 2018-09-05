@@ -8,12 +8,23 @@
 #include "s_log.h"
 #include "s_mem.h"
 #include "s_text.h"
-#include "s_cproc.h"
+#include "s_cproc.h"asff
 
 #include "s_cerror.h"
 
 
-_VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
+/*
+                      |------------------------------| ws_col
+\n*******************************token$$$$$$*****************\n
+                                 ^
+                                 offset
+  |<--------column-------------->|<--len-->|
+  |<--------start---------->|-----------ws_col-------------|
+
+  column >= start && colum + len < start + ws_col
+*/
+
+_VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset, size_t len, ENUM_BOOLEAN is_error)
 {
 	S_V_ASSERT(p_text_buffer != NULL);
 	//printf("text_buffer:%s\n", p_text_buffer);
@@ -41,7 +52,7 @@ _VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
 	};
 
     //printf("column: %zd\n", column);
-	while(column > size.ws_col + start)
+	while(!(column >= start && column + len < start + size.ws_col))
 	{
 		start += 10;
 	}
@@ -56,7 +67,10 @@ _VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
 		{
 			break;
 		}
-		
+		if(start + i >= column && start + i < len + column)
+		{
+            printf(is_error?LIGHT_RED:LIGHT_PURPLE);
+		}
 		printf("%c"NONE, c);
 	}
 
@@ -66,13 +80,17 @@ _VOID display_token_and_line(const _S8 *p_text_buffer, size_t offset)
 	{
 		printf(" ");
 	}
-	printf(LIGHT_GREEN"^"NONE"\n");
-	
+	printf("%s^"NONE, is_error?LIGHT_RED:LIGHT_PURPLE);
+    for(_S32 i = 0; i < len - 1; i++)
+	{
+		printf("%s~"NONE, is_error?LIGHT_RED:LIGHT_PURPLE);
+	}
+	printf("\n");
 }
 
 #ifdef CPPUTEST
 
-_VOID display_token_and_line_to_file(const _S8 *p_text_buffer, size_t offset, FILE *pfw)
+_VOID display_token_and_line_to_file(const _S8 *p_text_buffer, size_t offset, size_t len, FILE *pfw)
 {
 	S_V_ASSERT(p_text_buffer != NULL);
     S_V_FALSE(pfw != NULL);

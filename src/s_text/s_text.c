@@ -1113,7 +1113,7 @@ ENUM_RETURN s_trim_nl(_S8 *source)
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
+ENUM_RETURN s_strnindex(const _S8 *source, const size_t source_len, const _S8 *target, _S32 *index)
 {
     R_ASSERT(source != NULL, RETURN_FAILURE);
     R_ASSERT(target != NULL, RETURN_FAILURE);
@@ -1125,7 +1125,7 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
 
     /*  source*  len = 6 */
     /*  0123456  */
-    const _S8 *source_end = source + strlen(source);
+    const _S8 *source_end = source + source_len;
     const _S8 *source_start = source;
     
     while(source <= source_end - len)
@@ -1139,6 +1139,13 @@ ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
     }
 
     return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index)
+{
+    R_ASSERT(source != NULL, RETURN_FAILURE);
+
+    return s_strnindex(source, strlen(source), target, index);
 }
 
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index)

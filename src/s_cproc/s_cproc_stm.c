@@ -105,6 +105,7 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
     size_t c_step;
     ENUM_BOOLEAN move_to_next_line;
     STRU_C_POSITION current_c_position;
+    STRU_C_POSITION last_c_position;
     
     _S32 c;
     _S32 last_c;
@@ -128,8 +129,13 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 #define LAST_LAST_C (g_cproc_stm_run_data.last_last_c)
 
 #define CURRENT_C_OFFSET (g_cproc_stm_run_data.current_c_position.offset)
+#define CURRENT_C_LEN (g_cproc_stm_run_data.current_c_position.len)
 #define CURRENT_C_LINE (g_cproc_stm_run_data.current_c_position.line)
 #define CURRENT_C_COLUMN (g_cproc_stm_run_data.current_c_position.column)
+#define LAST_C_OFFSET (g_cproc_stm_run_data.last_c_position.offset)
+#define LAST_C_LEN (g_cproc_stm_run_data.last_c_position.len)
+#define LAST_C_LINE (g_cproc_stm_run_data.last_c_position.line)
+#define LAST_C_COLUMN (g_cproc_stm_run_data.last_c_position.column)
 
 #define CURRENT_TOKEN_STR_BUFFER g_cproc_stm_run_data.current_token
 #define CURRENT_TOKEN_STR_BUFFER_POINTER_TO_WRITE (g_cproc_stm_run_data.p_current_token)
@@ -142,7 +148,6 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 
 #define CURRENT_STATE (get_current_stm_state(g_cproc_stm_run_data.stm))
 
-#define LAST_TOKEN_TYPE (g_cproc_stm_run_data.last_token_type)
 
 #define TOKEN_IS_READY_TO_BE_ADDED\
     (g_cproc_stm_run_data.current_token_type != C_TOKEN_INVALID\
@@ -194,7 +199,7 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 
 #define RESET_TOKEN\
     do{\
-        CURRENT_TOKEN_STR_BUFFER[0] = '\0';\
+        memset(CURRENT_TOKEN_STR_BUFFER, '\0', MAX_TOKEN_LEN);\
         CURRENT_TOKEN_STR_BUFFER_LEFT_SIZE_TO_WRITE = MAX_TOKEN_LEN;\
         CURRENT_TOKEN_STR_BUFFER_POINTER_TO_WRITE = &(CURRENT_TOKEN_STR_BUFFER[0]);\
         CURRENT_TOKEN_TYPE = C_TOKEN_INVALID;\
@@ -337,6 +342,11 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
             S_CPROC_STM_GEN_WARNING(S_CPROC_STM_CURRENT_C_POSITION, "backslash-newline at end of file");\
         }\
         size_t ___skip = (skip);\
+/*
+        LAST_C_OFFSET = CURRENT_C_OFFSET;\
+        LAST_C_COLUMN = CURRENT_C_COLUMN;\
+        LAST_C_LINE = CURRENT_C_LINE;\
+        */\
         while(___skip > 0)\
         {\
             DEBUG_PRINT("skip \033[7m%c"NONE, TEXT_BUFFER[CURRENT_C_OFFSET]);\
@@ -350,7 +360,17 @@ typedef struct TAG_STRU_CPROC_STM_RUN_DATA
 
 PRIVATE STRU_CPROC_STM_RUN_DATA g_cproc_stm_run_data;
 PRIVATE STACK g_stack = NULL;
-PRIVATE ENUM_RETURN cproc_stm_postproc();
+PRIVATE ENUM_RETURN s_cproc_stm_postproc_proc();
+PRIVATE ENUM_BOOLEAN s_cproc_stm_current_token_has_string(const _S8* p_string)
+{
+    S_R_ASSERT(p_string != NULL, BOOLEAN_FALSE);
+    _S32 index = -1;
+    ENUM_RETURN ret_val = s_strnindex(CURRENT_TOKEN_STR_BUFFER, CURRENT_TOKEN_STR_BUFFER_LEN, p_string, &index);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, BOOLEAN_FALSE);
+    S_R_FALSE(index != -1, BOOLEAN_FALSE);
+
+    return BOOLEAN_TRUE;
+}
 
 PRIVATE _VOID s_cproc_stm_print_debug_info(_VOID)
 {
@@ -362,8 +382,13 @@ PRIVATE _VOID s_cproc_stm_print_debug_info(_VOID)
     printf("%-20s:%zd\n", "c_step", g_cproc_stm_run_data.c_step);
     printf("%-20s:%d\n", "move_to_next_line", g_cproc_stm_run_data.move_to_next_line);
     printf("%-20s:%zd\n", "current_c_position.offset", g_cproc_stm_run_data.current_c_position.offset);
+    printf("%-20s:%zd\n", "current_c_position.len", g_cproc_stm_run_data.current_c_position.len);
     printf("%-20s:%zd\n", "current_c_position.line", g_cproc_stm_run_data.current_c_position.line);
     printf("%-20s:%zd\n", "current_c_position.column", g_cproc_stm_run_data.current_c_position.column);
+    printf("%-20s:%zd\n", "last_c_position.offset", g_cproc_stm_run_data.last_c_position.offset);
+    printf("%-20s:%zd\n", "last_c_position.line", g_cproc_stm_run_data.last_c_position.line);
+    printf("%-20s:%zd\n", "last_c_position.column", g_cproc_stm_run_data.last_c_position.column);
+    
     printf("%-20s:%c\n", "c", g_cproc_stm_run_data.c);
     printf("%-20s:%c\n", "last_c", g_cproc_stm_run_data.last_c);
     printf("%-20s:%c\n", "last_last_c", g_cproc_stm_run_data.last_last_c);
@@ -399,13 +424,18 @@ STRU_C_POSITION *s_cproc_stm_get_current_c_position(_VOID)
     return &g_cproc_stm_run_data.current_c_position;
 }
 
+STRU_C_POSITION *s_cproc_stm_get_last_c_position(_VOID)
+{
+    return &g_cproc_stm_run_data.last_c_position;
+}
+
 STRU_C_POSITION *s_cproc_stm_get_current_token_c_position(_VOID)
 {
     return TOKEN_IS_READY_TO_BE_ADDED ? &g_cproc_stm_run_data.current_token_c_position: &g_cproc_stm_run_data.current_c_position;
 }
 
 /* get the skip number of the next availible char */
-PRIVATE ENUM_RETURN cproc_continued_newline(size_t *skip, size_t *space_num)
+PRIVATE ENUM_RETURN s_cproc_continued_newline(size_t *skip, size_t *space_num)
 {
     S_R_ASSERT(skip != NULL, RETURN_FAILURE);
     S_R_ASSERT(space_num != NULL, RETURN_FAILURE);
@@ -456,22 +486,23 @@ PRIVATE ENUM_RETURN cproc_continued_newline(size_t *skip, size_t *space_num)
     return RETURN_SUCCESS;
 }
 
-PRIVATE void display_check_correct_info(void)
-{
-    //printf(LIGHT_GREEN"Correct!\n"NONE);
-}
-
-PRIVATE ENUM_RETURN cproc_stm_prepare_proc()
+PRIVATE ENUM_RETURN s_cproc_stm_prepare_proc()
 {
     //g_cproc_stm_run_data.move_to_next_line
     LINE_STAY;
 
     //g_cproc_stm_run_data.current_c_position.offset
+    //g_cproc_stm_run_data.current_c_position.len
     //g_cproc_stm_run_data.current_c_position.line
     //g_cproc_stm_run_data.current_c_position.column
     CURRENT_C_OFFSET = 0;
+    CURRENT_C_LEN = 1;
     CURRENT_C_LINE = 0;
     CURRENT_C_COLUMN = 0;
+    LAST_C_OFFSET = 0;
+    LAST_C_LEN = 1;
+    LAST_C_LINE = 0;
+    LAST_C_COLUMN = 0;
 
     //g_cproc_stm_run_data.c
     CURRENT_C = INVALID_CHAR;
@@ -506,17 +537,17 @@ PRIVATE ENUM_RETURN cproc_stm_prepare_proc()
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN cproc_stm_clear_proc()
+PRIVATE ENUM_RETURN s_cproc_stm_clear_proc()
 {
     if(g_cproc_stm_run_data.whether_any_error_exists == BOOLEAN_FALSE)
     {
-        display_check_correct_info();
+
     }
 
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN cproc_stm_preproc()
+PRIVATE ENUM_RETURN s_cproc_stm_preproc_proc()
 {
     if(g_cproc_stm_run_data.whether_any_error_exists == BOOLEAN_TRUE)
     {
@@ -537,11 +568,11 @@ PRIVATE ENUM_RETURN cproc_stm_preproc()
     size_t space_num = 0;
     if(CURRENT_C == '\\')
     {
-        cproc_continued_newline(&skip, &space_num);
+        s_cproc_continued_newline(&skip, &space_num);
         if(skip != 0)
         {
             SKIP_CONTINUED_NEWLINE(skip, space_num);
-            return cproc_stm_preproc();
+            return s_cproc_stm_preproc_proc();
         }
     }
 
@@ -550,7 +581,7 @@ PRIVATE ENUM_RETURN cproc_stm_preproc()
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN cproc_stm_postproc()
+PRIVATE ENUM_RETURN s_cproc_stm_postproc_proc()
 {
     if(!C_DIRECTION_IS_FORWARD)
     {
@@ -560,6 +591,9 @@ PRIVATE ENUM_RETURN cproc_stm_postproc()
     LAST_LAST_C = LAST_C;
     LAST_C = CURRENT_C;
 
+    LAST_C_OFFSET = CURRENT_C_OFFSET;
+    LAST_C_COLUMN = CURRENT_C_COLUMN;
+    LAST_C_LINE = CURRENT_C_LINE;
     CURRENT_C_OFFSET += g_cproc_stm_run_data.c_step;
     CURRENT_C_COLUMN += g_cproc_stm_run_data.c_step;
     if(LINE_DIRECTION_IS_FORWARD)
@@ -571,12 +605,12 @@ PRIVATE ENUM_RETURN cproc_stm_postproc()
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN cproc_stm_state_notifier()
+PRIVATE ENUM_RETURN s_cproc_stm_state_notifier()
 {
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_RETURN cproc_stm_proc_normal()
+PRIVATE ENUM_RETURN s_cproc_stm_state_proc_normal()
 {
     _S8 c = CURRENT_C;
     
@@ -883,16 +917,6 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
             ADD_TOKEN;
             break;
         }
-        case '\\':
-        case '@':
-        case '`':
-        {
-            TYPE_TOKEN(C_TOKEN_PUNCTUATOR);
-            OUTPUT_TOKEN_C;
-            ADD_TOKEN;
-            //S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
-            break;
-        }
         case ' ':
         case '\t':
         case '\v':
@@ -940,9 +964,13 @@ PRIVATE ENUM_RETURN cproc_stm_proc_normal()
             }
             else
             {
-                TYPE_TOKEN(C_TOKEN_UNKNOWN);
+                // '\\':
+                // '@':
+                // '`':
+                TYPE_TOKEN(C_TOKEN_OTHER);
                 OUTPUT_TOKEN_C;
                 ADD_TOKEN;
+                //S_CPROC_STM_GEN_ERROR(S_CPROC_LAST_TOKEN_C_POSITION, "stray '%s' in program", S_CPROC_LAST_TOKEN_STRING);
             }
             break;
         }
@@ -1056,10 +1084,25 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pair_comment()
         case '/':
         {
             OUTPUT_TOKEN_C;
-            if(LAST_C == '*')
+            if(LAST_C == '*' && LAST_LAST_C != '/')
             {
                 REPLACE_TOKEN;
                 STATE_BACK;
+            }
+            break;
+        }
+        case '*':
+        {
+            OUTPUT_TOKEN_C;
+            STRU_C_TOKEN_NODE *p_last_token_node = S_CPROC_LAST_TOKEN_POINTER;
+            S_R_ASSERT(p_last_token_node != NULL, RETURN_FAILURE);
+            S_R_ASSERT(p_last_token_node->info.token_type == C_TOKEN_PAIR_COMMENT, RETURN_FAILURE);
+            
+            if(LAST_C == '/' 
+                && (BOOLEAN_TRUE == s_cproc_stm_current_token_has_string("\n")
+                    || BOOLEAN_TRUE == s_cproc_stm_current_token_has_string("\r")))
+            {
+                S_CPROC_STM_GEN_WARNING(S_CPROC_STM_LAST_C_POSITION, "\"/*\" within comment [-Wcomment]");
             }
             break;
         }
@@ -1156,15 +1199,64 @@ PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
 
 PRIVATE ENUM_RETURN cproc_stm_proc_number()
 {
+    ENUM_BOOLEAN number_finish = BOOLEAN_FALSE;
+    
     _S8 c = CURRENT_C;
-    TYPE_TOKEN(C_TOKEN_CONSTANT_INTEGER);
-    if(IS_DEC(c))
+    switch(c)
     {
-        OUTPUT_TOKEN_C;
-        return RETURN_SUCCESS;
+        //exponents
+        case '+':
+        case '-':
+        {
+            if(LAST_C == 'P' || LAST_C == 'p' || LAST_C == 'E' || LAST_C == 'e')
+            {
+                OUTPUT_TOKEN_C;
+            }
+            else
+            {
+                number_finish = BOOLEAN_TRUE;
+                STATE_BACK;
+            }
+            break;
+        }
+        //underscores, periods
+        case '.':
+        case '_':
+        {
+            OUTPUT_TOKEN_C;
+            break;
+        }
+        //letters, digits
+        default:
+        {
+            if(IS_DEC(c) || IS_ALPHABET(c))
+            {
+                OUTPUT_TOKEN_C;
+            }
+            else
+            {
+                number_finish = BOOLEAN_TRUE;
+                STATE_BACK;
+            }
+            break;
+        }
     }
-    ADD_TOKEN;
-    STATE_BACK;
+
+    if(number_finish == BOOLEAN_TRUE)
+    {
+        ADD_TOKEN;
+        if(S_CPROC_LAST_LAST_TOKEN_TYPE == C_TOKEN_OPERATOR_MEMBER)
+        {
+            MERGE_LAST_2_TOKENS(C_TOKEN_CONSTANT_FLOAT);
+        }
+        else
+        {
+            if(s_cproc_has_dot_before_number_or_alphabet(S_CPROC_LAST_TOKEN_STRING))
+            {
+                MOD_LAST_TOKEN_TYPE(C_TOKEN_CONSTANT_FLOAT);
+            }
+        }
+    }
     return RETURN_SUCCESS;
 }
 
@@ -2219,6 +2311,8 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_replacement()
         {
             if(IS_DEC(c))
             {
+                TYPE_TOKEN(C_TOKEN_PP_INTEGER_CONSTANT);
+                OUTPUT_TOKEN_C;
                 STATE_TO(CPROC_STM_PP_NUMBER);
             }
             else if(C_TOKEN_IS_IDENTIFIER_STARTER(c))
@@ -2428,17 +2522,76 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_undef_finish()
     return RETURN_SUCCESS;
 }
 
+/*
+A preprocessing number has a rather bizarre definition. The category includes all the normal integer and floating point constants one 
+expects of C, but also a number of other things one might not initially recognize as a number. Formally, preprocessing numbers begin with 
+an optional period, a required decimal digit, and then continue with any sequence of letters, digits, underscores, periods, and exponents
+. Exponents are the two-character sequences ¡®e+¡¯, ¡®e-¡¯, ¡®E+¡¯, ¡®E-¡¯, ¡®p+¡¯, ¡®p-¡¯, ¡®P+¡¯, and ¡®P-¡¯. (The 
+exponents that begin with ¡®p¡¯ or ¡®P¡¯ are used for hexadecimal floating-point constants.)
+
+*/
+
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_number()
 {
+    ENUM_BOOLEAN number_finish = BOOLEAN_FALSE;
+    
     _S8 c = CURRENT_C;
-    TYPE_TOKEN(C_TOKEN_PP_NUMBER);
-    if(IS_DEC(c))
+    switch(c)
     {
-        OUTPUT_TOKEN_C;
-        return RETURN_SUCCESS;
+        //exponents
+        case '+':
+        case '-':
+        {
+            if(LAST_C == 'P' || LAST_C == 'p' || LAST_C == 'E' || LAST_C == 'e')
+            {
+                OUTPUT_TOKEN_C;
+            }
+            else
+            {
+                number_finish = BOOLEAN_TRUE;
+                STATE_BACK;
+            }
+            break;
+        }
+        //underscores, periods
+        case '.':
+        case '_':
+        {
+            OUTPUT_TOKEN_C;
+            break;
+        }
+        //letters, digits
+        default:
+        {
+            if(IS_DEC(c) || IS_ALPHABET(c))
+            {
+                OUTPUT_TOKEN_C;
+            }
+            else
+            {
+                number_finish = BOOLEAN_TRUE;
+                STATE_BACK;
+            }
+            break;
+        }
     }
-    ADD_TOKEN;
-    STATE_BACK;
+
+    if(number_finish == BOOLEAN_TRUE)
+    {
+        ADD_TOKEN;
+        if(S_CPROC_LAST_LAST_TOKEN_TYPE == C_TOKEN_PP_PUNCTUATOR && strcmp(S_CPROC_LAST_LAST_TOKEN_STRING, ".") == 0)
+        {
+            MERGE_LAST_2_TOKENS(C_TOKEN_PP_FLOATING_CONSTANT);
+        }
+        else
+        {
+            if(s_cproc_has_dot_before_number_or_alphabet(S_CPROC_LAST_TOKEN_STRING))
+            {
+                MOD_LAST_TOKEN_TYPE(C_TOKEN_PP_FLOATING_CONSTANT);
+            }
+        }
+    }
+    
     return RETURN_SUCCESS;
 }
 
@@ -2510,7 +2663,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_end()
 
 PRIVATE STRU_CPROC_STM_PROC cproc_stm_proc[CPROC_STM_MAX] = 
 {
-    {CPROC_STM_NORMAL, cproc_stm_proc_normal, "normal"},
+    {CPROC_STM_NORMAL, s_cproc_stm_state_proc_normal, "normal"},
     {CPROC_STM_STRING_DOUBLE_QUOTE, cproc_stm_proc_string_double_quote, "string double quote"},
     {CPROC_STM_STRING_SINGLE_QUOTE, cproc_stm_proc_string_single_quote, "string single quote"},
     {CPROC_STM_ONELINE_COMMENT, cproc_stm_proc_oneline_comment, "oneline comment"},
@@ -2563,19 +2716,19 @@ PRIVATE ENUM_RETURN cproc_stm_init(void)
     ret_val = set_stm_end_state(g_cproc_stm_run_data.stm, CPROC_STM_END);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_prepare_handler(g_cproc_stm_run_data.stm, cproc_stm_prepare_proc);
+    ret_val = add_stm_prepare_handler(g_cproc_stm_run_data.stm, s_cproc_stm_prepare_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_clear_handler(g_cproc_stm_run_data.stm, cproc_stm_clear_proc);
+    ret_val = add_stm_clear_handler(g_cproc_stm_run_data.stm, s_cproc_stm_clear_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_preproc_handler(g_cproc_stm_run_data.stm, cproc_stm_preproc);
+    ret_val = add_stm_preproc_handler(g_cproc_stm_run_data.stm, s_cproc_stm_preproc_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_postproc_handler(g_cproc_stm_run_data.stm, cproc_stm_postproc);
+    ret_val = add_stm_postproc_handler(g_cproc_stm_run_data.stm, s_cproc_stm_postproc_proc);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    ret_val = add_stm_state_notifier(g_cproc_stm_run_data.stm, cproc_stm_state_notifier);
+    ret_val = add_stm_state_notifier(g_cproc_stm_run_data.stm, s_cproc_stm_state_notifier);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     for(int i = 0; i < SIZE_OF_ARRAY(cproc_stm_proc); i++)

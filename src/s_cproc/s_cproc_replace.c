@@ -15,34 +15,32 @@ int fff()
     printf("%s", FILE_B");
 }
 */
-//#define MACRO(A*&&& ... 123)
-//#define MACRO(A /**/*&&& ... 123)
-//#define MACRO2(,A, *&&& ... 123)
-//#define MACRO(A /**/B*&&& ... 123)
-//#define MACRO(A /**/,B,A*&&& ... 123)
-//#define MACRO2(A, a123,)
-//#define MACRO1(A,  ... 123)
-//#define VA1(arg...,.) (##arg)
-//#define VA(arg...) __VA_ARGS__
-//#define VA(arg...) #arg
-
-//#define VA(arg...) #__VA_ARGS__
-//#define VA(...) #__VA_ARGS__
-//#define VA(a)#/__VA_ARGS__
-//#define VA(a)###/__VA_ARGS__
-//#define VA##/__VA_ARGS__
-//#define VA/##__VA_ARGS__
-//#define VA()/__VA_ARGS__#a
-//#define VA(arg, arg...) __VA_ARGS__
-//#define VA(arg, arg.,..) __VA_ARGS__
 
 
-//#define STD__ "stdio\"
-//#define IO__ .h"
-//#define STDIO STD__ IO__
-//#include STDIO
-//#include STD__
-#define include
-//#define(me)
-//#define macro(/**/
 
+
+/*
+Formally, preprocessing numbers begin with an optional period, a required decimal digit, and then continue with any sequence of letters, 
+digits, underscores, periods, and exponents. Exponents are the two-character sequences ¡®e+¡¯, ¡®e-¡¯, ¡®E+¡¯, ¡®E-¡¯, ¡®p+¡¯, 
+¡®p-¡¯, ¡®P+¡¯, and ¡®P-¡¯. (The exponents that begin with ¡®p¡¯ or ¡®P¡¯ are used for hexadecimal floating-point constants.)
+*/
+/*
+#define E 234
+#define NUMBER111 5.50xer__99ME+P-12.4_323
+int x = 5aa.50xer__99ME+P-12.4_323S-10 + NUMBER111;
+int x = 5_.50xer__99ME+P-12.4_323S-10 + NUMBER111;
+*/
+
+//#define X^@1
+
+int example_test()
+{
+    int a,b,c;
+    //c = X;
+    //a+++++b;
+    return 0;
+}
+/*
+a+++++b
+tokens: a ++ ++ + b
+*/

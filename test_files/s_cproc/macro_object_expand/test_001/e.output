@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro_object_expand/test_001/i.input:1:2: error: no macro name given in #define directive
+ #define
+  ^

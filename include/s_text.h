@@ -198,8 +198,11 @@ ENUM_RETURN s_trim(_S8 *source);
    after removement, if the string only contains newlines, clear the string */
 ENUM_RETURN s_trim_nl(_S8 *source);
 
-/* strindex: return index of target in source, -1 if none or target is empty */
+/* strindex: return index of target in source(terminated by '\0'), -1 if none or target is empty */
 ENUM_RETURN s_strindex(const _S8 *source, const _S8 *target, _S32 *index);
+
+/* strindex: return index of target in source(not sure terminated by '\0'), -1 if none or target is empty */
+ENUM_RETURN s_strnindex(const _S8 *source, const size_t source_len, const _S8 *target, _S32 *index);
 
 /* returns the position of the rightmost occurrence of target in source , -1 if there is none or target is empty */
 ENUM_RETURN s_strrindex(const _S8 *source, const _S8 *target, _S32 *index);

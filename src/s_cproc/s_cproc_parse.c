@@ -137,7 +137,8 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_PP_PARAMETER_ID,                                  LIGHT_GREEN"Preprocessing: parameter: identifier"NONE},
     {C_TOKEN_PP_PARAMETER_ID_VA,                               LIGHT_GREEN"Preprocessing: parameter: identifier..."NONE},
     {C_TOKEN_PP_PARAMETER_VA,                                  LIGHT_GREEN"Preprocessing: parameter: ..."NONE},
-	{C_TOKEN_PP_NUMBER,                                        LIGHT_GREEN"Preprocessing: number"NONE},
+    {C_TOKEN_PP_INTEGER_CONSTANT,                              LIGHT_GREEN"Preprocessing: integer constant"NONE},
+	{C_TOKEN_PP_FLOATING_CONSTANT,                             LIGHT_GREEN"Preprocessing: floating constant"NONE},
 	{C_TOKEN_PP_CHARACTER_CONSTANT,                            LIGHT_GREEN"Preprocessing: character constant"NONE},
 	{C_TOKEN_PP_STRING_LITERAL,                                LIGHT_GREEN"Preprocessing: string literal"NONE},
 	{C_TOKEN_PP_PUNCTUATOR,                                    LIGHT_GREEN"Preprocessing: punctuator"NONE},
@@ -213,6 +214,7 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_STRING,                                           LIGHT_GREEN"C constant: string"NONE},
     {C_TOKEN_CHAR,                                             LIGHT_GREEN"C constant: character"NONE},
     {C_TOKEN_PUNCTUATOR,                                       LIGHT_GREEN"C punctuator"NONE},
+    {C_TOKEN_OTHER,                                            LIGHT_GREEN"C other"NONE},
     {C_TOKEN_END,                                              LIGHT_GREEN"END"NONE},
     {C_TOKEN_UNKNOWN,                                          LIGHT_RED"UNKNOWN"NONE},
     {C_TOKEN_LIST_HEAD,                                        LIGHT_RED"LIST HEAD"NONE},
@@ -291,6 +293,23 @@ ENUM_BOOLEAN is_keyword_control(const _S8 *string)
 ENUM_BOOLEAN is_keyword(const _S8 *string)
 {
     return get_ckeyword_type(string) != DCL_KEYWORD_INVALID;
+}
+
+ENUM_BOOLEAN s_cproc_has_dot_before_number_or_alphabet(const _S8*p_text)
+{
+    S_R_ASSERT(p_text != NULL, BOOLEAN_FALSE);
+    ENUM_BOOLEAN has_dot_before_number_or_alphabet = BOOLEAN_FALSE;
+    while(*p_text != '\0' && !(*p_text == '_' || IS_ALPHABET(*p_text)))
+    {
+        if(*p_text == '.')
+        {
+            has_dot_before_number_or_alphabet = BOOLEAN_TRUE;
+            break;
+        }
+        p_text++;
+    }
+
+    return has_dot_before_number_or_alphabet;
 }
 
 ENUM_RETURN s_cproc_parse_pp_directive(const _S8 *p_text_buffer, ENUM_C_TOKEN *token_type)

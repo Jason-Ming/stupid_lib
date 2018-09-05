@@ -1,5 +1,7 @@
-//this is a line comment\
-
-/*this is a pair comment contain newline 
-
+/*\
+/\
+*
 */
+/*
+//
+/**/

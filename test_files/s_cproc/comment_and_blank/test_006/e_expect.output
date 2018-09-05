@@ -1,3 +1,3 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_005/i.input:1:1: warning: multi-line comment [-Wcomment]
- //this is a line comment\
+/home/jason/github/stupid_lib/test_files/s_cproc/comment_and_blank/test_006/i.input:7:1: warning: "/*" within comment [-Wcomment]
+ /**/
  ^

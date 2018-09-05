@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_026/i.input:1:14: error: '##' cannot appear at either end of a macro expansion
+ #define VA(a)###/__VA_ARGS__
+              ^

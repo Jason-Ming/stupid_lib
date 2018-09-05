@@ -1,7 +1,5 @@
-#define STD <std
-#define IO io.
-#define H h >
-#include STD IO H </usr/include/stdio.h >asdff
+
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "s_log.h"
@@ -19,6 +17,10 @@
     {\
         *pp_real_file_name = p_filename_include;\
         return RETURN_SUCCESS;\
+    }\
+    else\
+    {\
+        S_FREE(p_filename_include);\
     }
 
 /* use cpp -v list 

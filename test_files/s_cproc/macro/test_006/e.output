@@ -1,3 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro/test_006/i.input:1:12: warning: ISO C99 requires whitespace after the macro name
- #define STD<stdio.h>
-            ^

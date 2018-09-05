@@ -17,6 +17,7 @@
 typedef struct TAG_STRU_C_POSITION
 {
 	size_t offset;
+    size_t len;
     size_t line;
     size_t column;
 }STRU_C_POSITION;

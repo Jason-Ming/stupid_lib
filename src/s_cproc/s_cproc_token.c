@@ -152,6 +152,7 @@ ENUM_RETURN s_cproc_token_merge_last_2_nodes(ENUM_C_TOKEN new_type)
     p_token_new->info.p_string = s_concatenate_string(p_token_last_last->info.p_string, p_token_last->info.p_string);
     S_R_ASSERT_DO(p_token_new->info.p_string != NULL, RETURN_FAILURE, s_ctoken_free_node(p_token_new));
     p_token_new->info.token_type = new_type;
+    p_token_new->info.c_position.len = strlen(p_token_new->info.p_string);
 
     ret_val = s_ctoken_delete_node_from_list(&g_c_token_list_head, p_token_last);
     S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_ctoken_free_node(p_token_new));

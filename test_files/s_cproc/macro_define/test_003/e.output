@@ -1,0 +1,3 @@
+/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_003/i.input:1:8: error: macro names must be identifiers
+ #define(me)
+        ^
