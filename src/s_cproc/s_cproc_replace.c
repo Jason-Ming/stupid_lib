@@ -1,3 +1,4 @@
+#include "s_text.h"
 //#include <stdio.h/*sadf*/>
 /*
 1. Ìæ»»×Ö·û¼¯
@@ -31,13 +32,18 @@ int x = 5aa.50xer__99ME+P-12.4_323S-10 + NUMBER111;
 int x = 5_.50xer__99ME+P-12.4_323S-10 + NUMBER111;
 */
 
-//#define X^@1
+#define MACRO(abc__VA_ARGS__) __VA_ARGS__
 
+
+
+
+
+#define ADD_PARAMETER(x)  5 + x##1
+void foo(int x)
+{
+}
 int example_test()
 {
-    int a,b,c;
-    //c = X;
-    //a+++++b;
     return 0;
 }
 /*
