@@ -340,6 +340,19 @@ TEST(s_cc_include, h_header_has_space)
 }
 
 /*
+after replacing macro, string concatonation will not execute:
+
+#define FILE_B() "s_cproc_include_file.h"
+#include FILE_B()FILE_B()
+
+s_cproc_replace.c:12:25: warning: extra tokens at end of #include directive
+ #include FILE_B()FILE_B()
+                         ^
+
+*/
+
+
+/*
 Search Path
 
 */
@@ -353,9 +366,16 @@ Search Path
 //
 //#endif /* !FILE_FOO_SEEN */
 
+
+
 /*
 #define HEADER "a\"b"
 #include HEADER
+
+
+s_cproc_replace.c:39:16: fatal error: a\"b: No such file or directory
+ #define HEADER "a\"b"
+                ^~~~~~
 
 */
 
@@ -378,5 +398,18 @@ according to the rules for angle-bracket includes.
 //#define STDIO STD__ IO__
 //#include STDIO
 //#include STD__
+
+/*
+邻近字符串的拼接操作是在预处理之后进行的,如下指令无法正确包含myfile.h:
+    #include "myfile" ".h"
+
+s_cproc_replace.c:1:19: warning: extra tokens at end of #include directive
+ #include "s_text.""h"
+                   ^~~
+s_cproc_replace.c:1:10: fatal error: s_text.: No such file or directory
+ #include "s_text.""h"
+          ^~~~~~~~~
+
+*/
 
 

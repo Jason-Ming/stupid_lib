@@ -143,6 +143,25 @@ TEST(s_cc_macro_object_expand, no_macro_name)
     CHECK_EQUAL(0, file_compare_result);
 }
 
+//--------------------3.1 Object-like Macros-----------------------------------------------------
+/*
+An object-like macro is a simple identifier which will be replaced by a code fragment. It is called object-like because it looks like a 
+data object in code that uses it. They are most commonly used to give symbolic names to numeric constants.
+*/
+
+/*
+如果一个#预处理记号后面跟着一个标识符，从字面上出现在一条预处理指令可以开始的位置, 那么该标识符不是宏替换的对象
+
+#define INCL_STD include<stdio.h>
+#INCL_STD   //宏INCL_STD不会执行期望的替换
+
+s_cproc_replace.c:35:2: error: invalid preprocessing directive #INCL_STD
+ #INCL_STD   //o鈎CL_STD2????ǚλμō滻
+  ^~~~~~~~
+
+*/
+
+
 /*
 #define NUMBERS 1, \
                 2, \
@@ -187,4 +206,30 @@ foo = (char *) malloc (TABLESIZE);
 → 
 
 foo = (char *) malloc (37);
+*/
+
+
+
+/*
+宏定义的作用范围独立于语句块结构⑦,它持续直到遇到一条对应的#undef指令,如果一条也没有遇到,
+则一直持续到预处理翻译单元的结束.在翻译阶段4结束之后,这些宏定义便不再具有意义.
+⑦ 见P9的翻译阶段.例如:
+void fun2();
+void fun1()
+{
+    #define MACRO1 "MACRO1"//此宏的作用范围从此行开始往下
+}
+
+void main()
+{
+    puts(MACRO1);//正确,尽管看起来定义MACRO1的fun1()还未调用过
+    fun2();
+    puts(MACRO2);//错误,MACRO2未定义,尽管看起来fun2()已经调用过了
+}
+
+void fun2()
+{
+    #define MACRO2 "MACRO2"//此宏的作用范围从此行开始往下
+}
+
 */

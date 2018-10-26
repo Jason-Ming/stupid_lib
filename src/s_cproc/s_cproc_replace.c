@@ -6,41 +6,16 @@
 3. ´¦Àí×¢ÊÍ
 4. Êä³ötoken: normal string, blank, newline
 */
-//#include <stdio.h>
-/*
-#define FILE_B() "s_cproc_include_file.h"
-#include FILE_B()FILE_B()
-
-int fff()
-{
-    printf("%s", FILE_B");
-}
-*/
-
-
-
-
-/*
-Formally, preprocessing numbers begin with an optional period, a required decimal digit, and then continue with any sequence of letters, 
-digits, underscores, periods, and exponents. Exponents are the two-character sequences ¡®e+¡¯, ¡®e-¡¯, ¡®E+¡¯, ¡®E-¡¯, ¡®p+¡¯, 
-¡®p-¡¯, ¡®P+¡¯, and ¡®P-¡¯. (The exponents that begin with ¡®p¡¯ or ¡®P¡¯ are used for hexadecimal floating-point constants.)
-*/
-/*
-#define E 234
-#define NUMBER111 5.50xer__99ME+P-12.4_323
-int x = 5aa.50xer__99ME+P-12.4_323S-10 + NUMBER111;
-int x = 5_.50xer__99ME+P-12.4_323S-10 + NUMBER111;
-*/
-
-#define MACRO(abc__VA_ARGS__) __VA_ARGS__
-
-
-
+#include "s_alg.h"
+#include <stdio.h>
 
 
 #define ADD_PARAMETER(x)  5 + x##1
+
 void foo(int x)
 {
+    int x1 = 0;
+    x1 = MAX(MIN(4,5), 6) + x1;
 }
 int example_test()
 {
@@ -50,3 +25,5 @@ int example_test()
 a+++++b
 tokens: a ++ ++ + b
 */
+
+

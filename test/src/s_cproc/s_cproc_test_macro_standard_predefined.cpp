@@ -11,41 +11,41 @@
 
 using namespace std;
 
-#define TEST_FILE_DIR001 "test_files/s_cproc/macro_standard_defined/test_001"
-#define TEST_FILE_DIR002 "test_files/s_cproc/macro_standard_defined/test_002"
-#define TEST_FILE_DIR003 "test_files/s_cproc/macro_standard_defined/test_003"
-#define TEST_FILE_DIR004 "test_files/s_cproc/macro_standard_defined/test_004"
-#define TEST_FILE_DIR005 "test_files/s_cproc/macro_standard_defined/test_005"
-#define TEST_FILE_DIR006 "test_files/s_cproc/macro_standard_defined/test_006"
-#define TEST_FILE_DIR007 "test_files/s_cproc/macro_standard_defined/test_007"
-#define TEST_FILE_DIR008 "test_files/s_cproc/macro_standard_defined/test_008"
-#define TEST_FILE_DIR009 "test_files/s_cproc/macro_standard_defined/test_009"
-#define TEST_FILE_DIR010 "test_files/s_cproc/macro_standard_defined/test_010"
-#define TEST_FILE_DIR011 "test_files/s_cproc/macro_standard_defined/test_011"
-#define TEST_FILE_DIR012 "test_files/s_cproc/macro_standard_defined/test_012"
-#define TEST_FILE_DIR013 "test_files/s_cproc/macro_standard_defined/test_013"
-#define TEST_FILE_DIR014 "test_files/s_cproc/macro_standard_defined/test_014"
-#define TEST_FILE_DIR015 "test_files/s_cproc/macro_standard_defined/test_015"
-#define TEST_FILE_DIR016 "test_files/s_cproc/macro_standard_defined/test_016"
-#define TEST_FILE_DIR017 "test_files/s_cproc/macro_standard_defined/test_017"
-#define TEST_FILE_DIR018 "test_files/s_cproc/macro_standard_defined/test_018"
-#define TEST_FILE_DIR019 "test_files/s_cproc/macro_standard_defined/test_019"
-#define TEST_FILE_DIR020 "test_files/s_cproc/macro_standard_defined/test_020"
-#define TEST_FILE_DIR021 "test_files/s_cproc/macro_standard_defined/test_021"
-#define TEST_FILE_DIR022 "test_files/s_cproc/macro_standard_defined/test_022"
-#define TEST_FILE_DIR023 "test_files/s_cproc/macro_standard_defined/test_023"
-#define TEST_FILE_DIR024 "test_files/s_cproc/macro_standard_defined/test_024"
-#define TEST_FILE_DIR025 "test_files/s_cproc/macro_standard_defined/test_025"
-#define TEST_FILE_DIR026 "test_files/s_cproc/macro_standard_defined/test_026"
-#define TEST_FILE_DIR027 "test_files/s_cproc/macro_standard_defined/test_027"
-#define TEST_FILE_DIR028 "test_files/s_cproc/macro_standard_defined/test_028"
-#define TEST_FILE_DIR029 "test_files/s_cproc/macro_standard_defined/test_029"
-#define TEST_FILE_DIR030 "test_files/s_cproc/macro_standard_defined/test_030"
-#define TEST_FILE_DIR031 "test_files/s_cproc/macro_standard_defined/test_031"
-#define TEST_FILE_DIR032 "test_files/s_cproc/macro_standard_defined/test_032"
-#define TEST_FILE_DIR033 "test_files/s_cproc/macro_standard_defined/test_033"
-#define TEST_FILE_DIR034 "test_files/s_cproc/macro_standard_defined/test_034"
-#define TEST_FILE_DIR035 "test_files/s_cproc/macro_standard_defined/test_035"
+#define TEST_FILE_DIR001 "test_files/s_cproc/macro_standard_predefined/test_001"
+#define TEST_FILE_DIR002 "test_files/s_cproc/macro_standard_predefined/test_002"
+#define TEST_FILE_DIR003 "test_files/s_cproc/macro_standard_predefined/test_003"
+#define TEST_FILE_DIR004 "test_files/s_cproc/macro_standard_predefined/test_004"
+#define TEST_FILE_DIR005 "test_files/s_cproc/macro_standard_predefined/test_005"
+#define TEST_FILE_DIR006 "test_files/s_cproc/macro_standard_predefined/test_006"
+#define TEST_FILE_DIR007 "test_files/s_cproc/macro_standard_predefined/test_007"
+#define TEST_FILE_DIR008 "test_files/s_cproc/macro_standard_predefined/test_008"
+#define TEST_FILE_DIR009 "test_files/s_cproc/macro_standard_predefined/test_009"
+#define TEST_FILE_DIR010 "test_files/s_cproc/macro_standard_predefined/test_010"
+#define TEST_FILE_DIR011 "test_files/s_cproc/macro_standard_predefined/test_011"
+#define TEST_FILE_DIR012 "test_files/s_cproc/macro_standard_predefined/test_012"
+#define TEST_FILE_DIR013 "test_files/s_cproc/macro_standard_predefined/test_013"
+#define TEST_FILE_DIR014 "test_files/s_cproc/macro_standard_predefined/test_014"
+#define TEST_FILE_DIR015 "test_files/s_cproc/macro_standard_predefined/test_015"
+#define TEST_FILE_DIR016 "test_files/s_cproc/macro_standard_predefined/test_016"
+#define TEST_FILE_DIR017 "test_files/s_cproc/macro_standard_predefined/test_017"
+#define TEST_FILE_DIR018 "test_files/s_cproc/macro_standard_predefined/test_018"
+#define TEST_FILE_DIR019 "test_files/s_cproc/macro_standard_predefined/test_019"
+#define TEST_FILE_DIR020 "test_files/s_cproc/macro_standard_predefined/test_020"
+#define TEST_FILE_DIR021 "test_files/s_cproc/macro_standard_predefined/test_021"
+#define TEST_FILE_DIR022 "test_files/s_cproc/macro_standard_predefined/test_022"
+#define TEST_FILE_DIR023 "test_files/s_cproc/macro_standard_predefined/test_023"
+#define TEST_FILE_DIR024 "test_files/s_cproc/macro_standard_predefined/test_024"
+#define TEST_FILE_DIR025 "test_files/s_cproc/macro_standard_predefined/test_025"
+#define TEST_FILE_DIR026 "test_files/s_cproc/macro_standard_predefined/test_026"
+#define TEST_FILE_DIR027 "test_files/s_cproc/macro_standard_predefined/test_027"
+#define TEST_FILE_DIR028 "test_files/s_cproc/macro_standard_predefined/test_028"
+#define TEST_FILE_DIR029 "test_files/s_cproc/macro_standard_predefined/test_029"
+#define TEST_FILE_DIR030 "test_files/s_cproc/macro_standard_predefined/test_030"
+#define TEST_FILE_DIR031 "test_files/s_cproc/macro_standard_predefined/test_031"
+#define TEST_FILE_DIR032 "test_files/s_cproc/macro_standard_predefined/test_032"
+#define TEST_FILE_DIR033 "test_files/s_cproc/macro_standard_predefined/test_033"
+#define TEST_FILE_DIR034 "test_files/s_cproc/macro_standard_predefined/test_034"
+#define TEST_FILE_DIR035 "test_files/s_cproc/macro_standard_predefined/test_035"
 
 
 
@@ -64,7 +64,7 @@ using namespace std;
 #define TEST_FILE_OUTPUT_EXPECT "/o_expect.output"
 #define TEST_FILE_ERRORS_EXPECT "/e_expect.output"
 
-TEST_GROUP(s_cc_macro_standard_defined)
+TEST_GROUP(s_cc_macro_standard_predefined)
 {
     void setup()
     {
@@ -125,7 +125,7 @@ TEST_GROUP(s_cc_macro_standard_defined)
 lang_init()
      ¡ú c_init()
 */
-TEST(s_cc_macro_standard_defined, no_macro_name)
+TEST(s_cc_macro_standard_predefined, no_macro_name)
 {
     file_init(TEST_FILE_DIR001);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
