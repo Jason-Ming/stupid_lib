@@ -31,6 +31,8 @@ ENUM_RETURN s_cproc_macro_add_parameter(
 ENUM_RETURN s_cproc_macro_finish_parameter(ENUM_RETURN *p_check_result);
 ENUM_RETURN s_cproc_macro_finish_replacement();
 
+ENUM_RETURN s_cproc_macro_expand(_VOID);
+
 __END_C_DECLS
 
 #endif

@@ -16,10 +16,10 @@
 
 typedef struct TAG_STRU_C_POSITION
 {
-	size_t offset;
-    size_t len;
-    size_t line;
-    size_t column;
+	size_t offset; //position from the head of text
+    size_t len;    //token string length
+    size_t line;   //token line in text
+    size_t column; //token column in text
 }STRU_C_POSITION;
 
 typedef struct TAG_STRU_C_TYPE_QUALIFIER
@@ -35,7 +35,6 @@ typedef struct TAG_STRU_C_TYPE_QUALIFIER
 typedef struct TAG_STRU_C_TOKEN
 {
     _S8 *p_string;
-    _SL inode;
     STRU_C_POSITION c_position;
     ENUM_C_TOKEN token_type;
     STRU_C_TYPE_QUALIFIER qualifier;

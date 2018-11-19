@@ -64,7 +64,6 @@ _VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name)
     
     p_head->info.p_string = head_name;
     p_head->info.token_type = C_TOKEN_LIST_HEAD;
-    p_head->info.inode = SL_INVALID;
     p_head->info.c_position.offset = 0;
     p_head->info.c_position.len = strlen(head_name);
     p_head->info.c_position.line = 0;

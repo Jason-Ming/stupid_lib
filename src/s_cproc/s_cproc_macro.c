@@ -169,7 +169,7 @@ ENUM_RETURN s_cproc_macro_get_replacement_list(_S8 *p_macro_name, STRU_C_TOKEN_N
     ret_val = s_cproc_macro_get_by_name(p_macro_name, &p_macro_node);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    S_R_ASSERT(p_macro_node != NULL, RETURN_SUCCESS);
+    S_R_FALSE(p_macro_node != NULL, RETURN_SUCCESS);
 
     *pp_replacement_token_list_head = &p_macro_node->info.replacement_list_head;
     return RETURN_SUCCESS;
@@ -648,8 +648,24 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     return RETURN_SUCCESS;
 }
 
-_VOID s_cproc_macro_expand(_VOID)
+ENUM_RETURN s_cproc_macro_expand(_VOID)
 {
+    //expand last token if the type is identifier
+    STRU_C_TOKEN_NODE *p_last_token = S_CPROC_LAST_LAST_TOKEN_POINTER;
+    S_R_ASSERT(p_last_token != NULL, RETURN_FAILURE);
+
+    //not a identifier
+    S_R_FALSE(p_last_token->info.token_type == C_TOKEN_IDENTIFIER, RETURN_SUCCESS);
+
+    STRU_C_TOKEN_NODE *p_replacement_token_list_head = NULL;
+    ENUM_RETURN ret_val = s_cproc_macro_get_replacement_list(p_last_token->info.p_string, &p_replacement_token_list_head);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    //the macro does not exist.
+    S_R_FALSE(p_replacement_token_list_head != NULL, RETURN_SUCCESS);
+
     //pasting """" and """" does not give a valid preprocessing token
+
+    return RETURN_SUCCESS;
 }
 

@@ -136,7 +136,7 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
     ENUM_RETURN result = RETURN_FAILURE;
     s_cproc_text_list_init();
     s_cproc_macro_list_init();
-    s_cproc_token_list_init();
+    s_cproc_token_init_list();
     
     ret_val = s_cpp(path, &result);
     S_ASSERT(ret_val == RETURN_SUCCESS);

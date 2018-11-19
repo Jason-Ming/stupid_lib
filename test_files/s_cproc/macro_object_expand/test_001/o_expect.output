@@ -1,1 +1,1 @@
-#define
+foo = (char *) malloc (1024);

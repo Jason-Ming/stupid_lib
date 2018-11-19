@@ -1,1 +1,3 @@
-#define
+
+foo = (char *) malloc (BUFFER_SIZE);
+

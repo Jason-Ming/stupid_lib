@@ -1177,7 +1177,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_blank()
 
 PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
 {
-    ENUM_RETURN ret_val;
+    
     _S8 c = CURRENT_C;
     if(C_TOKEN_IS_IDENTIFIER_CHAR(c))
     {
@@ -1187,13 +1187,19 @@ PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
 
     ADD_TOKEN;
 
+    /* In the preprocessing phase, no keywords need to be identified, and they are all considered as an identifier */
+    /*
+    ENUM_RETURN ret_val;
     ENUM_C_TOKEN token_type;
     ret_val = s_cproc_parse_word(S_CPROC_LAST_TOKEN_STRING, &token_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     MOD_LAST_TOKEN_TYPE(token_type);
-    
+    */
     
     STATE_BACK;
+
+    //expand identifier
+    
     return RETURN_SUCCESS;
 }
 
@@ -1680,10 +1686,9 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_include_macro()
         S_CPROC_STM_GEN_WARNING(S_CPROC_LAST_TOKEN_C_POSITION, "#include expects \"FILENAME\" or <FILENAME>");
     }
     
-    ret_val = s_cproc_macro_add_name(S_CPROC_LAST_TOKEN_POINTER);
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    //add replacement to token list, and check the filename format as h_header or q_header, if fail, then generate error
 
-    STATE_TO(CPROC_STM_PP_DEFINE_PARAMETER_START);
+    STATE_TO(CPROC_STM_PP_INCLUDE_FINISH);
     return RETURN_SUCCESS;
 }
 
@@ -1846,7 +1851,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define()
 
     return RETURN_SUCCESS;
 }
-
+#define if if
 PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_macro()
 {
     ENUM_RETURN ret_val;
