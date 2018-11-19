@@ -78,7 +78,7 @@ _VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name)
     INIT_LIST_HEAD(&p_head->list);
 }
 
-ENUM_RETURN s_ctoken_make_new(
+ENUM_RETURN s_ctoken_make_new_node(
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
     size_t text_offset,
@@ -115,7 +115,7 @@ ENUM_RETURN s_ctoken_make_new(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_ctoken_copy(
+ENUM_RETURN s_ctoken_duplicate_node(
     const STRU_C_TOKEN_NODE *p_token_node_source, 
     STRU_C_TOKEN_NODE **pp_token_node_dest)
 {
@@ -143,7 +143,7 @@ ENUM_RETURN s_ctoken_copy(
 
     return RETURN_SUCCESS;
 }
-ENUM_RETURN s_ctoken_add_node_to_list(
+ENUM_RETURN s_ctoken_add_node_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_new_token_node)
 {
@@ -158,7 +158,7 @@ ENUM_RETURN s_ctoken_add_node_to_list(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
+ENUM_RETURN s_ctoken_make_new_node_and_add_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
@@ -170,7 +170,7 @@ ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
 
     STRU_C_TOKEN_NODE *p_new_token_node = NULL;
     ENUM_RETURN ret_val;
-    ret_val = s_ctoken_make_new(
+    ret_val = s_ctoken_make_new_node(
         token_string,
         token_type, 
         text_offset, 
@@ -180,7 +180,7 @@ ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     S_R_ASSERT(p_new_token_node != NULL, RETURN_FAILURE);
     
-    ret_val = s_ctoken_add_node_to_list(
+    ret_val = s_ctoken_add_node_to_list_tail(
         p_token_list_head,
         p_new_token_node);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -560,26 +560,23 @@ ENUM_BOOLEAN s_ctoken_all_same_type_after_node(
     return all_same_type;
 }
 
-ENUM_RETURN s_ctoken_move_list_to_another_list(
+ENUM_RETURN s_ctoken_move_list_to_another_list_tail(
     STRU_C_TOKEN_NODE *p_source_token_list_head, 
     STRU_C_TOKEN_NODE *p_source_token_list_start,
     STRU_C_TOKEN_NODE *p_source_token_list_end,
-    STRU_C_TOKEN_NODE *p_dest_token_list_head,
-    STRU_C_TOKEN_NODE *p_dest_token_list_node)
+    STRU_C_TOKEN_NODE *p_dest_token_list_head)
 {
     S_R_ASSERT(p_source_token_list_head != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_source_token_list_start != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_source_token_list_end != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_dest_token_list_head != NULL, RETURN_FAILURE);
-    S_R_ASSERT(p_dest_token_list_node != NULL, RETURN_FAILURE);
 
     DEBUG_PRINT("move list: LIST HEAD: "TOKEN_INFO_FORMAT", from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT"\n"
-                "  to list: LIST HEAD: "TOKEN_INFO_FORMAT", after "TOKEN_INFO_FORMAT, 
+                "  to list: LIST HEAD: "TOKEN_INFO_FORMAT, 
             TOKEN_INFO_VALUE(p_source_token_list_head),
             TOKEN_INFO_VALUE(p_source_token_list_start),
             TOKEN_INFO_VALUE(p_source_token_list_end),
-            TOKEN_INFO_VALUE(p_dest_token_list_head),
-            TOKEN_INFO_VALUE(p_dest_token_list_node));
+            TOKEN_INFO_VALUE(p_dest_token_list_head));
 
     //start in the end of the list means the source list is empty, not need to move 
     S_R_FALSE(p_source_token_list_head != p_source_token_list_start, RETURN_SUCCESS);
@@ -594,11 +591,58 @@ ENUM_RETURN s_ctoken_move_list_to_another_list(
     p_source_token_list_start->list.prev->next = p_source_token_list_end->list.next;
     p_source_token_list_end->list.next->prev = p_source_token_list_start->list.prev;
 
-    p_source_token_list_end->list.next = p_dest_token_list_node->list.next;
-    p_dest_token_list_node->list.next->prev = &p_source_token_list_end->list;
-    p_dest_token_list_node->list.next = &p_source_token_list_start->list;
-    p_source_token_list_start->list.prev = &p_dest_token_list_node->list;
+    p_source_token_list_end->list.next = &p_dest_token_list_head->list;
+    p_dest_token_list_head->list.prev = &p_source_token_list_end->list;
+    p_dest_token_list_head->list.next = &p_source_token_list_start->list;
+    p_source_token_list_start->list.prev = &p_dest_token_list_head->list;
     
+    return RETURN_SUCCESS;
+}
+
+
+ENUM_RETURN s_ctoken_copy_list_to_another_list_tail(
+    STRU_C_TOKEN_NODE *p_source_token_list_head, 
+    STRU_C_TOKEN_NODE *p_source_token_list_start,
+    STRU_C_TOKEN_NODE *p_source_token_list_end,
+    STRU_C_TOKEN_NODE *p_dest_token_list_head)
+{
+    S_R_ASSERT(p_source_token_list_head != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_source_token_list_start != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_source_token_list_end != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_dest_token_list_head != NULL, RETURN_FAILURE);
+
+    DEBUG_PRINT("copy list: LIST HEAD: "TOKEN_INFO_FORMAT", from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT"\n"
+                "  to list: LIST HEAD: "TOKEN_INFO_FORMAT, 
+            TOKEN_INFO_VALUE(p_source_token_list_head),
+            TOKEN_INFO_VALUE(p_source_token_list_start),
+            TOKEN_INFO_VALUE(p_source_token_list_end),
+            TOKEN_INFO_VALUE(p_dest_token_list_head));
+
+    //start in the end of the list means the source list is empty, not need to move 
+    S_R_FALSE(p_source_token_list_head != p_source_token_list_start, RETURN_SUCCESS);
+    S_R_ASSERT(p_source_token_list_head != p_source_token_list_end, RETURN_FAILURE);
+    
+    ENUM_RETURN ret_val, check_result;
+    ret_val = s_ctoken_check_list_node_order(p_source_token_list_head, p_source_token_list_start, 
+        p_source_token_list_end, &check_result);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(check_result == RETURN_SUCCESS, RETURN_FAILURE);
+
+    struct list_head *pos;
+    STRU_C_TOKEN_NODE *p_token_list_node;
+    STRU_C_TOKEN_NODE *p_token_node_new;
+
+    list_for_each(pos, &p_source_token_list_head->list, &p_source_token_list_start->list, &p_source_token_list_end->list)
+	{
+        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+		ret_val = s_ctoken_duplicate_node(p_token_list_node, &p_token_node_new);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        S_R_ASSERT(p_token_node_new != NULL, RETURN_FAILURE);
+
+        ret_val = s_ctoken_add_node_to_list_tail(p_dest_token_list_head, p_token_node_new);
+        S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_ctoken_free_node(p_token_node_new));
+	}
+
     return RETURN_SUCCESS;
 }
 

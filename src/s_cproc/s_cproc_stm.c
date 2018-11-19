@@ -1188,7 +1188,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
     ADD_TOKEN;
 
     /* In the preprocessing phase, no keywords need to be identified, and they are all considered as an identifier */
-    /*
+    /* So, the next codes are not used. 
     ENUM_RETURN ret_val;
     ENUM_C_TOKEN token_type;
     ret_val = s_cproc_parse_word(S_CPROC_LAST_TOKEN_STRING, &token_type);
@@ -1199,6 +1199,8 @@ PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
     STATE_BACK;
 
     //expand identifier
+    ENUM_RETURN ret_val = s_cproc_macro_expand();
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     return RETURN_SUCCESS;
 }

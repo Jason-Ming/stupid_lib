@@ -28,8 +28,10 @@ STRU_C_TOKEN_NODE *s_cproc_token_get_list_head(_VOID);
 _VOID s_cproc_token_init_list(_VOID);
 _VOID s_cproc_token_print_list_debug_info(_VOID);
 _VOID s_cproc_token_print_list(    FILE *pfw);
+
 _VOID s_cproc_token_release_list(_VOID);
 _VOID s_cproc_token_delete_node(STRU_C_TOKEN_NODE *p_token_node);
+_VOID s_cproc_token_delete_last_node(_VOID);
 _VOID s_cproc_token_delete_blanks_and_newline(_VOID);
 _VOID s_cproc_token_release_list_after_node(STRU_C_TOKEN_NODE *p_token_list_node);
 _VOID s_cproc_token_release_list_after_last_newline(_VOID);
@@ -51,10 +53,6 @@ ENUM_RETURN s_cproc_token_mod_last_node_string_and_type(const _S8 *p_new_string,
 ENUM_RETURN s_cproc_token_merge_last_2_nodes(ENUM_C_TOKEN new_type);
 ENUM_RETURN s_cproc_token_merge_last_3_nodes(ENUM_C_TOKEN new_type);
 ENUM_BOOLEAN s_cproc_token_all_blank_in_line(_VOID);
-
-ENUM_RETURN s_cproc_token_move_replacement_list_to_another_list(
-    STRU_C_TOKEN_NODE *p_dest_token_list_head,
-    STRU_C_TOKEN_NODE *p_dest_token_list_node);
 
 
 __END_C_DECLS

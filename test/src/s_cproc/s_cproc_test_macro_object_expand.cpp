@@ -128,11 +128,11 @@ foo = (char *) malloc (BUFFER_SIZE);
 foo = (char *) malloc (1024);
 
 */
-TEST(s_cc_macro_object_expand, no_macro_name)
+TEST(s_cc_macro_object_expand, simple_one)
 {
     file_init(TEST_FILE_DIR001);
     ret_val = s_cc(file_name_input, pf_output, pf_errors);
-    CHECK_EQUAL(RETURN_FAILURE, ret_val);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
 
     ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
     CHECK_EQUAL(RETURN_SUCCESS, ret_val);

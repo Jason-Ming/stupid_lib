@@ -51,11 +51,11 @@ __BEGIN_C_DECLS
 _VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name);
 
 const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token);
-ENUM_RETURN s_ctoken_copy(
+ENUM_RETURN s_ctoken_duplicate_node(
     const STRU_C_TOKEN_NODE *p_token_node_source, 
     STRU_C_TOKEN_NODE **pp_token_node_dest);
 
-ENUM_RETURN s_ctoken_make_new(
+ENUM_RETURN s_ctoken_make_new_node(
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
     size_t text_offset,
@@ -63,7 +63,7 @@ ENUM_RETURN s_ctoken_make_new(
     size_t line_column,
     STRU_C_TOKEN_NODE **pp_new_token_node);
 
-ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
+ENUM_RETURN s_ctoken_make_new_node_and_add_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     const _S8 *token_string, 
     ENUM_C_TOKEN token_type, 
@@ -71,7 +71,7 @@ ENUM_RETURN s_ctoken_make_new_node_and_add_to_list(
     size_t line_index,
     size_t line_column);
 
-ENUM_RETURN s_ctoken_add_node_to_list(
+ENUM_RETURN s_ctoken_add_node_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_new_token_node);
 
@@ -143,12 +143,17 @@ ENUM_BOOLEAN s_ctoken_all_same_type_after_node(
     STRU_C_TOKEN_NODE *p_token_list_node,
     ENUM_C_TOKEN token_type);
 
-ENUM_RETURN s_ctoken_move_list_to_another_list(
+ENUM_RETURN s_ctoken_move_list_to_another_list_tail(
     STRU_C_TOKEN_NODE *p_source_token_list_head, 
     STRU_C_TOKEN_NODE *p_source_token_list_start,
     STRU_C_TOKEN_NODE *p_source_token_list_end,
-    STRU_C_TOKEN_NODE *p_dest_token_list_head,
-    STRU_C_TOKEN_NODE *p_dest_token_list_node);
+    STRU_C_TOKEN_NODE *p_dest_token_list_head);
+
+ENUM_RETURN s_ctoken_copy_list_to_another_list_tail(
+    STRU_C_TOKEN_NODE *p_source_token_list_head, 
+    STRU_C_TOKEN_NODE *p_source_token_list_start,
+    STRU_C_TOKEN_NODE *p_source_token_list_end,
+    STRU_C_TOKEN_NODE *p_dest_token_list_head);
 
 
 __END_C_DECLS

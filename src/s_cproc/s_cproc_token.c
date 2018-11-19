@@ -21,7 +21,7 @@ ENUM_RETURN s_cproc_token_add_node_to_list(
     size_t line_index,
     size_t line_column)
 {
-    return s_ctoken_make_new_node_and_add_to_list(
+    return s_ctoken_make_new_node_and_add_to_list_tail(
         &g_c_token_list_head,
         token_string, 
         token_type, 
@@ -84,6 +84,17 @@ _VOID s_cproc_token_delete_blanks_and_newline(_VOID)
 _VOID s_cproc_token_delete_node(STRU_C_TOKEN_NODE *p_token_node)
 {
     s_ctoken_free_node(p_token_node);
+}
+
+_VOID s_cproc_token_delete_last_node(_VOID)
+{
+    STRU_C_TOKEN_NODE *p_token_last = s_cproc_token_get_last_token();
+    S_V_ASSERT(p_token_last != NULL);
+
+    ENUM_RETURN ret_val = s_ctoken_delete_node_from_list(
+        &g_c_token_list_head,
+        p_token_last);
+    S_V_ASSERT(ret_val == RETURN_SUCCESS);
 }
 
 _VOID s_cproc_token_release_list_after_node(STRU_C_TOKEN_NODE *p_token_list_node)
@@ -150,7 +161,7 @@ ENUM_RETURN s_cproc_token_merge_last_2_nodes(ENUM_C_TOKEN new_type)
     S_R_ASSERT(p_token_last_last != NULL, RETURN_FAILURE);
 
     STRU_C_TOKEN_NODE *p_token_new = NULL;
-    ret_val = s_ctoken_copy(p_token_last_last, &p_token_new);
+    ret_val = s_ctoken_duplicate_node(p_token_last_last, &p_token_new);
     S_R_ASSERT(p_token_new != NULL, RETURN_FAILURE);
 
     S_FREE(p_token_new->info.p_string);
@@ -165,7 +176,7 @@ ENUM_RETURN s_cproc_token_merge_last_2_nodes(ENUM_C_TOKEN new_type)
     ret_val = s_ctoken_delete_node_from_list(&g_c_token_list_head, p_token_last_last);
     S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_ctoken_free_node(p_token_new));
 
-    ret_val = s_ctoken_add_node_to_list(&g_c_token_list_head, p_token_new);
+    ret_val = s_ctoken_add_node_to_list_tail(&g_c_token_list_head, p_token_new);
     S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_ctoken_free_node(p_token_new));
     
     return RETURN_SUCCESS;
@@ -195,22 +206,5 @@ ENUM_BOOLEAN s_cproc_token_all_blank_in_line(_VOID)
     }
 
     return s_ctoken_all_same_type_after_node(&g_c_token_list_head, p_token_last_newline, C_TOKEN_BLANK);
-}
-
-ENUM_RETURN s_cproc_token_move_replacement_list_to_another_list(
-#define AAAAA
-    STRU_C_TOKEN_NODE *p_dest_token_list_head,
-    STRU_C_TOKEN_NODE *p_dest_token_list_node)
-{
-    
-    STRU_C_TOKEN_NODE *p_token_replacement_list_head = s_cproc_token_get_last_node_by_type(C_TOKEN_PP_PARAMETER_FINISH);
-    if(p_token_replacement_list_head == NULL)
-    {
-        p_token_replacement_list_head = s_cproc_token_get_last_node_by_type(C_TOKEN_PP_MACRO);
-    }
-    S_R_ASSERT(p_token_replacement_list_head != NULL, RETURN_FAILURE);
-    
-    return s_ctoken_move_list_to_another_list(&g_c_token_list_head, NEXT_TOKEN(p_token_replacement_list_head), 
-        PREV_TOKEN(&g_c_token_list_head),p_dest_token_list_head, p_dest_token_list_node);
 }
 
