@@ -1,1 +1,2 @@
-#define defined
+#define INCL_STD include<stdio.h>
+#INCL_STD   //宏INCL_STD不会执行期望的替换

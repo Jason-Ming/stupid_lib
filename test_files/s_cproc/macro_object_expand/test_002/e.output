@@ -1,3 +1,3 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_002/i.input:1:9: error: "defined" cannot be used as a macro name
- #define defined
-         ^
+/home/jason/github/stupid_lib/test_files/s_cproc/macro_object_expand/test_002/i.input:2:2: error: invalid preprocessing directive #INCL_STD
+ #INCL_STD   //宏INCL_STD不会执行期望的替换
+  ^

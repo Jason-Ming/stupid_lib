@@ -160,6 +160,20 @@ s_cproc_replace.c:35:2: error: invalid preprocessing directive #INCL_STD
   ^~~~~~~~
 
 */
+TEST(s_cc_macro_object_expand, identifier_after_pp_directive_will_not_be_expanded)
+{
+    file_init(TEST_FILE_DIR002);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_FAILURE, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
 
 
 /*
