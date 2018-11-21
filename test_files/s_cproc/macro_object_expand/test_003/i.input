@@ -1,1 +1,4 @@
-#define(me)
+#define NUMBERS 1, \
+                2, \
+                3
+int x[] = { NUMBERS };

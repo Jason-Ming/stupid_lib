@@ -27,7 +27,7 @@ ENUM_RETURN s_cproc_token_add_node_to_list(
 STRU_C_TOKEN_NODE *s_cproc_token_get_list_head(_VOID);
 _VOID s_cproc_token_init_list(_VOID);
 _VOID s_cproc_token_print_list_debug_info(_VOID);
-_VOID s_cproc_token_print_list(    FILE *pfw);
+_VOID s_cproc_token_print_list_to_file(    FILE *pfw);
 
 _VOID s_cproc_token_release_list(_VOID);
 _VOID s_cproc_token_delete_node(STRU_C_TOKEN_NODE *p_token_node);

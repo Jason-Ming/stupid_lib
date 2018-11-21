@@ -597,6 +597,36 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
         }
     };
 
+    //continue blanks between the replacement tokens will be replaced by one space
+    DEBUG_PRINT("replace continued blanks by one space");
+    ENUM_BOOLEAN first_continued_blank = BOOLEAN_FALSE;
+    list_for_each_all_safe(pos, next, &p_macro_node->info.replacement_list_head.list)
+    {
+        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
+        {
+            if(first_continued_blank == BOOLEAN_FALSE)
+            {
+                first_continued_blank = BOOLEAN_TRUE;
+                ret_val = s_ctoken_mod_node_string(p_replacement_token_loop, " ");
+                S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            }
+            else
+            {
+                ret_val = s_ctoken_delete_node_from_list(
+                    &p_macro_node->info.replacement_list_head,
+                    p_replacement_token_loop);
+                S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+            }
+        }
+        else
+        {
+            first_continued_blank = BOOLEAN_FALSE;
+        }
+    };
+
+    //processing # and ## rules
+    DEBUG_PRINT("processing # and ##");
     p_replacement_token_loop = NULL;
     replacement_token_num = 0;
     ENUM_BOOLEAN last_stingification = BOOLEAN_FALSE;

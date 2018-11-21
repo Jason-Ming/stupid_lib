@@ -64,7 +64,7 @@ _VOID s_cproc_token_print_list_debug_info(_VOID)
     s_ctoken_print_list_debug_info(&g_c_token_list_head, NEXT_TOKEN(&g_c_token_list_head), PREV_TOKEN(&g_c_token_list_head));
 }
 
-_VOID s_cproc_token_print_list(    FILE *pfw)
+_VOID s_cproc_token_print_list_to_file(    FILE *pfw)
 {
     printf("\n\nprint tokens to output file%s start...\n", pfw==NULL?"(NULL)":"");
 	s_ctoken_print_list(pfw, &g_c_token_list_head, NEXT_TOKEN(&g_c_token_list_head), PREV_TOKEN(&g_c_token_list_head));

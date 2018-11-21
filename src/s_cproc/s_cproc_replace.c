@@ -25,5 +25,8 @@ int example_test()
 a+++++b
 tokens: a ++ ++ + b
 */
+#define NUMBERS 1,   2,\
+                3
+int x[] = { NUMBERS };
 
 

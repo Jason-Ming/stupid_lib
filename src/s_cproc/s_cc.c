@@ -145,7 +145,7 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
     s_cproc_token_print_list_debug_info();
     s_cproc_macro_print_list_debug_info();
 
-	s_cproc_token_print_list(pfw);
+	s_cproc_token_print_list_to_file(pfw);
 
     s_cproc_token_delete_blanks_and_newline();
     s_cproc_token_print_list_debug_info();
