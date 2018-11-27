@@ -1,9 +1,0 @@
-/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_004/i.input:1:8: warning: multi-line comment [-Wcomment]
- #define//\
-        ^
-/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_004/i.input:1:10: warning: backslash-newline at end of file
- #define//\
-          ^
-/home/jason/github/stupid_lib/test_files/s_cproc/macro_define/test_004/i.input:1:8: error: no macro name given in #define directive
- #define//\
-        ^

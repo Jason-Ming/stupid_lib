@@ -70,29 +70,29 @@
 
 #define PRINT_COLOR\
     do{\
-        printf("       BLACK:"BLACK"BLACK"NONE"\n");\
-        printf(" LIGHT_BLACK:"LIGHT_BLACK"LIGHT_BLACK"NONE"\n");\
-        printf("   DARK_GRAY:"DARK_GRAY"DARK_GRAY"NONE"\n");\
+        printf("       BLACK:" BLACK "BLACK" NONE "\n");\
+        printf(" LIGHT_BLACK:" LIGHT_BLACK "LIGHT_BLACK" NONE "\n");\
+        printf("   DARK_GRAY:" DARK_GRAY "DARK_GRAY" NONE "\n");\
         \
-        printf("         RED:"RED"RED"NONE"\n");\
-        printf("   LIGHT_RED:"LIGHT_RED"LIGHT_RED"NONE"\n");\
+        printf("         RED:" RED "RED" NONE "\n");\
+        printf("   LIGHT_RED:" LIGHT_RED "LIGHT_RED" NONE "\n");\
         \
-        printf("       GREEN:"GREEN"GREEN"NONE"\n");\
-        printf(" LIGHT_GREEN:"LIGHT_GREEN"LIGHT_GREEN"NONE"\n");\
+        printf("       GREEN:" GREEN "GREEN" NONE "\n");\
+        printf(" LIGHT_GREEN:" LIGHT_GREEN "LIGHT_GREEN" NONE "\n");\
         \
-        printf("      YELLOW:"YELLOW"YELLOW"NONE"\n");\
-        printf("LIGHT_YELLOW:"LIGHT_YELLOW"LIGHT_YELLOW"NONE"\n");\
+        printf("      YELLOW:" YELLOW "YELLOW" NONE "\n");\
+        printf("LIGHT_YELLOW:" LIGHT_YELLOW "LIGHT_YELLOW" NONE "\n");\
         \
-        printf("        BLUE:"BLUE"BLUE"NONE"\n");\
-        printf("  LIGHT_BLUE:"LIGHT_BLUE"LIGHT_BLUE"NONE"\n");\
+        printf("        BLUE:" BLUE "BLUE" NONE "\n");\
+        printf("  LIGHT_BLUE:" LIGHT_BLUE "LIGHT_BLUE" NONE "\n");\
         \
-        printf("      PURPLE:"PURPLE"PURPLE"NONE"\n");\
-        printf("LIGHT_PURPLE:"LIGHT_PURPLE"LIGHT_PURPLE"NONE"\n");\
+        printf("      PURPLE:" PURPLE "PURPLE" NONE "\n");\
+        printf("LIGHT_PURPLE:" LIGHT_PURPLE "LIGHT_PURPLE" NONE "\n");\
         \
-        printf("        CYAN:"CYAN"CYAN"NONE"\n");\
-        printf("  LIGHT_CYAN:"LIGHT_CYAN"LIGHT_CYAN"NONE"\n");\
+        printf("        CYAN:" CYAN "CYAN" NONE "\n");\
+        printf("  LIGHT_CYAN:" LIGHT_CYAN "LIGHT_CYAN" NONE "\n");\
         \
-        printf("  LIGHT_GRAY:"LIGHT_GRAY"LIGHT_GRAY"NONE"\n");\
-        printf("       WHITE:"WHITE"WHITE"NONE"\n");\
+        printf("  LIGHT_GRAY:" LIGHT_GRAY "LIGHT_GRAY" NONE "\n");\
+        printf("       WHITE:" WHITE "WHITE" NONE "\n");\
     }while(0)
 #endif

@@ -632,7 +632,7 @@ PRIVATE ENUM_RETURN s_cproc_stm_state_proc_normal()
         }
         case '(':
         {
-            TYPE_TOKEN(C_TOKEN_PARENTHESIS_LEFT);
+            TYPE_TOKEN (C_TOKEN_PARENTHESIS_LEFT);
             OUTPUT_TOKEN_C;
             ADD_TOKEN;
             break;

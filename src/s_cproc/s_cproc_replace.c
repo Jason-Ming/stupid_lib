@@ -25,8 +25,12 @@ int example_test()
 a+++++b
 tokens: a ++ ++ + b
 */
-#define NUMBERS 1,   2,\
-                3
-int x[] = { NUMBERS };
+#define NUMBERS(x) example_test()
+#define NUMBERS1 NUMBERS
+
+void fff()
+{
+    int ai = NUMBERS1(1);
+}
 
 

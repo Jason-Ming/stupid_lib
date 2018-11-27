@@ -276,6 +276,7 @@ ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, si
     R_ASSERT(buffer != NULL, RETURN_FAILURE);
     R_ASSERT(buffer_size > 0, RETURN_FAILURE);
     R_ASSERT(length != NULL, RETURN_FAILURE);
+    *length = 0;
 
     _S8 c;
     size_t len_temp = buffer_size;
@@ -291,11 +292,11 @@ ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, si
         OUTPUT_C(c, buffer, buffer_size);
         (*source)++;
     }
+    
+    *length = len_temp - buffer_size;
 
     OUTPUT_END(buffer, buffer_size);
 
-    *length = len_temp - buffer_size - 1;
-    
     return RETURN_SUCCESS;
 }
 
@@ -1583,7 +1584,8 @@ PRIVATE ENUM_RETURN build_text_table_element(STRU_TEXT_TABLE_ELEMENT* text_table
     _S32 lines = 0;
     size_t len = 0;
     const _S8 *text_temp = text_fold_buffer;
-    while(text_table_element->lines < MAX_TEXT_TABLE_ELEMENT_LINE 
+
+    while(lines < MAX_TEXT_TABLE_ELEMENT_LINE 
         && s_getline_s(&text_temp, 
             text_table_element->line_text[lines], 
             MAX_TEXT_TABLE_ELEMENT_LINE_LEN, &len) == RETURN_SUCCESS 
@@ -1595,6 +1597,7 @@ PRIVATE ENUM_RETURN build_text_table_element(STRU_TEXT_TABLE_ELEMENT* text_table
     }
         
     text_table_element->lines = lines;
+    
     return RETURN_SUCCESS;
 }
 

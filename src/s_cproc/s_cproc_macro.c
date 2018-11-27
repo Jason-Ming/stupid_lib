@@ -684,6 +684,52 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     return RETURN_SUCCESS;
 }
 
+
+/*
+[小结:下面的宏替换算法虽不够严密,却有助于理清思路]⑥
+⑥ void expand(x)//宏x替换算法
+{
+    if(x是函数宏),则对x的替换列表中,每次形参p的出现都执行下面的步骤
+    {
+        if(p对应的实参不是对象宏 && p对应的实参不构成一次函数宏的调用 //即:p对应的实参不是宏
+            || p此次作为##的操作数而出现)
+        {
+            将p替换成对应实参的拼写序列
+        }
+        else if(p此次作为#的操作数而出现)
+        {
+            将p连带它的#操作符一起替换成p对应实参的拼写序列
+        }
+        else//p对应的实参a是宏
+        {
+            expand(a);//递归调用expand展开宏a将p替换成a展开后的结果序列
+        }
+    }
+    if(x的替换列表中含有##)
+    {
+        将##连同它前后的空白符一起删除; //记号连接
+    }
+    用x现在的替换列表,代替源文件中x的这次调用; //宏替换
+    将刚才对x替换的结果,连同源文件的下文一起重复扫描,这时如果遇到了一个宏名y
+
+    if(y是出现在下文中)
+    {
+        expand(y);//递归调用expand展开宏y
+    }
+    else//y是出现在替换列表中
+    {
+        if(y!=x //y不是当前正在替换的宏名
+            &&y未被标记为不可用) //且y不是父层替换过程正在替换的宏名
+        {
+            expand(y);//递归调用expand展开宏y
+        }
+        else
+        {
+            将y标记为不可用;//使y在子层替换过程中也不再替换
+        }
+    }
+}
+*/
 ENUM_RETURN s_cproc_macro_expand(_VOID)
 {
     //expand last token if the type is identifier
