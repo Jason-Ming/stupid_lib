@@ -160,11 +160,10 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
     *pp_direct_dcl_list_tail = NULL;
     ENUM_BOOLEAN has_direct_dcl_list = BOOLEAN_FALSE;
     
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node;
-    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
+    list_for_each(PREV_TOKEN(p_token_list_head), NEXT_TOKEN(p_token_list_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_token_list_node->info.token_type == C_TOKEN_IDENTIFIER 
             || p_token_list_node->info.token_type == C_TOKEN_PARENTHESIS_LEFT
             || p_token_list_node->info.token_type == C_TOKEN_BRACKET_LEFT)
@@ -216,11 +215,10 @@ PRIVATE ENUM_RETURN dcl_get_next_parameter(
     ENUM_BOOLEAN in_parenthesis = BOOLEAN_FALSE;
     ENUM_BOOLEAN find_comma = BOOLEAN_FALSE;
     
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node = NULL;
-    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
+    list_for_each(PREV_TOKEN(p_token_list_head), NEXT_TOKEN(p_token_list_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         switch(p_token_list_node->info.token_type)
         {
@@ -294,11 +292,10 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
     ENUM_BOOLEAN stop_loop = BOOLEAN_FALSE;
     ENUM_BOOLEAN has_previous_type = BOOLEAN_FALSE;
 
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node = NULL;
-    list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_token_loop_previous_type->list)
+    list_for_each_reverse(PREV_TOKEN(p_prelist_head), NEXT_TOKEN(p_token_loop_previous_type))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         switch(p_token_list_node->info.token_type)
         {
@@ -347,9 +344,9 @@ PRIVATE ENUM_RETURN find_type_for_qualifier(
     stop_loop = BOOLEAN_FALSE;
     ENUM_BOOLEAN has_next_type = BOOLEAN_FALSE;
 
-    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_loop_next_type->list, &p_prelist_tail->list)
+    list_for_each(PREV_TOKEN(p_token_loop_next_type), NEXT_TOKEN(p_prelist_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         switch(p_token_list_node->info.token_type)
         {
@@ -406,11 +403,10 @@ PRIVATE ENUM_RETURN proc_type_qualifier(
     ENUM_RETURN ret_val;
     
     /* delete continuing const */
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node = NULL;
-    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_prelist_tail->list)
+    list_for_each(PREV_TOKEN(p_prelist_head), NEXT_TOKEN(p_prelist_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         ENUM_BOOLEAN find_type = BOOLEAN_FALSE;
         if(p_token_list_node->info.token_type == C_TOKEN_KEYWORD_TYPE_QUALIFIER 
@@ -443,11 +439,10 @@ PRIVATE ENUM_RETURN proc_prelist(
     ENUM_RETURN ret_val = proc_type_qualifier(p_prelist_head, p_prelist_tail);
     R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node = NULL;
-    list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &p_prelist_head->list, &p_prelist_tail->list)
+    list_for_each_reverse(PREV_TOKEN(p_prelist_head), NEXT_TOKEN(p_prelist_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         switch(p_token_list_node->info.token_type)
         {
@@ -559,11 +554,10 @@ PRIVATE ENUM_RETURN proc_array_size(
     DCL_PRINT("a array");
     *need_type = BOOLEAN_FALSE;
 
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node = NULL;
-    list_for_each(pos, &s_cproc_token_get_list_head()->list, &p_token_list_head->list, &p_token_list_tail->list)
+    list_for_each(PREV_TOKEN(p_token_list_head), NEXT_TOKEN(p_token_list_tail))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         switch(p_token_list_node->info.token_type)
         {
@@ -653,7 +647,6 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         }
     }
 
-    struct list_head *pos;
     //STRU_C_TOKEN_NODE *p_token_list_node = NULL;
 
     STRU_C_TOKEN_NODE *p_token_list_tail_temp = p_token_list_tail;
@@ -661,9 +654,9 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     if(p_token_list_tail_temp->info.token_type == C_TOKEN_PARENTHESIS_RIGHT)
     {
         /* find one ()' '(' from tail */
-        list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, &s_cproc_token_get_list_head()->list, &p_token_list_tail->list)
+        list_for_each_reverse(PREV_TOKEN(s_cproc_token_get_list_head()), NEXT_TOKEN(p_token_list_tail))
         {
-            p_token_list_tail_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+            p_token_list_tail_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
             switch(p_token_list_tail_temp->info.token_type)
             {
@@ -747,11 +740,9 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     /* array */
     if(p_token_list_tail->info.token_type == C_TOKEN_BRACKET_RIGHT)
     {
-        list_for_each_reverse(pos, &s_cproc_token_get_list_head()->list, 
-            &s_cproc_token_get_list_head()->list, 
-            p_token_list_tail_temp->list.prev)
+        list_for_each_reverse(PREV_TOKEN(s_cproc_token_get_list_head()),  p_token_list_tail_temp)
         {
-            p_token_list_tail_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+            p_token_list_tail_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
             if(p_token_list_tail_temp->info.token_type != C_TOKEN_BRACKET_LEFT
                 &&p_token_list_tail_temp->info.token_type != C_TOKEN_BRACKET_RIGHT

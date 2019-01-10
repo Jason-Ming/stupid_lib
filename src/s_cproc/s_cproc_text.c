@@ -119,12 +119,12 @@ const _S8 * s_cproc_text_get_buffer_by_filename(const _S8 *p_filename)
 
     _SL inode = s_get_inode(p_filename);
     S_R_ASSERT(inode != SL_INVALID, NULL);
-    struct list_head *pos;
+
     STRU_C_TEXT_NODE *p_c_text_temp;
 
-    list_for_each_all(pos, &g_c_text_list_head.list)
+    LIST_FOR_EACH_ALL(&g_c_text_list_head)
     {
-        p_c_text_temp = list_entry(pos, STRU_C_TEXT_NODE, list);
+        p_c_text_temp = LIST_GET_ITERATOR(STRU_C_TEXT_NODE);
         if(p_c_text_temp->data.inode == inode)
         {
             return p_c_text_temp->data.p_buffer;
@@ -137,11 +137,11 @@ const _S8 * s_cproc_text_get_buffer_by_filename(const _S8 *p_filename)
 _VOID s_cproc_text_release_list(_VOID)
 {
     STRU_C_TEXT_NODE *p_c_text_node_temp;
-    struct list_head *pos, *next;
-    list_for_each_all_safe(pos, next, &g_c_text_list_head.list)
+
+    LIST_FOR_EACH_ALL_SAFE(&g_c_text_list_head)
     {
-        p_c_text_node_temp = list_entry(pos, STRU_C_TEXT_NODE, list); 
-        list_del_init(pos); 
+        p_c_text_node_temp = LIST_GET_ITERATOR(STRU_C_TEXT_NODE); 
+        LIST_RMV_NODE(p_c_text_node_temp);
         s_cproc_text_release_node(&p_c_text_node_temp); 
     }
 }
@@ -158,11 +158,11 @@ PRIVATE _VOID s_cproc_text_print_node_debug_info(STRU_C_TEXT_NODE *p_c_text_node
 ENUM_RETURN s_cproc_text_print_list_debug_info(_VOID)
 {
     STRU_C_TEXT_NODE *p_c_text_node_temp;
-    struct list_head *pos;
+
     printf("\n\n--TEXT LIST DEBUG INFO BEGIN-------------------------------------------------------\n");
-    list_for_each_all(pos, &g_c_text_list_head.list)
+    LIST_FOR_EACH_ALL(&g_c_text_list_head)
     {
-        p_c_text_node_temp = list_entry(pos, STRU_C_TEXT_NODE, list); 
+        p_c_text_node_temp = LIST_GET_ITERATOR(STRU_C_TEXT_NODE); 
         s_cproc_text_print_node_debug_info(p_c_text_node_temp);
     }
     printf("--TEXT LIST DEBUG INFO END---------------------------------------------------------\n");

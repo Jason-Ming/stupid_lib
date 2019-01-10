@@ -73,7 +73,7 @@ _VOID s_cproc_token_print_list_to_file(    FILE *pfw)
 
 _VOID s_cproc_token_release_list(_VOID)
 {
-    s_ctoken_release_list(&g_c_token_list_head);
+    s_ctoken_delete_list(&g_c_token_list_head);
 }
 
 _VOID s_cproc_token_delete_blanks_and_newline(_VOID)
@@ -83,7 +83,8 @@ _VOID s_cproc_token_delete_blanks_and_newline(_VOID)
 
 _VOID s_cproc_token_delete_node(STRU_C_TOKEN_NODE *p_token_node)
 {
-    s_ctoken_free_node(p_token_node);
+    ENUM_RETURN ret_val = s_ctoken_delete_node_from_list(&g_c_token_list_head, p_token_node);
+    S_V_ASSERT(ret_val == RETURN_SUCCESS);
 }
 
 _VOID s_cproc_token_delete_last_node(_VOID)
@@ -97,9 +98,9 @@ _VOID s_cproc_token_delete_last_node(_VOID)
     S_V_ASSERT(ret_val == RETURN_SUCCESS);
 }
 
-_VOID s_cproc_token_release_list_after_node(STRU_C_TOKEN_NODE *p_token_list_node)
+_VOID s_cproc_token_delete_list_after_node(STRU_C_TOKEN_NODE *p_token_list_node)
 {
-    s_ctoken_release_list_after_node(&g_c_token_list_head, p_token_list_node);
+    s_ctoken_delete_list_after_node(&g_c_token_list_head, p_token_list_node);
 }
 
 STRU_C_TOKEN_NODE *s_cproc_token_get_last_newline(_VOID)
@@ -107,7 +108,7 @@ STRU_C_TOKEN_NODE *s_cproc_token_get_last_newline(_VOID)
     return s_cproc_token_get_last_node_by_type(C_TOKEN_NEWLINE);
 }
 
-_VOID s_cproc_token_release_list_after_last_newline(_VOID)
+_VOID s_cproc_token_delete_list_after_last_newline(_VOID)
 {
     DEBUG_PRINT("delete tokens after last newline");
     
@@ -118,7 +119,7 @@ _VOID s_cproc_token_release_list_after_last_newline(_VOID)
         p_token_last_newline = s_cproc_token_get_list_head();
     }
 
-    s_cproc_token_release_list_after_node(p_token_last_newline);
+    s_cproc_token_delete_list_after_node(p_token_last_newline);
 }
 
 ENUM_RETURN s_cproc_token_mod_last_node_type(ENUM_C_TOKEN new_type)

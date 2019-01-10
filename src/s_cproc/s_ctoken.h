@@ -50,6 +50,12 @@ __BEGIN_C_DECLS
 
 _VOID s_ctoken_init_head(STRU_C_TOKEN_NODE *p_head, _S8 * head_name);
 
+ENUM_RETURN s_ctoken_check_list_node_order(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_start, 
+    STRU_C_TOKEN_NODE *p_token_list_end,
+    ENUM_RETURN *result);
+
 const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token);
 ENUM_RETURN s_ctoken_duplicate_node(
     const STRU_C_TOKEN_NODE *p_token_node_source, 
@@ -71,6 +77,11 @@ ENUM_RETURN s_ctoken_make_new_node_and_add_to_list_tail(
     size_t line_index,
     size_t line_column);
 
+ENUM_RETURN s_ctoken_add_node_after_node(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_node,
+    STRU_C_TOKEN_NODE *p_new_token_node);
+
 ENUM_RETURN s_ctoken_add_node_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_new_token_node);
@@ -86,8 +97,8 @@ ENUM_RETURN s_ctoken_get_token(
 	ENUM_C_TOKEN *token);
 _VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_list_head);
 
-_VOID s_ctoken_release_list(STRU_C_TOKEN_NODE *p_token_list_head);
-_VOID s_ctoken_release_list_after_node(STRU_C_TOKEN_NODE *p_token_list_head, 
+_VOID s_ctoken_delete_list(STRU_C_TOKEN_NODE *p_token_list_head);
+_VOID s_ctoken_delete_list_after_node(STRU_C_TOKEN_NODE *p_token_list_head, 
     STRU_C_TOKEN_NODE *p_token_list_node);
 
 _VOID s_ctoken_free_node(STRU_C_TOKEN_NODE *p_token_to_be_deleted);
@@ -155,6 +166,12 @@ ENUM_RETURN s_ctoken_copy_list_to_another_list_tail(
     STRU_C_TOKEN_NODE *p_source_token_list_end,
     STRU_C_TOKEN_NODE *p_dest_token_list_head);
 
+ENUM_RETURN s_ctoken_copy_list_to_another_list_after_node(
+    STRU_C_TOKEN_NODE *p_source_token_list_head, 
+    STRU_C_TOKEN_NODE *p_source_token_list_start,
+    STRU_C_TOKEN_NODE *p_source_token_list_end,
+    STRU_C_TOKEN_NODE *p_dest_token_list_head,
+    STRU_C_TOKEN_NODE *p_dest_token_list_node);
 
 __END_C_DECLS
 #endif

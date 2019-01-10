@@ -28,24 +28,23 @@ typedef struct TAG_STRU_MACRO_NODE
 }STRU_MACRO_NODE;
 
 PRIVATE STRU_MACRO_NODE g_macro_node_list_head;
+PRIVATE ENUM_RETURN s_cproc_macro_expand_identifier(STRU_C_TOKEN_NODE *p_token);
 
 
 _VOID s_cproc_macro_print_list_debug_info(_VOID)
 {
 
 	STRU_MACRO_NODE *p_macro_temp;
-    struct list_head *pos_macro;
     printf("\n\n--MACRO LIST DEBUG INFO BEGIN------------------------------------------------------\n");
-    list_for_each_all(pos_macro, &g_macro_node_list_head.list)
+    LIST_FOR_EACH_ALL(&g_macro_node_list_head)
 	{
-        p_macro_temp = list_entry(pos_macro, STRU_MACRO_NODE, list);
+        p_macro_temp = LIST_GET_ITERATOR(STRU_MACRO_NODE);
 
         STRU_C_TOKEN_NODE *p_token_temp;
-        struct list_head *pos_token;
 
-        list_for_each_all(pos_token, &p_macro_temp->info.name_head.list)
+        LIST_FOR_EACH_ALL(&p_macro_temp->info.name_head)
         {
-            p_token_temp = list_entry(pos_token, STRU_C_TOKEN_NODE, list);
+            p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 		    printf(LIGHT_BLUE"%s"NONE, p_token_temp->info.p_string);
         }
         
@@ -53,9 +52,9 @@ _VOID s_cproc_macro_print_list_debug_info(_VOID)
         {
             printf(LIGHT_BLUE"("NONE);
             ENUM_BOOLEAN first_parameter = BOOLEAN_TRUE;
-            list_for_each_all(pos_token, &p_macro_temp->info.parameter_list_head.list)
+            LIST_FOR_EACH_ALL(&p_macro_temp->info.parameter_list_head)
             {
-                p_token_temp = list_entry(pos_token, STRU_C_TOKEN_NODE, list);
+                p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
     		    printf(LIGHT_BLUE"%s%s"NONE, first_parameter?"":", ", p_token_temp->info.p_string);
                 first_parameter = BOOLEAN_FALSE;
             }
@@ -64,9 +63,9 @@ _VOID s_cproc_macro_print_list_debug_info(_VOID)
 
         printf(LIGHT_BLUE": "NONE);
 
-        list_for_each_all(pos_token, &p_macro_temp->info.replacement_list_head.list)
+        LIST_FOR_EACH_ALL(&p_macro_temp->info.replacement_list_head)
         {
-            p_token_temp = list_entry(pos_token, STRU_C_TOKEN_NODE, list);
+            p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
             printf(LIGHT_BLUE"%s"NONE, p_token_temp->info.p_string);
         };
 		printf("\n");
@@ -87,9 +86,8 @@ _VOID s_cproc_macro_list_init(_VOID)
 PRIVATE size_t s_cproc_macro_get_parameter_num(STRU_MACRO *macro)
 {
     size_t parameter_num = 0;
-    struct list_head *pos;
     DEBUG_PRINT("in...");
-    list_for_each_all(pos, &macro->parameter_list_head.list)
+    LIST_FOR_EACH_ALL(&macro->parameter_list_head)
     {
         //DEBUG_PRINT("%s", list_entry(pos, STRU_C_TOKEN_NODE, list)->info.p_string);
         parameter_num++;
@@ -108,18 +106,16 @@ PRIVATE ENUM_RETURN s_cproc_macro_get_by_name(
     *pp_macro_node = NULL;
     
     STRU_MACRO_NODE *p_macro_temp;
-    struct list_head *pos_macro;
     
-    list_for_each_all(pos_macro, &g_macro_node_list_head.list)
+    LIST_FOR_EACH_ALL(&g_macro_node_list_head)
 	{
-        p_macro_temp = list_entry(pos_macro, STRU_MACRO_NODE, list);
+        p_macro_temp = LIST_GET_ITERATOR(STRU_MACRO_NODE);
 
         STRU_C_TOKEN_NODE *p_token_temp;
-        struct list_head *pos_token;
 
-        list_for_each_all(pos_token, &p_macro_temp->info.name_head.list)
+        LIST_FOR_EACH_ALL(&p_macro_temp->info.name_head)
         {
-            p_token_temp = list_entry(pos_token, STRU_C_TOKEN_NODE, list);
+            p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
             S_R_ASSERT(p_token_temp->info.p_string != NULL, RETURN_FAILURE);
             if( strcmp(p_token_temp->info.p_string, p_macro_name) == 0)
@@ -188,10 +184,9 @@ ENUM_BOOLEAN s_cproc_macro_va_in_parameter_list(_VOID)
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
 
     STRU_C_TOKEN_NODE *p_parameter_token;
-    struct list_head *pos;
-    list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
+    LIST_FOR_EACH_ALL(&p_macro_node->info.parameter_list_head)
     {
-        p_parameter_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_parameter_token = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_VA)
         {
             return BOOLEAN_TRUE;
@@ -209,10 +204,10 @@ ENUM_BOOLEAN s_cproc_macro_identifier_name_in_parameter_list(const _S8 *p_identi
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
 
     STRU_C_TOKEN_NODE *p_parameter_token;
-    struct list_head *pos;
-    list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
+
+    LIST_FOR_EACH_ALL(&p_macro_node->info.parameter_list_head)
     {
-        p_parameter_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_parameter_token = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(strcmp(p_parameter_token->info.p_string, p_identifier) == 0)
         {
             return BOOLEAN_TRUE;
@@ -244,10 +239,10 @@ ENUM_BOOLEAN s_cproc_macro_replacement_identifier_in_parameter_list(const STRU_C
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
 
     STRU_C_TOKEN_NODE *p_parameter_token;
-    struct list_head *pos;
-    list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
+
+    LIST_FOR_EACH_ALL(&p_macro_node->info.parameter_list_head)
     {
-        p_parameter_token = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_parameter_token = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_parameter_token));
         
         if(p_parameter_token->info.token_type == C_TOKEN_PP_PARAMETER_ID
@@ -276,10 +271,10 @@ ENUM_BOOLEAN s_cproc_macro_parameter_identifier_in_parameter_list(const STRU_C_T
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
 
     STRU_C_TOKEN_NODE *p_parameter_token_loop;
-    struct list_head *pos;
-    list_for_each_all(pos, &p_macro_node->info.parameter_list_head.list)
+
+    LIST_FOR_EACH_ALL(&p_macro_node->info.parameter_list_head)
     {
-        p_parameter_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_parameter_token_loop = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_parameter_token_loop));
 
         S_R_ASSERT(p_parameter_token_loop->info.token_type == C_TOKEN_PP_PARAMETER_ID, BOOLEAN_FALSE);
@@ -339,9 +334,9 @@ PRIVATE ENUM_RETURN s_cproc_macro_add_node_to_list(
 PRIVATE _VOID s_cproc_macro_delete_node(STRU_MACRO_NODE *p_macro_node_to_be_deleted)
 {
     S_V_FALSE(p_macro_node_to_be_deleted != NULL);
-    s_ctoken_release_list(&(p_macro_node_to_be_deleted->info.name_head));
-    s_ctoken_release_list(&(p_macro_node_to_be_deleted->info.parameter_list_head));
-    s_ctoken_release_list(&(p_macro_node_to_be_deleted->info.replacement_list_head));
+    s_ctoken_delete_list(&(p_macro_node_to_be_deleted->info.name_head));
+    s_ctoken_delete_list(&(p_macro_node_to_be_deleted->info.parameter_list_head));
+    s_ctoken_delete_list(&(p_macro_node_to_be_deleted->info.replacement_list_head));
 
     S_FREE(p_macro_node_to_be_deleted);
 }
@@ -349,7 +344,7 @@ PRIVATE ENUM_RETURN s_cproc_macro_delete_node_from_list(
     STRU_MACRO_NODE *p_macro_node_to_be_deleted)
 {
     S_R_ASSERT(p_macro_node_to_be_deleted != NULL, RETURN_FAILURE);
-    list_del_init(&p_macro_node_to_be_deleted->list);
+    LIST_RMV_NODE(p_macro_node_to_be_deleted);
 
     s_cproc_macro_delete_node(p_macro_node_to_be_deleted);
 
@@ -359,11 +354,10 @@ PRIVATE ENUM_RETURN s_cproc_macro_delete_node_from_list(
 _VOID s_cproc_macro_release_list(_VOID)
 {
     STRU_MACRO_NODE *p_macro_temp;
-    struct list_head *pos, *next;
     
-    list_for_each_all_safe(pos, next, &g_macro_node_list_head.list)
+    LIST_FOR_EACH_ALL_SAFE(&g_macro_node_list_head)
     {
-        p_macro_temp = list_entry(pos, STRU_MACRO_NODE, list);
+        p_macro_temp = LIST_GET_ITERATOR(STRU_MACRO_NODE);
         s_cproc_macro_delete_node_from_list(p_macro_temp);
     }
 }
@@ -550,14 +544,13 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     
     STRU_C_TOKEN_NODE *p_replacement_token_loop = NULL, *p_replacement_token_first_nonblank = NULL;
     
-    struct list_head *pos, *next, *prev;
     size_t replacement_token_num = 0;
     size_t first_blank_replacement_token_num = 0;
     
-    list_for_each_all_safe(pos, next, &p_macro_node->info.replacement_list_head.list)
+    LIST_FOR_EACH_ALL_SAFE(&p_macro_node->info.replacement_list_head)
     {
         replacement_token_num++;
-        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_replacement_token_loop = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
         {
             first_blank_replacement_token_num++;
@@ -581,9 +574,9 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     }
 
     p_replacement_token_loop = NULL;
-    list_for_each_all_reverse_safe(pos, prev, &p_macro_node->info.replacement_list_head.list)
+    LIST_FOR_EACH_ALL_REVERSE_SAFE(&p_macro_node->info.replacement_list_head)
     {
-        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_replacement_token_loop = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
         {
             ret_val = s_ctoken_delete_node_from_list(
@@ -600,9 +593,9 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     //continue blanks between the replacement tokens will be replaced by one space
     DEBUG_PRINT("replace continued blanks by one space");
     ENUM_BOOLEAN first_continued_blank = BOOLEAN_FALSE;
-    list_for_each_all_safe(pos, next, &p_macro_node->info.replacement_list_head.list)
+    LIST_FOR_EACH_ALL_SAFE(&p_macro_node->info.replacement_list_head)
     {
-        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_replacement_token_loop = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_replacement_token_loop->info.token_type == C_TOKEN_BLANK)
         {
             if(first_continued_blank == BOOLEAN_FALSE)
@@ -630,9 +623,9 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     p_replacement_token_loop = NULL;
     replacement_token_num = 0;
     ENUM_BOOLEAN last_stingification = BOOLEAN_FALSE;
-    list_for_each_all(pos, &p_macro_node->info.replacement_list_head.list)
+    LIST_FOR_EACH_ALL(&p_macro_node->info.replacement_list_head)
     {
-        p_replacement_token_loop = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_replacement_token_loop = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_replacement_token_loop));
         //'#' is not followed by a macro parameter
@@ -730,34 +723,105 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     }
 }
 */
-ENUM_RETURN s_cproc_macro_expand(_VOID)
-{
-    //expand last token if the type is identifier
-    STRU_C_TOKEN_NODE *p_last_token = S_CPROC_LAST_TOKEN_POINTER;
-    S_R_ASSERT(p_last_token != NULL, RETURN_FAILURE);
 
-    //not a identifier
-    S_R_ASSERT(p_last_token->info.token_type == C_TOKEN_IDENTIFIER, RETURN_FAILURE);
+PRIVATE ENUM_RETURN s_cproc_macro_expand_list(STRU_C_TOKEN_NODE *p_token_list_start, STRU_C_TOKEN_NODE *p_token_list_end)
+{
+    DEBUG_PRINT("------>s_cproc_macro_expand_list\n");
+    S_R_ASSERT(p_token_list_start != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_token_list_end != NULL, RETURN_FAILURE);
+    STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
+    S_R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+
+    STRU_C_TOKEN_NODE *p_token_list_start_temp = NEXT_TOKEN(p_token_list_start);
+    STRU_C_TOKEN_NODE *p_token_list_end_temp = PREV_TOKEN(p_token_list_end);
+
+    DEBUG_PRINT("p_token_list_head: "TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_token_list_head));
+
+    DEBUG_PRINT("original:start: "TOKEN_INFO_FORMAT", end: "TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_token_list_start), 
+    TOKEN_INFO_VALUE(p_token_list_end));
+    DEBUG_PRINT("temp:    start: "TOKEN_INFO_FORMAT", end: "TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_token_list_start_temp), 
+    TOKEN_INFO_VALUE(p_token_list_end_temp));
+
+    ENUM_RETURN ret_val;
+    STRU_C_TOKEN_NODE *p_token_list_node;
+
+    list_for_each_safe(PREV_TOKEN(p_token_list_start_temp), NEXT_TOKEN(p_token_list_end_temp))
+	{
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        DEBUG_PRINT(TOKEN_INFO_FORMAT, TOKEN_INFO_VALUE(p_token_list_node));
+
+        //not a identifier
+        if(p_token_list_node->info.token_type != C_TOKEN_IDENTIFIER &&
+            p_token_list_node->info.token_type != C_TOKEN_PP_IDENTIFIER)
+        {
+            continue;
+        }
+
+		ret_val = s_cproc_macro_expand_identifier(p_token_list_node);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+	}
+
+    return RETURN_SUCCESS;
+}
+
+PRIVATE ENUM_RETURN s_cproc_macro_expand_identifier(STRU_C_TOKEN_NODE *p_token)
+{
+    DEBUG_PRINT("------>s_cproc_macro_expand_identifier\n");
+    S_R_ASSERT(p_token != NULL, RETURN_FAILURE);
 
     /* get macro node by name */
     STRU_MACRO_NODE *p_macro_node = NULL;
     ENUM_RETURN ret_val;
 
-    ret_val = s_cproc_macro_get_by_name(p_last_token->info.p_string, &p_macro_node);
+    ret_val = s_cproc_macro_get_by_name(p_token->info.p_string, &p_macro_node);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     //the macro doesn't exist
-    S_R_FALSE(p_macro_node != NULL, RETURN_SUCCESS);
+    DEBUG_PRINT("macro: %s\n", p_token->info.p_string);
+    S_R_ASSERT(p_macro_node != NULL, RETURN_SUCCESS);
     
     STRU_C_TOKEN_NODE *p_replacement_token_list_head = NULL;
     ret_val = s_cproc_macro_get_replacement_list(p_macro_node, &p_replacement_token_list_head);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     S_R_ASSERT(p_replacement_token_list_head != NULL, RETURN_FAILURE);
 
-    s_cproc_token_delete_last_node();
+    STRU_C_TOKEN_NODE *p_token_list_start = PREV_TOKEN(p_token);
+    STRU_C_TOKEN_NODE *p_token_list_end = NEXT_TOKEN(p_token);
 
-    ret_val = s_ctoken_copy_list_to_another_list_tail(p_replacement_token_list_head, NEXT_TOKEN(p_replacement_token_list_head), 
-        PREV_TOKEN(p_replacement_token_list_head), s_cproc_token_get_list_head());
+    //replace the node by replacement list
+    ret_val = s_ctoken_copy_list_to_another_list_after_node(
+        p_replacement_token_list_head, 
+        NEXT_TOKEN(p_replacement_token_list_head), 
+        PREV_TOKEN(p_replacement_token_list_head), 
+        s_cproc_token_get_list_head(),
+        p_token);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    s_cproc_token_delete_node(p_token);
+
+    //replacement list is empty, return
+    S_R_FALSE(PREV_TOKEN(p_token_list_end) != p_token_list_start, RETURN_SUCCESS);
+    
+    ret_val = s_cproc_macro_expand_list(p_token_list_start, p_token_list_end);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_cproc_macro_expand(_VOID)
+{
+    DEBUG_PRINT("------>expand\n");
+    //expand last token if the type is identifier
+    STRU_C_TOKEN_NODE *p_last_token = S_CPROC_LAST_TOKEN_POINTER;
+    S_R_ASSERT(p_last_token != NULL, RETURN_FAILURE);
+    
+    //not a identifier
+    S_R_ASSERT(p_last_token->info.token_type == C_TOKEN_IDENTIFIER 
+        || p_last_token->info.token_type == C_TOKEN_PP_IDENTIFIER, RETURN_FAILURE);
+
+    ENUM_RETURN ret_val = RETURN_SUCCESS;
+    ret_val = s_cproc_macro_expand_identifier(p_last_token);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     //pasting """" and """" does not give a valid preprocessing token
 

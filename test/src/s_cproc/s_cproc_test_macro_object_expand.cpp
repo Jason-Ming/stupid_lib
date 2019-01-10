@@ -237,6 +237,21 @@ foo = (char *) malloc (TABLESIZE);
 foo = (char *) malloc (1024);
 
 */
+TEST(s_cc_macro_object_expand, expand_identifier_recursive)
+{
+    file_init(TEST_FILE_DIR005);
+    ret_val = s_cc(file_name_input, pf_output, pf_errors);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+
+    ret_val = s_file_compare(pf_output, pf_output_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+
+    ret_val = s_file_compare(pf_errors, pf_errors_expect, &file_compare_result);
+    CHECK_EQUAL(RETURN_SUCCESS, ret_val);
+    CHECK_EQUAL(0, file_compare_result);
+}
+
 
 /*
 #define BUFSIZE 1020

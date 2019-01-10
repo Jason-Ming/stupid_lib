@@ -1,1 +1,3 @@
-#define macro
+#define TABLESIZE BUFSIZE
+#define BUFSIZE 1024
+foo = (char *) malloc (TABLESIZE);

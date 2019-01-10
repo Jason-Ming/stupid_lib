@@ -27,12 +27,12 @@ ENUM_RETURN s_ctoken_check_list_node_order(
 
     //make sure p_source_token_list_start is the previous node of p_source_token_list_end
     STRU_C_TOKEN_NODE *p_dest_token_list_temp;
-    struct list_head *pos;
+
     ENUM_BOOLEAN find_start_node = BOOLEAN_FALSE;
     ENUM_BOOLEAN find_end_node = BOOLEAN_FALSE;
-    list_for_each_all(pos, &p_token_list_head->list)
+    LIST_FOR_EACH_ALL(p_token_list_head)
     {
-        p_dest_token_list_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_dest_token_list_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_token_list_start == p_dest_token_list_temp)
         {
             if(find_start_node == BOOLEAN_FALSE)
@@ -143,6 +143,26 @@ ENUM_RETURN s_ctoken_duplicate_node(
 
     return RETURN_SUCCESS;
 }
+
+ENUM_RETURN s_ctoken_add_node_after_node(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_node,
+    STRU_C_TOKEN_NODE *p_new_token_node)
+{
+    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+    R_ASSERT(p_token_node != NULL, RETURN_FAILURE);
+    R_ASSERT(p_new_token_node != NULL, RETURN_FAILURE);
+    
+    DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", add token "TOKEN_INFO_FORMAT" after token "TOKEN_INFO_FORMAT, 
+            TOKEN_INFO_VALUE(p_token_list_head),
+            TOKEN_INFO_VALUE(p_new_token_node),
+            TOKEN_INFO_VALUE(p_token_node));
+
+    list_add(&p_new_token_node->list, &p_token_node->list);
+
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN s_ctoken_add_node_to_list_tail(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_new_token_node)
@@ -209,46 +229,44 @@ ENUM_RETURN s_ctoken_delete_node_from_list(
         TOKEN_INFO_VALUE(p_token_list_head),
         TOKEN_INFO_VALUE(p_token_to_be_deleted));
     
-    list_del_init(&p_token_to_be_deleted->list);
+    LIST_RMV_NODE(p_token_to_be_deleted);
     
     s_ctoken_free_node(p_token_to_be_deleted);
 
     return RETURN_SUCCESS;
 };
 
-_VOID s_ctoken_release_list_after_node(
+_VOID s_ctoken_delete_list_after_node(
     STRU_C_TOKEN_NODE *p_token_list_head, 
     STRU_C_TOKEN_NODE *p_token_list_node)
 {
     S_V_ASSERT(p_token_list_head != NULL);
     S_V_ASSERT(p_token_list_node != NULL);
     STRU_C_TOKEN_NODE *p_token_temp;
-    struct list_head *pos, *next;
 
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", release tokens after "TOKEN_INFO_FORMAT, 
             TOKEN_INFO_VALUE(p_token_list_head),
             TOKEN_INFO_VALUE(p_token_list_node));
     
-    list_for_each_safe(pos, next, &p_token_list_head->list, p_token_list_node->list.next, p_token_list_head->list.prev)
+    list_for_each_safe(p_token_list_node, p_token_list_head)
     {
-        p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
-        list_del_init(pos);
+        p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        LIST_RMV_NODE(p_token_temp);
         s_ctoken_free_node(p_token_temp);
     }
 }
 
-_VOID s_ctoken_release_list(STRU_C_TOKEN_NODE *p_token_list_head)
+_VOID s_ctoken_delete_list(STRU_C_TOKEN_NODE *p_token_list_head)
 {
     S_V_ASSERT(p_token_list_head != NULL);
     STRU_C_TOKEN_NODE *p_token_temp;
-    struct list_head *pos, *next;
 
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", release the whole token list", 
             TOKEN_INFO_VALUE(p_token_list_head));
-    list_for_each_all_safe(pos, next, &p_token_list_head->list)
+    LIST_FOR_EACH_ALL_SAFE(p_token_list_head)
     {
-        p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
-        list_del_init(pos);
+        p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        LIST_RMV_NODE(p_token_temp);
         s_ctoken_free_node(p_token_temp);
     }
 }
@@ -257,21 +275,20 @@ _VOID s_ctoken_delete_blanks_and_newline_from_list(STRU_C_TOKEN_NODE *p_token_li
 {
     S_V_ASSERT(p_token_list_head != NULL);
     STRU_C_TOKEN_NODE *p_token_temp;
-    struct list_head *pos, *next;
 
     printf("\n\ndelete blank tokens start...\n");
 
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", delete all blank tokens", 
             TOKEN_INFO_VALUE(p_token_list_head));
     size_t token_num = 0;
-    list_for_each_all_safe(pos, next, &p_token_list_head->list)
+    LIST_FOR_EACH_ALL_SAFE(p_token_list_head)
     {
-        p_token_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         if(p_token_temp->info.token_type == C_TOKEN_BLANK
             || p_token_temp->info.token_type == C_TOKEN_NEWLINE)
         {
             token_num++;
-            list_del_init(pos);
+            LIST_RMV_NODE(p_token_temp);
             s_ctoken_free_node(p_token_temp);
         }
     }
@@ -289,7 +306,6 @@ _VOID s_ctoken_print_list(
     S_V_ASSERT(p_token_list_start != NULL);
     S_V_ASSERT(p_token_list_end != NULL);
     
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node;
     
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", print tokens to file or IO from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT, 
@@ -297,9 +313,9 @@ _VOID s_ctoken_print_list(
             TOKEN_INFO_VALUE(p_token_list_start),
             TOKEN_INFO_VALUE(p_token_list_end));
 
-    list_for_each(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
+    list_for_each(PREV_TOKEN(p_token_list_start), NEXT_TOKEN(p_token_list_end))
 	{
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 		CPP_PRINT(fpw, "%s", p_token_list_node->info.p_string);
 	}
 
@@ -316,7 +332,6 @@ _VOID s_ctoken_print_list_debug_info(
     S_V_ASSERT(p_token_list_end != NULL);
     
     STRU_C_TOKEN_NODE *p_token_list_node; 
-    struct list_head *pos;
 
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", display tokens from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT, 
         TOKEN_INFO_VALUE(p_token_list_head),
@@ -324,9 +339,9 @@ _VOID s_ctoken_print_list_debug_info(
         TOKEN_INFO_VALUE(p_token_list_end));
     
 	printf("\n\n--TOKEN LIST DEBUG INFO BEGIN------------------------------------------------------\n");
-    list_for_each(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
+    list_for_each(PREV_TOKEN(p_token_list_start), NEXT_TOKEN(p_token_list_end))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
 		printf(REVERSE"%s"NONE, p_token_list_node->info.p_string);
 		size_t len = strlen(p_token_list_node->info.p_string);
@@ -365,16 +380,16 @@ STRU_C_TOKEN_NODE * s_ctoken_get_last_node_by_type(
     S_R_ASSERT(p_token_list_end != NULL, NULL);
     
     STRU_C_TOKEN_NODE *p_token_list_node; 
-    struct list_head *pos;
+
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", find token type: %s from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT, 
         TOKEN_INFO_VALUE(p_token_list_head),
         s_ctoken_get_str(token_type), 
         TOKEN_INFO_VALUE(p_token_list_start),
         TOKEN_INFO_VALUE(p_token_list_end));
     
-    list_for_each_reverse(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
+    list_for_each_reverse(PREV_TOKEN(p_token_list_start), NEXT_TOKEN(p_token_list_end))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         DEBUG_PRINT("iterator token: "TOKEN_INFO_FORMAT, 
             TOKEN_INFO_VALUE(p_token_list_node));
         if(p_token_list_node->info.token_type == token_type)
@@ -398,16 +413,16 @@ STRU_C_TOKEN_NODE *s_ctoken_get_last_node_by_name(
     S_R_ASSERT(p_token_list_end != NULL, NULL);
     
     STRU_C_TOKEN_NODE *p_token_list_node; 
-    struct list_head *pos;
+
     DEBUG_PRINT("LIST HEAD: "TOKEN_INFO_FORMAT", find name: %s from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT, 
         TOKEN_INFO_VALUE(p_token_list_head),
         p_string, 
         TOKEN_INFO_VALUE(p_token_list_start),
         TOKEN_INFO_VALUE(p_token_list_end));
     
-    list_for_each_reverse(pos, &p_token_list_head->list, &p_token_list_start->list, &p_token_list_end->list)
+    list_for_each_reverse(PREV_TOKEN(p_token_list_start), NEXT_TOKEN(p_token_list_end))
     {
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
         DEBUG_PRINT("iterator token: "TOKEN_INFO_FORMAT, 
             TOKEN_INFO_VALUE(p_token_list_node));
         if(strcmp(p_token_list_node->info.p_string, p_string) == 0)
@@ -542,10 +557,9 @@ ENUM_BOOLEAN s_ctoken_all_same_type_after_node(
     STRU_C_TOKEN_NODE *p_token_list_temp;
     ENUM_BOOLEAN all_same_type = BOOLEAN_TRUE;
 
-    struct list_head *pos;
-    list_for_each_reverse(pos, &p_token_list_head->list, p_token_list_node->list.next, p_token_list_head->list.prev)
+    list_for_each_reverse(p_token_list_node, p_token_list_head)
     {
-        p_token_list_temp = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
         DEBUG_PRINT("iterator token: "TOKEN_INFO_FORMAT, 
             TOKEN_INFO_VALUE(p_token_list_temp));
@@ -600,6 +614,57 @@ ENUM_RETURN s_ctoken_move_list_to_another_list_tail(
 }
 
 
+ENUM_RETURN s_ctoken_copy_list_to_another_list_after_node(
+    STRU_C_TOKEN_NODE *p_source_token_list_head, 
+    STRU_C_TOKEN_NODE *p_source_token_list_start,
+    STRU_C_TOKEN_NODE *p_source_token_list_end,
+    STRU_C_TOKEN_NODE *p_dest_token_list_head,
+    STRU_C_TOKEN_NODE *p_dest_token_list_node)
+{
+    S_R_ASSERT(p_source_token_list_head != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_source_token_list_start != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_source_token_list_end != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_dest_token_list_head != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_dest_token_list_node != NULL, RETURN_FAILURE);
+
+    DEBUG_PRINT("copy list: LIST HEAD: "TOKEN_INFO_FORMAT", from "TOKEN_INFO_FORMAT"to "TOKEN_INFO_FORMAT"\n"
+                "  to list: LIST HEAD: "TOKEN_INFO_FORMAT", after "TOKEN_INFO_FORMAT, 
+            TOKEN_INFO_VALUE(p_source_token_list_head),
+            TOKEN_INFO_VALUE(p_source_token_list_start),
+            TOKEN_INFO_VALUE(p_source_token_list_end),
+            TOKEN_INFO_VALUE(p_dest_token_list_head),
+            TOKEN_INFO_VALUE(p_dest_token_list_node));
+
+    //start in the end of the list means the source list is empty, not need to move 
+    S_R_FALSE(p_source_token_list_head != p_source_token_list_start, RETURN_SUCCESS);
+    S_R_ASSERT(p_source_token_list_head != p_source_token_list_end, RETURN_FAILURE);
+    
+    ENUM_RETURN ret_val, check_result;
+    ret_val = s_ctoken_check_list_node_order(p_source_token_list_head, p_source_token_list_start, 
+        p_source_token_list_end, &check_result);
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    S_R_ASSERT(check_result == RETURN_SUCCESS, RETURN_FAILURE);
+
+    STRU_C_TOKEN_NODE *p_token_list_node;
+    STRU_C_TOKEN_NODE *p_token_node_new;
+    STRU_C_TOKEN_NODE *p_token_node_after = p_dest_token_list_node;
+
+    list_for_each(PREV_TOKEN(p_source_token_list_start), NEXT_TOKEN(p_source_token_list_end))
+	{
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+		ret_val = s_ctoken_duplicate_node(p_token_list_node, &p_token_node_new);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        S_R_ASSERT(p_token_node_new != NULL, RETURN_FAILURE);
+
+        ret_val = s_ctoken_add_node_after_node(p_dest_token_list_head, p_token_node_after, p_token_node_new);
+        S_R_ASSERT_DO(ret_val == RETURN_SUCCESS, RETURN_FAILURE, s_ctoken_free_node(p_token_node_new));
+
+        p_token_node_after = p_token_node_new;
+	}
+
+    return RETURN_SUCCESS;
+}
+
 ENUM_RETURN s_ctoken_copy_list_to_another_list_tail(
     STRU_C_TOKEN_NODE *p_source_token_list_head, 
     STRU_C_TOKEN_NODE *p_source_token_list_start,
@@ -628,13 +693,12 @@ ENUM_RETURN s_ctoken_copy_list_to_another_list_tail(
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     S_R_ASSERT(check_result == RETURN_SUCCESS, RETURN_FAILURE);
 
-    struct list_head *pos;
     STRU_C_TOKEN_NODE *p_token_list_node;
     STRU_C_TOKEN_NODE *p_token_node_new;
 
-    list_for_each(pos, &p_source_token_list_head->list, &p_source_token_list_start->list, &p_source_token_list_end->list)
+    list_for_each(PREV_TOKEN(p_source_token_list_start), NEXT_TOKEN(p_source_token_list_end))
 	{
-        p_token_list_node = list_entry(pos, STRU_C_TOKEN_NODE, list);
+        p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 		ret_val = s_ctoken_duplicate_node(p_token_list_node, &p_token_node_new);
         S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         S_R_ASSERT(p_token_node_new != NULL, RETURN_FAILURE);

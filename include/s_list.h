@@ -111,35 +111,45 @@ static inline int list_empty(const struct list_head * head)
 	const __typeof( ((type *)0)->member ) *__mptr = (ptr);			\
 	(type *)( (char *)__mptr - s_offsetof(type,member) );})
 
-// 遍历双向链表
-#define list_for_each_all(pos, head)									\
-	for (pos = (head)->next; pos != (head); pos = pos->next)
-
-#define list_for_each_all_safe(pos, n, head)							\
-	for (pos = (head)->next, n = pos->next; pos != (head);			\
-	pos = n, n = pos->next)
-
-#define list_for_each_all_reverse(pos, head)							\
-	for (pos = (head)->prev; pos != (head); pos = pos->prev)
-
-#define list_for_each_all_reverse_safe(pos, p, head)					\
-	for (pos = (head)->prev, p = pos->prev; pos != (head);			\
-	pos = p, p = pos->prev)
-
-#define list_for_each(pos, head, start, end)							\
-	for (pos = (start); (pos != (end)->next) && ((start) != (head)) && ((end) != (head)); pos = (pos)->next)
-
-#define list_for_each_safe(pos, n, head, start, end)					\
-	for (pos = (start), n = pos->next;	(pos != (end)->next) && ((start) != (head)) && ((end) != (head)); pos = n, n = pos->next)
-
-#define list_for_each_reverse(pos, head, start, end)					\
-	for (pos = (end); (pos != (start)->prev) && ((start) != (head)) && ((end) != (head)); pos = pos->prev)
-
-#define list_for_each_reverse_safe(pos, p, head, start, end)			\
-	for (pos = (end), p = pos->prev; (pos != (start)->prev) && ((start) != (head)) && ((end) != (head)); pos = p, p = pos->prev)
-
 #define list_entry(ptr, type, member)									\
 	container_of(ptr, type, member)
 
+// 遍历双向链表
+#define LIST_FOR_EACH_ALL(p_list_head)									\
+	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->next; \
+        __pos != (__head); __pos = __pos->next)
+
+#define LIST_FOR_EACH_ALL_SAFE(p_list_head)							\
+	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->next, *__n = __pos->next; \
+        __pos != (__head); __pos = __n, __n = __pos->next)
+
+#define LIST_FOR_EACH_ALL_REVERSE(p_list_head)							\
+	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->prev; \
+        __pos != (__head); __pos = __pos->prev)
+
+#define LIST_FOR_EACH_ALL_REVERSE_SAFE(p_list_head)					\
+	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->prev, *__p = __pos->prev; \
+        __pos != (__head); __pos = __p, __p = __pos->prev)
+
+//iterator begin from start->next to end->prev
+#define list_for_each(p_list_begin, p_list_end)							\
+	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = __begin->next; \
+        __pos != (__end); __pos = (__pos)->next)
+
+#define list_for_each_safe(p_list_begin, p_list_end)					\
+	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = __begin->next, *__n = __pos->next; \
+        __pos != (__end); __pos = __n, __n = __pos->next)
+
+#define list_for_each_reverse(p_list_begin, p_list_end)					\
+	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = (__end)->prev; \
+        __pos != (__begin); __pos = __pos->prev)
+
+#define list_for_each_reverse_safe(p_list_begin, p_list_end)			\
+	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = (__end)->prev, *__p = __pos->prev; \
+        __pos != (__begin); __pos = __p, __p = __pos->prev)
+
+
+#define LIST_GET_ITERATOR(node_type) list_entry(__pos, node_type, list)
+#define LIST_RMV_NODE(p_list_node) list_del_init(&p_list_node->list)
 #endif
 

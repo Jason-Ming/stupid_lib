@@ -156,7 +156,7 @@ ENUM_RETURN s_cproc_include_file(ENUM_RETURN *check_result)
     }
     
     DEBUG_PRINT("delete the tokens of #include line, delete all tokens after last newline");
-    s_cproc_token_release_list_after_last_newline();
+    s_cproc_token_delete_list_after_last_newline();
 
     DEBUG_PRINT("recurse into another cpp to process file: %s", p_include_real_file_name);
     ret_val = s_cpp(p_include_real_file_name, check_result);

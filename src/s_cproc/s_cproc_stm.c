@@ -2294,7 +2294,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_define_replacement()
             ret_val = s_cproc_macro_finish_replacement();
             S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
-            s_cproc_token_release_list_after_last_newline();
+            s_cproc_token_delete_list_after_last_newline();
 
             STATE_TO(CPROC_STM_NEWLINE);
             break;
