@@ -39,7 +39,6 @@
 
 #define OUTPUT_END(dest, size)\
     do{\
-        if(*(dest) == '\0') break;\
 		S_ASSERT_LOG_DO((size) > 0, break, "buffer '"#dest"''s size(%zd) is not enough!", (size));\
         *(dest)++ = '\0';\
         (size)--;\

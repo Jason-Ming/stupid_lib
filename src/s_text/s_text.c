@@ -247,6 +247,8 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
     R_ASSERT(fp != NULL, RETURN_FAILURE);
     R_ASSERT(buffer != NULL, RETURN_FAILURE);
     R_ASSERT(length != NULL, RETURN_FAILURE);
+    
+    *length = 0;
 
     _S32 c;
     size_t len_temp = buffer_size;
@@ -263,7 +265,7 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
 
     OUTPUT_END(buffer, buffer_size);
 
-    *length = len_temp - buffer_size - 1;
+    *length = (len_temp - buffer_size) - 1;
     
     return RETURN_SUCCESS;
 }
