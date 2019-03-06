@@ -46,6 +46,7 @@ __END_C_DECLS
 #define DISPLAY_VAR_MEM_ONE_LINE(var)\
     do\
     {\
+        printf("    "#var":\n");\
         display_var((void *)&var, sizeof(var));\
     }while(0)
 

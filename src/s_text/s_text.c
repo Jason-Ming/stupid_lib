@@ -211,7 +211,41 @@ ENUM_RETURN s_getlines_f(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t
     };
 
     /* still have lines to be read, the number of line_ptr is not enough */
-    R_ASSERT(feof(pfr), RETURN_FAILURE);
+    if(!feof(pfr))
+    {
+        DEBUG_PRINT("still have lines to be read, the number of line_ptr is not enough!\n");
+    }
+    
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_getlines_f_r(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr != NULL, RETURN_FAILURE);
+    R_ASSERT(line_ptr_num > 0, RETURN_FAILURE);
+    R_ASSERT(line_num != NULL, RETURN_FAILURE);
+    
+    _S8 line_buffer[MAX_LINE_LEN];
+    size_t line_len = 0;
+    *line_num = 0;
+
+    ENUM_RETURN ret_val = fseek(pfr, 0, SEEK_END);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    while(s_getline_f_r(pfr, line_buffer, MAX_LINE_LEN, &line_len) == RETURN_SUCCESS && line_len > 0 && *line_num < line_ptr_num)
+    {
+        line_ptr[*line_num] = (_S8*)malloc(line_len + 1);
+        R_ASSERT(line_ptr[*line_num] != NULL, RETURN_FAILURE);
+
+        strcpy(line_ptr[(*line_num)++], line_buffer);
+    };
+
+    /* still have lines to be read, the number of line_ptr is not enough */
+    if(fseek(pfr, -1, SEEK_CUR) == 0)
+    {
+        DEBUG_PRINT("still have lines to be read, the number of line_ptr is not enough!\n");
+    }
     
     return RETURN_SUCCESS;
 }
@@ -242,9 +276,9 @@ ENUM_RETURN s_getlines_s(const _S8 **source, _S8 *line_ptr[], size_t line_ptr_nu
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length)
+ENUM_RETURN s_getline_f(FILE *pfr, _S8 buffer[], size_t buffer_size, size_t *length)
 {
-    R_ASSERT(fp != NULL, RETURN_FAILURE);
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
     R_ASSERT(buffer != NULL, RETURN_FAILURE);
     R_ASSERT(length != NULL, RETURN_FAILURE);
     
@@ -253,7 +287,7 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
     _S32 c;
     size_t len_temp = buffer_size;
 
-    while((c = fgetc(fp)) != EOF && c != '\n')
+    while((c = fgetc(pfr)) != EOF && c != '\n')
     {
         OUTPUT_C(c, buffer, buffer_size);
     }
@@ -270,6 +304,48 @@ ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *leng
     return RETURN_SUCCESS;
 }
 
+ENUM_RETURN s_getline_f_r(FILE *pfr, _S8 buffer[], size_t buffer_size, size_t *length)
+{
+    R_ASSERT(pfr != NULL, RETURN_FAILURE);
+    R_ASSERT(buffer != NULL, RETURN_FAILURE);
+    R_ASSERT(length != NULL, RETURN_FAILURE);
+    
+    *length = 0;
+
+    ENUM_RETURN ret_val;
+
+    _S32 c;
+    _S8 *temp_buffer = buffer;
+    size_t len_temp = buffer_size;
+    ENUM_BOOLEAN whether_last_char_has_been_read = BOOLEAN_FALSE;
+
+    //前提条件是调用者要把指针移到文件末尾，且每次调用假设指向的都是上一行的最后一个字符（有可能是换行）。
+    while(fseek(pfr, -1, SEEK_CUR) == 0)
+    {
+        if((c = fgetc(pfr)) == '\n')
+        {
+            if(whether_last_char_has_been_read == BOOLEAN_TRUE)
+            {
+                break;
+            }
+        }
+
+        whether_last_char_has_been_read = BOOLEAN_TRUE;
+
+        OUTPUT_C(c, buffer, buffer_size);
+        
+        R_ASSERT(fseek(pfr, -1, SEEK_CUR) == 0, RETURN_FAILURE);
+    }
+
+    OUTPUT_END(buffer, buffer_size);
+
+    *length = (len_temp - buffer_size) - 1;
+
+    ret_val = s_reverse(temp_buffer);
+    R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    return RETURN_SUCCESS;
+}
 
 ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, size_t *length)
 {
@@ -319,8 +395,6 @@ ENUM_RETURN s_reverse(_S8 *pstr_buf)
 
     return RETURN_SUCCESS;
 }
-
-
 
 /* word in this function has 3 type: '\n', continuing blanks, continuing non-blanks */
 PRIVATE size_t find_next_word_position_f(FILE *pfr, ENUM_BOOLEAN *next_word_is_newline)

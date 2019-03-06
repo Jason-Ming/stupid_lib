@@ -133,15 +133,22 @@ ENUM_RETURN s_get_word_f(FILE *pfr, _S8 *word_buf, size_t buf_size, size_t *word
 ENUM_RETURN s_get_word_s(const _S8 **source, _S8 *word_buf, size_t buf_size, size_t *word_len);
 
 
-/* read a line into buffer(include '\n'), return length(not include '\0'), fp point to next line or EOF */
-ENUM_RETURN s_getline_f(FILE *fp, _S8 buffer[], size_t buffer_size, size_t *length);
+/* read a line sequentially from a file head into buffer(include '\n'), return length(not include '\0'), fp point to next line or EOF */
+ENUM_RETURN s_getline_f(FILE *pfr, _S8 buffer[], size_t buffer_size, size_t *length);
+
+/* read a line reversely from a file tail into buffer(include '\n'), return length(not include '\0'), fp point to next line or EOF*/
+ENUM_RETURN s_getline_f_r(FILE *pfr, _S8 buffer[], size_t buffer_size, size_t *length);
 
 /* read a line into buffer, return length(not include '\0'), source point to next line or '\0' */
 ENUM_RETURN s_getline_s(const _S8 **source, _S8 buffer[], size_t buffer_size, size_t *length);
 
-/* read lines into line_ptr, return read line number, this function will call malloc to alloc memory 
+/* read lines sequentially from a file head into line_ptr, return read line number, this function will call malloc to alloc memory 
    for line_ptr to store line, pfr point to EOF */
 ENUM_RETURN s_getlines_f(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
+
+/* read lines reversely from a file tail into line_ptr, return read line number, this function will call malloc to alloc memory 
+   for line_ptr to store line, pfr point to EOF */
+ENUM_RETURN s_getlines_f_r(FILE *pfr, _S8 *line_ptr[], size_t line_ptr_num, size_t *line_num);
 
 /* read lines into line_ptr, return read line number, this function will call malloc to alloc memory 
    for line_ptr to store line, source point to '\0' */
