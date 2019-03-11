@@ -12,6 +12,8 @@
 #define TOKEN_INFO_VALUE(p_token) p_token, p_token->info.p_string, s_ctoken_get_str(p_token->info.token_type)
 
 #define NEXT_TOKEN(p_token_node) (list_entry((p_token_node)->list.next, STRU_C_TOKEN_NODE, list))
+#define NEXT_NEXT_TOKEN(p_token_node) (list_entry((p_token_node)->list.next->next, STRU_C_TOKEN_NODE, list))
+
 #define PREV_TOKEN(p_token_node) (list_entry((p_token_node)->list.prev, STRU_C_TOKEN_NODE, list))
 
 typedef struct TAG_STRU_C_POSITION

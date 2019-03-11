@@ -954,6 +954,7 @@ PRIVATE ENUM_RETURN s_cproc_stm_state_proc_normal()
         {
             if(IS_DEC(c))
             {
+                TYPE_TOKEN(C_TOKEN_CONSTANT_INTEGER);
                 STATE_TO(CPROC_STM_NUMBER);
             }
             else if(C_TOKEN_IS_IDENTIFIER_STARTER(c))
@@ -1191,7 +1192,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_identifier()
     /* So, the next codes are not used. 
     ENUM_RETURN ret_val;
     ENUM_C_TOKEN token_type;
-    ret_val = s_cproc_parse_word(S_CPROC_LAST_TOKEN_STRING, &token_type);
+    ret_val = s_cproc_parse_keyword(S_CPROC_LAST_TOKEN_STRING, &token_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     MOD_LAST_TOKEN_TYPE(token_type);
     */

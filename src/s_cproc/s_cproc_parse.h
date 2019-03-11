@@ -6,20 +6,20 @@
 
 typedef enum TAG_ENUM_C_TOKEN
 {
-    C_TOKEN_NORMAL = 0,                                       /* normal */
-    C_TOKEN_BLANK,                                            /* continued spaces */
-    C_TOKEN_CONTINUED_NEWLINE,                                /* continued newline */
+    C_TOKEN_NORMAL = 0,                                       /*     normal */
+    C_TOKEN_BLANK,                                            /*     continued spaces */
+    C_TOKEN_CONTINUED_NEWLINE,                                /*     continued newline */
     C_TOKEN_NEWLINE,                                          /* \n, \r\n, \r */
     //C_TOKEN_NEWLINE_LINUX,                                    /* \n */
     //C_TOKEN_NEWLINE_WINDOWS,                                  /* \r\n */
     //C_TOKEN_NEWLINE_MAC,                                      /* \r */
-    C_TOKEN_LINE_COMMENT,                                     /* line comment */
-    C_TOKEN_PAIR_COMMENT,                                     /* pair comment */
+    C_TOKEN_LINE_COMMENT,                                     /*     line comment */
+    C_TOKEN_PAIR_COMMENT,                                     /*     pair comment */
 
-    C_TOKEN_PPD,                                              /* Preprocessing directive: # */
-    C_TOKEN_PPD_STRINGIFICATION,                              /* Preprocessing directive: stringification # */
-    C_TOKEN_PPD_CONCATENATE,                                  /* Preprocessing directive: concatenate ## */
-    C_TOKEN_PPD_DEFINED,                                      /* Preprocessing directive: defined */
+    C_TOKEN_PPD,                                              /*     Preprocessing directive: # */
+    C_TOKEN_PPD_STRINGIFICATION,                              /*     Preprocessing directive: stringification # */
+    C_TOKEN_PPD_CONCATENATE,                                  /*     Preprocessing directive: concatenate ## */
+    C_TOKEN_PPD_DEFINED,                                      /*     Preprocessing directive: defined */
 
     /* group:
         group-part
@@ -38,9 +38,9 @@ typedef enum TAG_ENUM_C_TOKEN
         # if constant-expression new-line group_opt
         # ifdef identifier new-line group_opt
         # ifndef identifier new-line group_opt */
-    C_TOKEN_PPD_IF,                                           /* Preprocessing directive: if */
-    C_TOKEN_PPD_IFDEF,                                        /* Preprocessing directive: ifdef */
-    C_TOKEN_PPD_IFNDEF,                                       /* Preprocessing directive: ifndef */
+    C_TOKEN_PPD_IF,                                           /*     Preprocessing directive: if */
+    C_TOKEN_PPD_IFDEF,                                        /*     Preprocessing directive: ifdef */
+    C_TOKEN_PPD_IFNDEF,                                       /*     Preprocessing directive: ifndef */
 
     
     /* elif-groups:
@@ -49,16 +49,16 @@ typedef enum TAG_ENUM_C_TOKEN
 
     /* elif-group:
         # elif constant-expression new-line group_opt */
-    C_TOKEN_PPD_ELIF,                                         /* Preprocessing directive: elif */
+    C_TOKEN_PPD_ELIF,                                         /*     Preprocessing directive: elif */
 
     /* else-group:
         # else new-line group_opt */
-    C_TOKEN_PPD_ELSE,                                         /* Preprocessing directive: else */
+    C_TOKEN_PPD_ELSE,                                         /*     Preprocessing directive: else */
 
     /* endif-line:
         # endif new-line */
-    C_TOKEN_PPD_ENDIF,                                        /* Preprocessing directive: endif */
-    C_TOKEN_PPD_UNKNOWN,                                      /* Preprocessing directive: unknown */
+    C_TOKEN_PPD_ENDIF,                                        /*     Preprocessing directive: endif */
+    C_TOKEN_PPD_UNKNOWN,                                      /*     Preprocessing directive: unknown */
 
     /* control-line:
         # include pp-tokens new-line
@@ -71,12 +71,12 @@ typedef enum TAG_ENUM_C_TOKEN
         # error pp-tokens_opt new-line
         # pragma pp-tokens_opt new-line
         # new-line */
-    C_TOKEN_PP_CONTROL_INCLUDE,                               /* Preprocessing directive: include */
-    C_TOKEN_PP_CONTROL_DEFINE,                                /* Preprocessing directive: define */
-    C_TOKEN_PP_CONTROL_UNDEF,                                 /* Preprocessing directive: undef */
-    C_TOKEN_PP_CONTROL_LINE,                                  /* Preprocessing directive: line */
-    C_TOKEN_PP_CONTROL_ERROR,                                 /* Preprocessing directive: error */
-    C_TOKEN_PP_CONTROL_PRAGMA,                                /* Preprocessing directive: pragma */
+    C_TOKEN_PP_CONTROL_INCLUDE,                               /*     Preprocessing directive: include */
+    C_TOKEN_PP_CONTROL_DEFINE,                                /*     Preprocessing directive: define */
+    C_TOKEN_PP_CONTROL_UNDEF,                                 /*     Preprocessing directive: undef */
+    C_TOKEN_PP_CONTROL_LINE,                                  /*     Preprocessing directive: line */
+    C_TOKEN_PP_CONTROL_ERROR,                                 /*     Preprocessing directive: error */
+    C_TOKEN_PP_CONTROL_PRAGMA,                                /*     Preprocessing directive: pragma */
     
     /* text-line:
         pp-tokens_opt new-line */
@@ -99,28 +99,36 @@ typedef enum TAG_ENUM_C_TOKEN
         字符串文字量,
         标点符号,
         以及在词法上不匹配其它预处理记号类别的非空白符 */
-    C_TOKEN_PP_HEADER_H_NAME,                                 /* Preprocessing: header <name> */
-    C_TOKEN_PP_HEADER_Q_NAME,                                 /* Preprocessing: header "name" */
-    C_TOKEN_PP_HEADER_H_START,                                /* Preprocessing: header < */
-    C_TOKEN_PP_HEADER_H_FINISH,                               /* Preprocessing: header > */
-    C_TOKEN_PP_HEADER_Q_START,                                /* Preprocessing: header " */
-    C_TOKEN_PP_HEADER_Q_FINISH,                               /* Preprocessing: header " */
-    C_TOKEN_PP_MACRO,                                         /* Preprocessing: macro */
-    C_TOKEN_PP_IDENTIFIER,                                    /* Preprocessing: identifier */
-    C_TOKEN_PP_IDENTIFIER_VA,                                 /* Preprocessing: identifier __VA_ARGS__ */
-    C_TOKEN_PP_PARAMETER_START,                               /* Preprocessing: parameter start */
-    C_TOKEN_PP_PARAMETER_FINISH,                              /* Preprocessing: parameter finish */
-    C_TOKEN_PP_PARAMETER_ID,                                  /* Preprocessing: identifier */
-    C_TOKEN_PP_PARAMETER_ID_VA,                               /* Preprocessing: identifier... */
-    C_TOKEN_PP_PARAMETER_VA,                                  /* Preprocessing: ... */
-    C_TOKEN_PP_INTEGER_CONSTANT,                              /* Preprocessing: integer constant */
-    C_TOKEN_PP_FLOATING_CONSTANT,                             /* Preprocessing: floating constant */
-    C_TOKEN_PP_CHARACTER_CONSTANT,                            /* Preprocessing: character constant */
-    C_TOKEN_PP_STRING_LITERAL,                                /* Preprocessing: string literal */
-    C_TOKEN_PP_PUNCTUATOR,                                    /* Preprocessing: punctuator */
-    C_TOKEN_PP_PLACEHOLDER,                                   /* Preprocessing: placeholder */
-    C_TOKEN_PP_IGNORE,                                        /* Preprocessing: ignore */
+    C_TOKEN_PP_HEADER_H_NAME,                                 /*     Preprocessing: header <name> */
+    C_TOKEN_PP_HEADER_Q_NAME,                                 /*     Preprocessing: header "name" */
+    C_TOKEN_PP_HEADER_H_START,                                /*     Preprocessing: header < */
+    C_TOKEN_PP_HEADER_H_FINISH,                               /*     Preprocessing: header > */
+    C_TOKEN_PP_HEADER_Q_START,                                /*     Preprocessing: header " */
+    C_TOKEN_PP_HEADER_Q_FINISH,                               /*     Preprocessing: header " */
+    C_TOKEN_PP_MACRO,                                         /*     Preprocessing: macro */
+    C_TOKEN_PP_IDENTIFIER,                                    /* *** Preprocessing: identifier */
+    C_TOKEN_PP_IDENTIFIER_VA,                                 /*     Preprocessing: identifier __VA_ARGS__ */
+    C_TOKEN_PP_PARAMETER_START,                               /*     Preprocessing: parameter start */
+    C_TOKEN_PP_PARAMETER_FINISH,                              /*     Preprocessing: parameter finish */
+    C_TOKEN_PP_PARAMETER_ID,                                  /*     Preprocessing: identifier */
+    C_TOKEN_PP_PARAMETER_ID_VA,                               /*     Preprocessing: identifier... */
+    C_TOKEN_PP_PARAMETER_VA,                                  /*     Preprocessing: ... */
+    C_TOKEN_PP_INTEGER_CONSTANT,                              /* *** Preprocessing: integer constant */
+    C_TOKEN_PP_FLOATING_CONSTANT,                             /* *** Preprocessing: floating constant */
+    C_TOKEN_PP_CHARACTER_CONSTANT,                            /* *** Preprocessing: character constant */
+    C_TOKEN_PP_STRING_LITERAL,                                /* *** Preprocessing: string literal */
+    C_TOKEN_PP_PUNCTUATOR,                                    /* *** Preprocessing: punctuator */
+    C_TOKEN_PP_PLACEHOLDER,                                   /*     Preprocessing: placeholder */
+    C_TOKEN_PP_IGNORE,                                        /*     Preprocessing: ignore */
 
+    /*
+    记号(token)定义为:
+        关键字(keyword)
+        标识符(identifier)
+        常量(constant)
+        字符串文字量(string-literal)
+        标点符号(punctuator)
+    */
     C_TOKEN_PARENTHESIS_LEFT,                                 /* ( */
     C_TOKEN_PARENTHESIS_RIGHT,                                /* ) */
     C_TOKEN_BRACKET_LEFT,                                     /* [ */
@@ -179,6 +187,8 @@ typedef enum TAG_ENUM_C_TOKEN
     C_TOKEN_CHAR,                                             /* C constant: character */
     C_TOKEN_PUNCTUATOR,                                       /* C punctuator */
     C_TOKEN_OTHER,                                            /* C other: \\, `, @, 0x7F–0xFF */
+
+    
     C_TOKEN_END,                                              /* END: NUL */
     C_TOKEN_UNKNOWN,                                          /* UNKNOWN */
     C_TOKEN_LIST_HEAD,                                        /* LIST HEAD */
@@ -192,7 +202,7 @@ typedef enum TAG_ENUM_C_TOKEN
 __BEGIN_C_DECLS
 ENUM_RETURN s_cproc_parse_pp_directive(const _S8 *p_text_buffer, ENUM_C_TOKEN *token_type);
 ENUM_RETURN s_cproc_parse_pp_is_va_suffix(const _S8* p_text_buffer, ENUM_BOOLEAN *is_va_suffix);
-ENUM_RETURN s_cproc_parse_word(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type);
+ENUM_RETURN s_cproc_parse_keyword(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type);
 ENUM_BOOLEAN s_cproc_has_dot_before_number_or_alphabet(const _S8*p_text);
 
 __END_C_DECLS

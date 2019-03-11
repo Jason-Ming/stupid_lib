@@ -535,7 +535,8 @@ ENUM_RETURN s_cproc_macro_finish_replacement()
     ENUM_RETURN ret_val;
     STRU_MACRO_NODE *p_macro_node = list_entry(g_macro_node_list_head.list.prev, STRU_MACRO_NODE, list);
     S_R_ASSERT(p_macro_node != &g_macro_node_list_head, BOOLEAN_FALSE);
-   
+
+   
     ret_val = s_cproc_macro_move_replacement_list_from_token_list(&p_macro_node->info.replacement_list_head);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 

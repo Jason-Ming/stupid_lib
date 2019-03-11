@@ -12,17 +12,18 @@ __BEGIN_C_DECLS
 ENUM_RETURN s_cchk_pair(FILE *pfr, ENUM_RETURN *check_result);
 
 /* statement means: code separated by semicolon.
-   be sure the content in text_buffer does not contain any comment¡¢macro and had been checked pairing match
+   be sure the content in text_buffer does not contain any comment¡¢macro and had been checked pairing match,
    the result does not include semicolon at the end 
-   after processed, *pp_text_buffer is point to next statement
+   after processing, *pp_text_buffer will point to next statement
 */
 ENUM_RETURN s_cget_statement(_S8 **pp_text_buffer, _S8 statement_buffer[], size_t buffer_size, size_t *len);
 
 /*
 The c compiler compile on its input. 
 
-1.preprocess input file.
-2.process declaration.
+current functions:
+1.preprocess input file. see s_cpp.
+2.process declaration. see s_cdcl.
 4.others.
 
 the text after transform of 1 is output to a file.

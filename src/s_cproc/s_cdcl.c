@@ -12,6 +12,27 @@
 #include "s_cpp.h"
 #include "s_cproc_token.h"
 #include "s_cdcl.h"
+/*
+
+dcl: optional *'s direct-dcl 
+direct-dcl:
+  name 
+  (dcl) 
+  direct-dcl() 
+  direct-dcl[optional size] 
+
+简而言之，声明符 dcl 就是前面可能带有多个*的 direct-dcl。direct-dcl 可以是 name、由一对圆括号括起来的 
+dcl、后面跟有一对圆括号的 direct-dcl、后面跟有用方括号括起来的表示可选长度的 direct-dcl。
+
+该语法可用来对 C 语言的声明进行分析。例如，考虑下面的声明符：
+    (*pfa[])() 
+按照该语法分析，pfa 将被识别为一个 name，从而被认为是一个 direct-dcl。于是，pfa[]也
+是一个 direct-dcl。接着，*pfa[]被识别为一个 dcl，因此，判定(*pfa[])是一个 direct-dcl。
+再接着，(*pfa[])()被识别为一个 direct-dcl，因此也是一个 dcl。可以用图 5-12 所示的语法
+分析树来说明分析的过程（其中 direct-dcl 缩写为 dir-dcl）。
+
+*/
+
 
 struct TAG_STRU_DCL_VAR;
 struct TAG_STRU_DCL_TYPE;
@@ -95,11 +116,18 @@ typedef struct TAG_STRU_DCL_VAR
 
 #define DCL_DBG 0
 #if DCL_DBG
-#define DCL_DBG_PRINT(head, tail)\
-    printf("\n%s:\n", __FUNCTION__);\
-    s_ctoken_print_list(NULL, s_cproc_token_get_list_head(), head, tail);
+#define DCL_DBG_PRINT(info, head, tail)\
+    printf("\n%s: %s\n", __FUNCTION__, info);\
+    if(head == NULL)\
+    {\
+        printf("NULL\n");\
+    }\
+    else\
+    {\
+        s_ctoken_print_list(NULL, s_cproc_token_get_list_head(), head, tail);\
+    }
 #else
-#define DCL_DBG_PRINT(head, tail)
+#define DCL_DBG_PRINT(info, head, tail)
 #endif
 
 
@@ -135,7 +163,7 @@ PRIVATE _VOID display_dcl_error(
     STRU_C_TOKEN_NODE *p_token_list_tail,
     const _S8 *info)
 {
-    printf(LIGHT_RED"Error: %s\n"NONE, info);
+    printf(LIGHT_RED"\nError: %s\n"NONE, info);
     s_ctoken_print_list(NULL, s_cproc_token_get_list_head(), p_token_list_head, p_token_list_tail);
 };
 
@@ -152,7 +180,7 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
     R_ASSERT(pp_direct_dcl_list_head != NULL, RETURN_FAILURE);
     R_ASSERT(pp_direct_dcl_list_tail != NULL, RETURN_FAILURE);
 
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
 
     *pp_prelist_head = NULL;
     *pp_prelist_tail = NULL;
@@ -164,6 +192,7 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
     list_for_each(PREV_TOKEN(p_token_list_head), NEXT_TOKEN(p_token_list_tail))
     {
         p_token_list_node = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        
         if(p_token_list_node->info.token_type == C_TOKEN_IDENTIFIER 
             || p_token_list_node->info.token_type == C_TOKEN_PARENTHESIS_LEFT
             || p_token_list_node->info.token_type == C_TOKEN_BRACKET_LEFT)
@@ -182,6 +211,8 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
         }
     };
 
+    DCL_DBG_PRINT("prelist:", *pp_prelist_head, *pp_prelist_tail);
+
     if(!has_direct_dcl_list)
     {
         *pp_direct_dcl_list_head = NULL;
@@ -192,7 +223,9 @@ PRIVATE ENUM_RETURN dcl_get_prelist_and_direct_dcl_list(
         *pp_direct_dcl_list_head = p_token_list_node;
         *pp_direct_dcl_list_tail = p_token_list_tail;
     }
-    
+
+    DCL_DBG_PRINT("direct_dcl_list:", *pp_direct_dcl_list_head, *pp_direct_dcl_list_tail);
+
     return RETURN_SUCCESS;
 };
 
@@ -207,7 +240,7 @@ PRIVATE ENUM_RETURN dcl_get_next_parameter(
     R_ASSERT(pp_parameter_head != NULL, RETURN_FAILURE);
     R_ASSERT(pp_parameter_tail != NULL, RETURN_FAILURE);
 
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
 
     *pp_parameter_head = p_token_list_head;
     
@@ -253,11 +286,11 @@ PRIVATE ENUM_RETURN dcl_get_next_parameter(
         }
     }
 
-    R_ASSERT(p_token_list_node != s_cproc_token_get_list_head(), RETURN_FAILURE);
+    //R_ASSERT(p_token_list_node != NEXT_TOKEN(p_token_list_tail), RETURN_FAILURE);
 
     if(find_comma)
     {
-        *pp_parameter_tail = list_entry(p_token_list_node->list.prev, STRU_C_TOKEN_NODE, list);
+        *pp_parameter_tail = PREV_TOKEN(p_token_list_node);
     }
     else
     {
@@ -431,7 +464,7 @@ PRIVATE ENUM_RETURN proc_prelist(
     ENUM_BOOLEAN *need_type)
 {
     
-    DCL_DBG_PRINT(p_prelist_head, p_prelist_tail);
+    DCL_DBG_PRINT("input:", p_prelist_head, p_prelist_tail);
     R_ASSERT(need_type != NULL, RETURN_FAILURE);
 
     S_R_FALSE(p_prelist_head != s_cproc_token_get_list_head(), RETURN_SUCCESS);
@@ -464,7 +497,7 @@ PRIVATE ENUM_RETURN proc_prelist(
             }
             default:
             {
-                display_dcl_error(p_prelist_head, p_token_list_node, "");
+                display_dcl_error(p_prelist_head, p_token_list_node, "unexpected case!");
                 return RETURN_FAILURE;
             }
         }
@@ -478,11 +511,12 @@ PRIVATE ENUM_RETURN proc_function_parameters(
     STRU_C_TOKEN_NODE *p_token_list_tail,
     ENUM_BOOLEAN *need_type)
 {
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
 
     R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
     R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
-    R_ASSERT(need_type != NULL, RETURN_FAILURE);
+    R_ASSERT(need_type != NULL, RETURN_FAILURE);
+
     
     STRU_C_TOKEN_NODE *p_token_list_head_temp = p_token_list_head;
     STRU_C_TOKEN_NODE *p_token_list_tail_temp = p_token_list_tail;
@@ -493,10 +527,12 @@ PRIVATE ENUM_RETURN proc_function_parameters(
     DCL_PRINT("a function(");
     *need_type = BOOLEAN_FALSE;
 
-    if(p_token_list_head->list.next != &p_token_list_tail->list)
+    //"()" OR NOT
+    if(NEXT_TOKEN(p_token_list_head) != p_token_list_tail)
     {
-        p_token_list_head_temp = list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE, list);
-        p_token_list_tail_temp = list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE, list);
+        //relocation the list in parentheses
+        p_token_list_head_temp = NEXT_TOKEN(p_token_list_head);
+        p_token_list_tail_temp = PREV_TOKEN(p_token_list_tail);
 
         ENUM_BOOLEAN first_parameter = BOOLEAN_TRUE;
         
@@ -507,6 +543,7 @@ PRIVATE ENUM_RETURN proc_function_parameters(
                 DCL_PRINT(", ");
             }
             first_parameter = BOOLEAN_FALSE;
+
             ret_val = proc_dcl_list(p_token_list_head_parameter, p_token_list_tail_parameter, BOOLEAN_TRUE, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
@@ -515,15 +552,14 @@ PRIVATE ENUM_RETURN proc_function_parameters(
                 break;
             }
 
-            if(p_token_list_tail_parameter->list.next == &s_cproc_token_get_list_head()->list 
-                || p_token_list_tail_parameter->list.next->next == &s_cproc_token_get_list_head()->list)
+            if(NEXT_TOKEN(p_token_list_tail_parameter) == p_token_list_tail 
+                || NEXT_NEXT_TOKEN(p_token_list_tail_parameter) == p_token_list_tail)
             {
                 display_dcl_error(p_token_list_tail_parameter, p_token_list_tail, "function premeter error");
                 return RETURN_FAILURE;
             }
             
-            p_token_list_head_temp = list_entry(p_token_list_tail_parameter->list.next->next, STRU_C_TOKEN_NODE, list);
-            p_token_list_tail_temp = list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE, list);
+            p_token_list_head_temp = NEXT_NEXT_TOKEN(p_token_list_tail_parameter);
         }
     }
     else
@@ -541,7 +577,7 @@ PRIVATE ENUM_RETURN proc_array_size(
     STRU_C_TOKEN_NODE *p_token_list_tail,
     ENUM_BOOLEAN *need_type)
 {
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
 
     R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
     R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
@@ -624,15 +660,14 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     ENUM_BOOLEAN in_function_parameters,
     ENUM_BOOLEAN *need_type)
 {
-    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
-    R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
-    
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    R_ASSERT((p_token_list_head != NULL && p_token_list_tail != NULL) || (p_token_list_head == NULL && p_token_list_tail == NULL), RETURN_FAILURE);
+
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
 
     ENUM_RETURN ret_val;
 
-    if(p_token_list_head == s_cproc_token_get_list_head() 
-        && p_token_list_tail == s_cproc_token_get_list_head())
+    if(p_token_list_head == NULL 
+        && p_token_list_tail == NULL)
     {
         if(in_function_parameters)
         {
@@ -654,7 +689,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     if(p_token_list_tail_temp->info.token_type == C_TOKEN_PARENTHESIS_RIGHT)
     {
         /* find one ()' '(' from tail */
-        list_for_each_reverse(PREV_TOKEN(s_cproc_token_get_list_head()), NEXT_TOKEN(p_token_list_tail))
+        list_for_each_reverse(PREV_TOKEN(p_token_list_head), NEXT_TOKEN(p_token_list_tail))
         {
             p_token_list_tail_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
@@ -685,7 +720,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         }
 
         /* not have a pair */
-        if(p_token_list_tail_temp == s_cproc_token_get_list_head())
+        if(p_token_list_tail_temp == PREV_TOKEN(p_token_list_head))
         {
             display_dcl_error(p_token_list_head, p_token_list_tail, "parenthesis pairing error");
             return RETURN_FAILURE;
@@ -695,7 +730,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         if(p_token_list_tail_temp == p_token_list_head)
         {
             /* empty() */
-            if(p_token_list_head->list.next == &p_token_list_tail->list)
+            if(NEXT_TOKEN(p_token_list_head) == p_token_list_tail)
             {
                 if(in_function_parameters)
                 {
@@ -714,9 +749,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             else
             {
                 /* (dcl_list) */
-                ret_val = proc_dcl_list(
-                    list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE,list),
-                    list_entry(p_token_list_tail->list.prev, STRU_C_TOKEN_NODE,list),
+                ret_val = proc_dcl_list(NEXT_TOKEN(p_token_list_head), PREV_TOKEN(p_token_list_tail),
                     in_function_parameters, need_type);
                 R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
                 return RETURN_SUCCESS;
@@ -725,8 +758,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         else
         {
             /* direct_dcl_list (function premeters) */
-            ret_val = proc_direct_dcl_list(p_token_list_head, 
-                list_entry(p_token_list_tail_temp->list.prev, STRU_C_TOKEN_NODE,list), 
+            ret_val = proc_direct_dcl_list(p_token_list_head, PREV_TOKEN(p_token_list_tail_temp), 
                 in_function_parameters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
             
@@ -740,7 +772,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
     /* array */
     if(p_token_list_tail->info.token_type == C_TOKEN_BRACKET_RIGHT)
     {
-        list_for_each_reverse(PREV_TOKEN(s_cproc_token_get_list_head()),  p_token_list_tail_temp)
+        list_for_each_reverse(PREV_TOKEN(p_token_list_head),  p_token_list_tail_temp)
         {
             p_token_list_tail_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
 
@@ -753,7 +785,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         }
 
         /* direct_dcl_list only contain [][], the array identifier is not given */
-        if(&p_token_list_tail_temp->list == p_token_list_head->list.prev)
+        if(p_token_list_tail_temp == PREV_TOKEN(p_token_list_head))
         {
             ret_val = proc_direct_dcl_list(NULL, NULL, in_function_parameters, need_type);
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -765,7 +797,7 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
             R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         }
         
-        ret_val = proc_array_size(list_entry(p_token_list_tail_temp->list.next, STRU_C_TOKEN_NODE, list), p_token_list_tail, need_type);
+        ret_val = proc_array_size(NEXT_TOKEN(p_token_list_tail_temp), p_token_list_tail, need_type);
         R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
         return RETURN_SUCCESS;
@@ -782,12 +814,12 @@ PRIVATE ENUM_RETURN proc_direct_dcl_list(
         }
         else
         {
-            display_dcl_error(p_token_list_head, p_token_list_tail, "");
+            display_dcl_error(p_token_list_head, p_token_list_tail, "head not equals to tail!");
             return RETURN_FAILURE;
         }
     }
 
-    display_dcl_error(p_token_list_head, p_token_list_tail, "");
+    display_dcl_error(p_token_list_head, p_token_list_tail, "missing identifier!");
     return RETURN_FAILURE;
 }
 
@@ -802,7 +834,7 @@ PRIVATE ENUM_RETURN proc_dcl_list(
     STRU_C_TOKEN_NODE *p_direct_dcl_list_head = NULL;
     STRU_C_TOKEN_NODE *p_direct_dcl_list_tail = NULL;
 
-    DCL_DBG_PRINT(p_token_list_head, p_token_list_tail);
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
     
     ENUM_RETURN ret_val = dcl_get_prelist_and_direct_dcl_list(
         p_token_list_head, 
@@ -832,19 +864,43 @@ PRIVATE ENUM_RETURN proc_dcl_list(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cdcl(_VOID)
+ENUM_RETURN s_cproc_identify_token_type_of_keyword(_VOID)
 {
-    ENUM_RETURN ret_val;
     STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
-    printf(LIGHT_CYAN"declaration: ");
-	s_ctoken_print_list(NULL, p_token_list_head, p_token_list_head, p_token_list_head);
-	printf(NONE"\n");
-	
+    ENUM_RETURN ret_val;
+    ENUM_C_TOKEN token_type;
+    STRU_C_TOKEN_NODE *p_dest_token_list_temp;
+
+    LIST_FOR_EACH_ALL(p_token_list_head)
+    {
+        p_dest_token_list_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        if(p_dest_token_list_temp->info.token_type != C_TOKEN_IDENTIFIER)
+        {
+            continue;
+        }
+        
+        ret_val = s_cproc_parse_keyword(p_dest_token_list_temp->info.p_string, &token_type);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        ret_val = s_ctoken_mod_node_type(p_dest_token_list_temp, token_type);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
+    
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_cproc_dcl_statement(
+    STRU_C_TOKEN_NODE *p_token_list_head,
+    STRU_C_TOKEN_NODE *p_token_list_tail)
+{
+    R_ASSERT(p_token_list_head != NULL, RETURN_FAILURE);
+    R_ASSERT(p_token_list_tail != NULL, RETURN_FAILURE);
+
+    DCL_DBG_PRINT("input:", p_token_list_head, p_token_list_tail);
+
+    ENUM_RETURN ret_val;
     ENUM_BOOLEAN need_type = BOOLEAN_FALSE;
     
-    ret_val = proc_dcl_list(
-        list_entry(p_token_list_head->list.next, STRU_C_TOKEN_NODE, list), 
-        list_entry(p_token_list_head->list.prev, STRU_C_TOKEN_NODE, list), 
+    ret_val = proc_dcl_list(p_token_list_head, p_token_list_tail, 
         BOOLEAN_FALSE, 
         &need_type);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
@@ -856,6 +912,54 @@ ENUM_RETURN s_cdcl(_VOID)
         display_dcl_error(p_token_list_head, p_token_list_head, "missing type");
         return RETURN_FAILURE;
     }
+    
+    return RETURN_SUCCESS;
+}
+
+ENUM_RETURN s_cdcl(_VOID)
+{
+    ENUM_RETURN ret_val;
+    STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
+    printf(LIGHT_CYAN"declaration: \n");
+	s_ctoken_print_list(NULL, p_token_list_head, NEXT_TOKEN(p_token_list_head), PREV_TOKEN(p_token_list_head));
+	printf(NONE"\n");
+
+    /* In the dcl preprocessing phase, all keywords need to be identified */
+    ret_val = s_cproc_identify_token_type_of_keyword();
+    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    
+    //seperate statement by semicolon
+    STRU_C_TOKEN_NODE *p_token_node_temp = NULL;
+    STRU_C_TOKEN_NODE *p_token_list_head_temp = NULL;
+
+    LIST_FOR_EACH_ALL(p_token_list_head)
+    {
+        p_token_node_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
+        if(p_token_node_temp->info.token_type != C_TOKEN_SEMICOLON)
+        {
+            if(p_token_list_head_temp == NULL)
+            {
+                p_token_list_head_temp = p_token_node_temp;
+            }
+            continue;
+        }
+
+        if(p_token_list_head_temp == NULL)
+        {
+            continue;
+        }
+        
+        ret_val = s_cproc_dcl_statement(p_token_list_head_temp, PREV_TOKEN(p_token_node_temp));
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+        p_token_list_head_temp = NULL;
+    }
+
+    if(p_token_list_head_temp != NULL)
+    {
+        ret_val = s_cproc_dcl_statement(p_token_list_head_temp, PREV_TOKEN(p_token_node_temp));
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+    }
+        
 
     return RETURN_SUCCESS;
 }

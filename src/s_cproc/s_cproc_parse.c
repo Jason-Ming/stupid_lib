@@ -352,7 +352,7 @@ ENUM_RETURN s_cproc_parse_pp_is_va_suffix(const _S8* p_text_buffer, ENUM_BOOLEAN
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_parse_word(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type)
+ENUM_RETURN s_cproc_parse_keyword(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type)
 {
     S_R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
     S_R_ASSERT(token_type != NULL, RETURN_FAILURE);

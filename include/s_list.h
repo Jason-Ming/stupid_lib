@@ -8,7 +8,7 @@
 // 双向链表节点
 struct list_head
 {
-struct list_head * next, *prev;
+    struct list_head * next, *prev;
 };
 
 
@@ -131,7 +131,7 @@ static inline int list_empty(const struct list_head * head)
 	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->prev, *__p = __pos->prev; \
         __pos != (__head); __pos = __p, __p = __pos->prev)
 
-//iterator begin from start->next to end->prev
+//iterator begin from begin->next to end->prev
 #define list_for_each(p_list_begin, p_list_end)							\
 	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = __begin->next; \
         __pos != (__end); __pos = (__pos)->next)

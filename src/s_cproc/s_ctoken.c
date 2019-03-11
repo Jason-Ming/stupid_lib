@@ -351,7 +351,14 @@ _VOID s_ctoken_print_list_debug_info(
 			printf(" ");
 		}
 
-		printf(" %s\n", s_ctoken_get_str(p_token_list_node->info.token_type));
+		printf(" %s", s_ctoken_get_str(p_token_list_node->info.token_type));
+
+        if(p_token_list_node->info.token_type < C_TOKEN_PARENTHESIS_LEFT || p_token_list_node->info.token_type > C_TOKEN_OTHER)
+        {
+            printf(RED" ERROR!"NONE);
+        }
+
+        printf("\n");
 	}
 
     printf("--TOKEN LIST DEBUG INFO END--------------------------------------------------------\n");
