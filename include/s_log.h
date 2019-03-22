@@ -166,9 +166,8 @@ char* log_getfn(void);
 	if(!(condition))\
 	{\
 		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-			"ASSERT("#condition")!, return	= %ld.\n"NONE,\
-			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-			(_SL)value);\
+			"ASSERT("#condition")!\n"NONE,\
+			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__);\
 		action;\
 		return;\
 	}
@@ -177,9 +176,9 @@ char* log_getfn(void);
 	if(!(condition))\
 	{\
 		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			"ASSERT("#condition")!, "fmt"\n"NONE,\
 			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-			(_SL)value, ##args);\
+			##args);\
 		return;\
 	}
 
@@ -187,9 +186,9 @@ char* log_getfn(void);
 	if(!(condition))\
 	{\
 		LOG_PRINT(LIGHT_RED"[%s] [file: %s, line: %ld] [function: %s]\n   "\
-			"ASSERT("#condition")!, return	= %ld, "fmt"\n"NONE,\
+			"ASSERT("#condition")!, "fmt"\n"NONE,\
 			get_time_stamp(), __FILE__, (_SL)__LINE__, __FUNCTION__,\
-			(_SL)value, ##args);\
+			##args);\
 		action;\
 		return;\
 	}
