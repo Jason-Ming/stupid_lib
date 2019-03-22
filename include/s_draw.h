@@ -27,6 +27,9 @@ STRU_POINT s_make_point(_S32 x, _S32 y);
 /* s_add_point: add two points */
 STRU_POINT s_add_point(STRU_POINT p1, STRU_POINT p2);
 
+/* calculate distance between two points */
+_SD s_dist_of_points(STRU_POINT p1, STRU_POINT p2);
+
 /* s_point_in_rectangle: return 1 if p in rect, 0 if not */
 ENUM_BOOLEAN s_point_in_rectangle(STRU_POINT p, STRU_RECTANGLE rect);
 
