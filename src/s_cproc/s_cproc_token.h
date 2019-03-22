@@ -54,6 +54,7 @@ ENUM_RETURN s_cproc_token_merge_last_2_nodes(ENUM_C_TOKEN new_type);
 ENUM_RETURN s_cproc_token_merge_last_3_nodes(ENUM_C_TOKEN new_type);
 ENUM_BOOLEAN s_cproc_token_all_blank_in_line(_VOID);
 
+ENUM_RETURN s_cproc_token_identify_type_of_keyword(_VOID);
 
 __END_C_DECLS
 #endif

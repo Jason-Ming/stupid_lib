@@ -33,4 +33,5 @@ void fff()
     int ai = NUMBERS1(1);
 }
 
-
+//#define DECLARE(name, type) type name##_##type_type
+//DECLARE(val, int)

@@ -204,6 +204,7 @@ ENUM_RETURN s_cproc_parse_pp_directive(const _S8 *p_text_buffer, ENUM_C_TOKEN *t
 ENUM_RETURN s_cproc_parse_pp_is_va_suffix(const _S8* p_text_buffer, ENUM_BOOLEAN *is_va_suffix);
 ENUM_RETURN s_cproc_parse_keyword(const _S8* p_text_buffer, ENUM_C_TOKEN *token_type);
 ENUM_BOOLEAN s_cproc_has_dot_before_number_or_alphabet(const _S8*p_text);
+_VOID s_cproc_draw_keyword_count(_VOID);
 
 __END_C_DECLS
 

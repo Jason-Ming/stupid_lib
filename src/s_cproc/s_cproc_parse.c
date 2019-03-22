@@ -7,6 +7,7 @@
 #include "s_text.h"
 #include "s_stack.h"
 #include "s_stm.h"
+#include "s_diagram.h"
 #include "s_cproc.h"
 #include "s_cproc_parse.h"
 
@@ -43,41 +44,42 @@ typedef struct TAG_STRU_DCL_KEYWORD
 {
     const _S8 *keyword;
     ENUM_DCL_KEYWORD type;
+    _S64 count;
 }STRU_DCL_KEYWORD;
 
 PRIVATE STRU_DCL_KEYWORD g_ckeyword[] = {
-    {"char", DCL_KEYWORD_TYPE}, 
-    {"double", DCL_KEYWORD_TYPE},
-    {"enum", DCL_KEYWORD_TYPE}, 
-    {"float", DCL_KEYWORD_TYPE}, 
-    {"int", DCL_KEYWORD_TYPE}, 
-    {"long", DCL_KEYWORD_TYPE}, 
-    {"short", DCL_KEYWORD_TYPE}, 
-    {"signed", DCL_KEYWORD_TYPE}, 
-    {"struct", DCL_KEYWORD_TYPE}, 
-    {"union", DCL_KEYWORD_TYPE}, 
-    {"unsigned", DCL_KEYWORD_TYPE}, 
-    {"void", DCL_KEYWORD_TYPE}, 
-    {"auto", DCL_KEYWORD_TYPE_QUALIFIER}, 
-    {"const", DCL_KEYWORD_TYPE_QUALIFIER}, 
-    {"extern", DCL_KEYWORD_TYPE_QUALIFIER}, 
-    {"register", DCL_KEYWORD_TYPE_QUALIFIER}, 
-    {"static", DCL_KEYWORD_TYPE_QUALIFIER}, 
-    {"volatile", DCL_KEYWORD_TYPE_QUALIFIER},
-    {"break", DCL_KEYWORD_CONTROL}, 
-    {"case", DCL_KEYWORD_CONTROL}, 
-    {"continue", DCL_KEYWORD_CONTROL}, 
-    {"default", DCL_KEYWORD_CONTROL}, 
-    {"do", DCL_KEYWORD_CONTROL}, 
-    {"else", DCL_KEYWORD_CONTROL}, 
-    {"for", DCL_KEYWORD_CONTROL}, 
-    {"goto", DCL_KEYWORD_CONTROL}, 
-    {"if", DCL_KEYWORD_CONTROL}, 
-    {"return", DCL_KEYWORD_CONTROL}, 
-    {"sizeof", DCL_KEYWORD_CONTROL}, 
-    {"switch", DCL_KEYWORD_CONTROL}, 
-    {"typedef", DCL_KEYWORD_CONTROL}, 
-    {"while", DCL_KEYWORD_CONTROL},
+    {"char", DCL_KEYWORD_TYPE, 0}, 
+    {"double", DCL_KEYWORD_TYPE, 0},
+    {"enum", DCL_KEYWORD_TYPE, 0}, 
+    {"float", DCL_KEYWORD_TYPE, 0}, 
+    {"int", DCL_KEYWORD_TYPE, 0}, 
+    {"long", DCL_KEYWORD_TYPE, 0}, 
+    {"short", DCL_KEYWORD_TYPE, 0}, 
+    {"signed", DCL_KEYWORD_TYPE, 0}, 
+    {"struct", DCL_KEYWORD_TYPE, 0}, 
+    {"union", DCL_KEYWORD_TYPE, 0}, 
+    {"unsigned", DCL_KEYWORD_TYPE, 0}, 
+    {"void", DCL_KEYWORD_TYPE, 0}, 
+    {"auto", DCL_KEYWORD_TYPE_QUALIFIER, 0}, 
+    {"const", DCL_KEYWORD_TYPE_QUALIFIER, 0}, 
+    {"extern", DCL_KEYWORD_TYPE_QUALIFIER, 0}, 
+    {"register", DCL_KEYWORD_TYPE_QUALIFIER, 0}, 
+    {"static", DCL_KEYWORD_TYPE_QUALIFIER, 0}, 
+    {"volatile", DCL_KEYWORD_TYPE_QUALIFIER, 0},
+    {"break", DCL_KEYWORD_CONTROL, 0}, 
+    {"case", DCL_KEYWORD_CONTROL, 0}, 
+    {"continue", DCL_KEYWORD_CONTROL, 0}, 
+    {"default", DCL_KEYWORD_CONTROL, 0}, 
+    {"do", DCL_KEYWORD_CONTROL, 0}, 
+    {"else", DCL_KEYWORD_CONTROL, 0}, 
+    {"for", DCL_KEYWORD_CONTROL, 0}, 
+    {"goto", DCL_KEYWORD_CONTROL, 0}, 
+    {"if", DCL_KEYWORD_CONTROL, 0}, 
+    {"return", DCL_KEYWORD_CONTROL, 0}, 
+    {"sizeof", DCL_KEYWORD_CONTROL, 0}, 
+    {"switch", DCL_KEYWORD_CONTROL, 0}, 
+    {"typedef", DCL_KEYWORD_CONTROL, 0}, 
+    {"while", DCL_KEYWORD_CONTROL, 0},
 }; 
 
 
@@ -254,7 +256,7 @@ PRIVATE ENUM_BOOLEAN is_number(const _S8 *string)
     return(RETURN_SUCCESS == s_strtos32(string, &number) && number >= 0)?BOOLEAN_TRUE:BOOLEAN_FALSE;
 }
 #endif
-PRIVATE ENUM_DCL_KEYWORD get_ckeyword_type(const _S8 *string)
+PRIVATE ENUM_DCL_KEYWORD get_ckeyword_type_and_count(const _S8 *string)
 {
     R_ASSERT(string != NULL, DCL_KEYWORD_INVALID);
     
@@ -272,27 +274,8 @@ PRIVATE ENUM_DCL_KEYWORD get_ckeyword_type(const _S8 *string)
 
     S_R_FALSE(i < size, DCL_KEYWORD_INVALID);
 
+    g_ckeyword[i].count++;
     return g_ckeyword[i].type;
-}
-
-ENUM_BOOLEAN is_keyword_type(const _S8 *string)
-{
-    return get_ckeyword_type(string) == DCL_KEYWORD_TYPE;
-}
-
-ENUM_BOOLEAN is_keyword_type_qualifier(const _S8 *string)
-{
-    return get_ckeyword_type(string) == DCL_KEYWORD_TYPE_QUALIFIER;
-}
-
-ENUM_BOOLEAN is_keyword_control(const _S8 *string)
-{
-    return get_ckeyword_type(string) == DCL_KEYWORD_CONTROL;
-}
-
-ENUM_BOOLEAN is_keyword(const _S8 *string)
-{
-    return get_ckeyword_type(string) != DCL_KEYWORD_INVALID;
 }
 
 ENUM_BOOLEAN s_cproc_has_dot_before_number_or_alphabet(const _S8*p_text)
@@ -357,20 +340,51 @@ ENUM_RETURN s_cproc_parse_keyword(const _S8* p_text_buffer, ENUM_C_TOKEN *token_
     S_R_ASSERT(p_text_buffer != NULL, RETURN_FAILURE);
     S_R_ASSERT(token_type != NULL, RETURN_FAILURE);
     *token_type = C_TOKEN_IDENTIFIER;
+    ENUM_DCL_KEYWORD dcl_keyword = get_ckeyword_type_and_count(p_text_buffer);
 
-    if(is_keyword_type(p_text_buffer))
+    switch(dcl_keyword)
     {
-        *token_type = C_TOKEN_KEYWORD_TYPE;
-    }
-    else if(is_keyword_type_qualifier(p_text_buffer))
-    {
-        *token_type = C_TOKEN_KEYWORD_TYPE_QUALIFIER;
-    }
-    else if(is_keyword_control(p_text_buffer))
-    {
-        *token_type = C_TOKEN_KEYWORD_CONTROL;
+        case DCL_KEYWORD_TYPE:
+            *token_type = C_TOKEN_KEYWORD_TYPE;
+            break;
+        case DCL_KEYWORD_CONTROL:
+            *token_type = C_TOKEN_KEYWORD_CONTROL;
+            break;
+        case DCL_KEYWORD_TYPE_QUALIFIER:
+            *token_type = C_TOKEN_KEYWORD_TYPE_QUALIFIER;
+            break;
+        default:
+            break;
     }
 
     return RETURN_SUCCESS;
 }
 
+_VOID s_cproc_draw_keyword_count(_VOID)
+{
+    STRU_CHART_DATA *chart_data = NULL;
+    _S32 i = 0;
+    _S32 size = SIZE_OF_ARRAY(g_ckeyword);
+
+    chart_data = (STRU_CHART_DATA * )malloc(sizeof(STRU_CHART_DATA) * size);
+    S_V_ASSERT(chart_data != NULL);
+
+     while(i < size)
+    {
+        strncpy(chart_data[i].info, g_ckeyword[i].keyword, CHART_DATA_INFO_STR_SIZE - 1);
+        chart_data[i].info[CHART_DATA_INFO_STR_SIZE - 1] = '\0';
+        chart_data[i].val = g_ckeyword[i].count;
+        
+        i++;
+    };
+
+    FILE *fpw = fopen("keyword_count.txt", "w");
+    S_V_ASSERT_DO(fpw != NULL, S_FREE(chart_data));
+    
+    ENUM_RETURN ret_val = draw_histogram(fpw, chart_data, size);
+    fclose(fpw);
+    S_FREE(chart_data);
+    
+    S_V_ASSERT(ret_val == RETURN_SUCCESS);
+
+}

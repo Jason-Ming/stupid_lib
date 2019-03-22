@@ -864,30 +864,6 @@ PRIVATE ENUM_RETURN proc_dcl_list(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_identify_token_type_of_keyword(_VOID)
-{
-    STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
-    ENUM_RETURN ret_val;
-    ENUM_C_TOKEN token_type;
-    STRU_C_TOKEN_NODE *p_dest_token_list_temp;
-
-    LIST_FOR_EACH_ALL(p_token_list_head)
-    {
-        p_dest_token_list_temp = LIST_GET_ITERATOR(STRU_C_TOKEN_NODE);
-        if(p_dest_token_list_temp->info.token_type != C_TOKEN_IDENTIFIER)
-        {
-            continue;
-        }
-        
-        ret_val = s_cproc_parse_keyword(p_dest_token_list_temp->info.p_string, &token_type);
-        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-        ret_val = s_ctoken_mod_node_type(p_dest_token_list_temp, token_type);
-        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
-    }
-    
-    return RETURN_SUCCESS;
-}
-
 ENUM_RETURN s_cproc_dcl_statement(
     STRU_C_TOKEN_NODE *p_token_list_head,
     STRU_C_TOKEN_NODE *p_token_list_tail)
@@ -925,7 +901,7 @@ ENUM_RETURN s_cdcl(_VOID)
 	printf(NONE"\n");
 
     /* In the dcl preprocessing phase, all keywords need to be identified */
-    ret_val = s_cproc_identify_token_type_of_keyword();
+    ret_val = s_cproc_token_identify_type_of_keyword();
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     //seperate statement by semicolon
