@@ -2434,7 +2434,7 @@ PRIVATE ENUM_RETURN cproc_stm_proc_pp_undef_macro()
 
     ADD_TOKEN;
 
-    ret_val = s_cproc_macro_remove_name(S_CPROC_LAST_TOKEN_POINTER);
+    ret_val = s_cproc_macro_delete_name(S_CPROC_LAST_TOKEN_POINTER);
     S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
 
     STATE_TO(CPROC_STM_PP_UNDEF_FINISH);

@@ -19,7 +19,7 @@ _VOID s_cproc_macro_release_list(_VOID);
 ENUM_RETURN s_cproc_macro_add_name(
     const STRU_C_TOKEN_NODE* p_macro_name_token_node);
 
-ENUM_RETURN s_cproc_macro_remove_name(
+ENUM_RETURN s_cproc_macro_delete_name(
     const STRU_C_TOKEN_NODE* p_macro_name_token_node);
 
 

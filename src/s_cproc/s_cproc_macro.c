@@ -33,7 +33,6 @@ PRIVATE ENUM_RETURN s_cproc_macro_expand_identifier(STRU_C_TOKEN_NODE *p_token);
 
 _VOID s_cproc_macro_print_list_debug_info(_VOID)
 {
-
 	STRU_MACRO_NODE *p_macro_temp;
     printf("\n\n--MACRO LIST DEBUG INFO BEGIN------------------------------------------------------\n");
     LIST_FOR_EACH_ALL(&g_macro_node_list_head)
@@ -420,7 +419,7 @@ ENUM_RETURN s_cproc_macro_add_name(
     return RETURN_SUCCESS;
 }
 
-ENUM_RETURN s_cproc_macro_remove_name(
+ENUM_RETURN s_cproc_macro_delete_name(
     const STRU_C_TOKEN_NODE* p_macro_name_token_node)
 {
     S_R_ASSERT(p_macro_name_token_node != NULL, RETURN_FAILURE);

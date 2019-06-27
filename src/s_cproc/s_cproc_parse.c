@@ -262,6 +262,8 @@ PRIVATE ENUM_DCL_KEYWORD get_ckeyword_type_and_count(const _S8 *string)
     
     _S32 i = 0;
     _S32 size = SIZE_OF_ARRAY(g_ckeyword);
+
+    //need to be optimized, using the binsearch or bin tree
     while(i < size)
     {
         if(strcmp(g_ckeyword[i].keyword, string) == 0)
