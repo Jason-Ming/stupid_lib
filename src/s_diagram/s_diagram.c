@@ -129,7 +129,7 @@ PRIVATE ENUM_RETURN init_histogram_table(STRU_CHART_DATA array[], int array_size
     //以最大的数量为准，每增加一行的数量
     int step = max_value_of_array/CHART_ROWS + (max_value_of_array % CHART_ROWS == 0 ? 0 : 1);
 
-    printf("max_value_of_array: %d, step: %d\n", max_value_of_array, step);
+    //printf("max_value_of_array: %d, step: %d\n", max_value_of_array, step);
     
     //初始化整个表
     for(int i = 0; i < table_row; i++)

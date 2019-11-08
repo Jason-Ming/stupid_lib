@@ -778,7 +778,7 @@ PRIVATE ENUM_RETURN s_cproc_macro_expand_identifier(STRU_C_TOKEN_NODE *p_token)
 
     //the macro doesn't exist
     DEBUG_PRINT("macro: %s\n", p_token->info.p_string);
-    S_R_ASSERT(p_macro_node != NULL, RETURN_SUCCESS);
+    S_R_FALSE_LOG(p_macro_node != NULL, RETURN_SUCCESS, "macro: %s doesn't exist!", p_token->info.p_string);
     
     STRU_C_TOKEN_NODE *p_replacement_token_list_head = NULL;
     ret_val = s_cproc_macro_get_replacement_list(p_macro_node, &p_replacement_token_list_head);

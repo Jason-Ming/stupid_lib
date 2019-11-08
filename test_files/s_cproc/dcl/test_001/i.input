@@ -1,0 +1,24 @@
+const int const (*const (*fp)(int x[][10], void *p))(int(*f)(char* c, int argc, char**argv));
+/*identifier-'fp' is a pointer to a function(identifier-'x' is a array[][10] of type-'int'identifier-'p' is a pointer to type-'void') returning a const pointer to a function(identifier-'f' is a pointer to a function(identifier-'c' is a pointer to type-'char'identifier-'argc' is type-'int'identifier-'argv' is a pointer to a pointer to type-'char') returning type-'int') returning const type-'int'*/
+int const(*(*fp)(int [][10]))(int(*)(void));
+/*identifier-'fp' is a pointer to a function(identifier-'not given' is a array[][10] of type-'int') returning a pointer to a function(identifier-'not given' is a pointer to a function(identifier-'not given' is type-'void') returning type-'int') returning const type-'int'*/
+int a;
+/*identifier-'a' is type-'int'*/
+char const **argv;
+/*identifier-'argv' is a pointer to a pointer to const type-'char'*/
+const int x;
+/*identifier-'x' is const type-'int'*/
+int(*daytab)[13];
+/*identifier-'daytab' is a pointer to a array[13] of type-'int'*/
+int *daytab[13];
+/*identifier-'daytab' is a array[13] of a pointer to type-'int'*/
+void *comp();
+/*identifier-'comp' is a function() returning a pointer to type-'void'*/
+void (*comp)();
+/*identifier-'comp' is a pointer to a function() returning type-'void'*/
+char (*(*x(int()))[])();
+/*identifier-'x' is a function(identifier-'not given' is a function() returning type-'int') returning a pointer to a array[] of a pointer to a function() returning type-'char'*/
+char (*(*x[3])())[5];
+/*identifier-'x' is a array[3] of a pointer to a function() returning a pointer to a array[5] of type-'char'*/
+int aa[];
+//identifier-'aa' is a array[] of type-'int'

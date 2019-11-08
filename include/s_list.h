@@ -131,6 +131,8 @@ static inline int list_empty(const struct list_head * head)
 	for (struct list_head *__head = &((p_list_head)->list), *__pos = (__head)->prev, *__p = __pos->prev; \
         __pos != (__head); __pos = __p, __p = __pos->prev)
 
+//注意：LIST_GET_ITERATOR 
+// 永远不可能再循环结束后到达两边的边界，因为它只是在循环体内的允许范围内才被赋值
 //iterator begin from begin->next to end->prev
 #define list_for_each(p_list_begin, p_list_end)							\
 	for (struct list_head *__begin = &((p_list_begin)->list), *__end = &((p_list_end)->list), *__pos = __begin->next; \

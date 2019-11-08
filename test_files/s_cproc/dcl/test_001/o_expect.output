@@ -1,0 +1,25 @@
+const int const (*const (*fp)(int x[][10], void *p))(int(*f)(char* c, int argc, char**argv));
+ 
+int const(*(*fp)(int [][10]))(int(*)(void));
+ 
+int a;
+ 
+char const **argv;
+ 
+const int x;
+ 
+int(*daytab)[13];
+ 
+int *daytab[13];
+ 
+void *comp();
+ 
+void (*comp)();
+ 
+char (*(*x(int()))[])();
+ 
+char (*(*x[3])())[5];
+ 
+int aa[];
+ 
+
