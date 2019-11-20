@@ -1,7 +1,7 @@
 #include "CppUTest/TestHarness.h"
 #include <string.h>
 #include <stdio.h>
-#include"s_text.h"
+#include "s_text.h"
 #include "s_type.h"
 #include "s_limits.h"
 #include "s_mem.h"

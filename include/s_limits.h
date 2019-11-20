@@ -1,6 +1,6 @@
 #ifndef __S_LIMITS_H__
 #define __S_LIMITS_H__
-#include <limits.h>
+
 
 #include "s_type.h"
 

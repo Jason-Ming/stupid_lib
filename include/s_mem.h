@@ -1,8 +1,7 @@
 #ifndef __S_MEM_H__
 #define __S_MEM_H__
 
-#include <string.h>
-#include <endian.h>
+//#include <endian.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
 #include "s_type.h"
@@ -20,8 +19,10 @@ __END_C_DECLS
     
 #define SIZE_OF_ARRAY(a) (sizeof(a)/sizeof(a[0]))
 
-#define S_MALLOC 
+//#define S_MALLOC(size) malloc(size)
 #define S_FREE(p) do{ if((p) != NULL){free(p); (p) = NULL;}}while(0)
+
+//#define S_FREE(p) free(p)
 
 #define S_FCLOSE(p) do{ if((p) != NULL){fclose(p); (p) = NULL;}}while(0)
 

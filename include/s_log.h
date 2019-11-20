@@ -1,8 +1,6 @@
 #ifndef __S_LOG_H__
 #define __S_LOG_H__
 
-#include <stdio.h>
-
 #include "s_clinkage.h"
 #include "s_time.h"
 #include "s_type.h"

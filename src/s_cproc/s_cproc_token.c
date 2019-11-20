@@ -1,4 +1,6 @@
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "s_log.h"
 #include "s_mem.h"
@@ -6,6 +8,7 @@
 
 #include "s_ctoken.h"
 #include "s_cproc_token.h"
+#include "s_cproc_identifier.h"
 
 PRIVATE STRU_C_TOKEN_NODE g_c_token_list_head;
 
@@ -229,10 +232,14 @@ ENUM_RETURN s_cproc_token_identify_type_of_keyword(_VOID)
         S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
         ret_val = s_ctoken_mod_node_type(p_dest_token_list_temp, token_type);
         S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
+
+        ret_val = s_cproc_identifier_insert(p_dest_token_list_temp->info.p_string);
+        S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
 
     s_cproc_draw_keyword_count();
     
     return RETURN_SUCCESS;
 }
+
 

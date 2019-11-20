@@ -43,6 +43,7 @@
 #include <string.h>
 #include <limits.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "s_log.h"
 #include "s_mem.h"
@@ -55,6 +56,7 @@
 #include "s_cproc_macro.h"
 #include "s_cproc_text.h"
 #include "s_cproc_token.h"
+#include "s_cproc_identifier.h"
 
 #ifdef CPPUTEST
 FILE *g_pfw_errors;
@@ -138,6 +140,9 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
     s_cproc_macro_list_init();
     s_cproc_token_init_list();
     
+    ret_val = s_cproc_identifier_init();
+    S_ASSERT(ret_val == RETURN_SUCCESS);
+    
     ret_val = s_cpp(path, &result);
     S_ASSERT(ret_val == RETURN_SUCCESS);
     
@@ -148,6 +153,14 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 	s_cproc_token_print_list_to_file(pfw);
 
     s_cproc_token_delete_blanks_and_newline();
+
+    /* In the dcl preprocessing phase, all keywords need to be identified */
+    ret_val = s_cproc_token_identify_type_of_keyword();
+    S_ASSERT(ret_val == RETURN_SUCCESS);
+
+    ret_val = s_cproc_identifier_print();
+    S_ASSERT(ret_val == RETURN_SUCCESS);
+    
     s_cproc_token_print_list_debug_info();
 
     //s_cproc_token_process_after_cpp
@@ -161,6 +174,7 @@ ENUM_RETURN s_cc(const _S8 * file_name, FILE * pfw)
 	s_cproc_text_release_list();
     s_cproc_token_release_list();
     s_cproc_macro_release_list();
+    s_cproc_identifier_release();
 #ifndef CPPUTEST
     S_FREE(path);
 #endif

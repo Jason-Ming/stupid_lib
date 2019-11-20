@@ -1,7 +1,6 @@
 #ifndef __S_TYPE_H__
 #define __S_TYPE_H__
-#include <limits.h>
-#include <stdio.h>
+
 
 #include "s_clinkage.h"
 typedef void                    _VOID;

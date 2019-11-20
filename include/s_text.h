@@ -1,7 +1,6 @@
 #ifndef __S_TEXT_H__
 #define __S_TEXT_H__
 
-#include <ctype.h>
 #include "s_clinkage.h"
 #include "s_defines.h"
 #include "s_type.h"

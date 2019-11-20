@@ -1,9 +1,9 @@
 #ifndef __S_LIST_H__
 #define __S_LIST_H__
-#include <string.h>
-#include <s_clinkage.h>
-#include <s_type.h>
-#include <s_defines.h>
+
+#include "s_clinkage.h"
+#include "s_type.h"
+#include "s_defines.h"
 
 // 双向链表节点
 struct list_head

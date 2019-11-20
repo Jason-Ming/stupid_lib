@@ -1,6 +1,6 @@
 #ifndef __S_BITS_H__
 #define __S_BITS_H__
-#include <byteswap.h>
+//#include <byteswap.h>
 #include "s_clinkage.h"
 #include "s_type.h"
 

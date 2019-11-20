@@ -903,13 +903,10 @@ ENUM_RETURN s_cdcl(_VOID)
 {
     ENUM_RETURN ret_val;
     STRU_C_TOKEN_NODE *p_token_list_head = s_cproc_token_get_list_head();
+    
     printf(LIGHT_CYAN"declaration: \n");
 	s_ctoken_print_list(NULL, p_token_list_head, NEXT_TOKEN(p_token_list_head), PREV_TOKEN(p_token_list_head));
 	printf(NONE"\n");
-
-    /* In the dcl preprocessing phase, all keywords need to be identified */
-    ret_val = s_cproc_token_identify_type_of_keyword();
-    S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     
     //seperate statement by semicolon
     STRU_C_TOKEN_NODE *p_token_node_temp = NULL;

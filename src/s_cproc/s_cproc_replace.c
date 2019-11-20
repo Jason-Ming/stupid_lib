@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "s_text.h"
 //#include <stdio.h/*sadf*/>
 /*
@@ -7,7 +9,6 @@
 4. Êä³ötoken: normal string, blank, newline
 */
 #include "s_alg.h"
-#include <stdio.h>
 
 
 #define ADD_PARAMETER(x)  5 + x##1

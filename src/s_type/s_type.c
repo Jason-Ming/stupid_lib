@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include <limits.h>
 #include "s_mem.h"
 #include "s_text.h"

@@ -223,6 +223,7 @@ PRIVATE STRU_C_TOKEN_ENUM_INFO g_c_token_enum_info[C_TOKEN_MAX] =
     {C_TOKEN_INVALID,                                          LIGHT_RED"INVALID"NONE},
 };
 
+
 const _S8 * s_ctoken_get_str(ENUM_C_TOKEN token)
 {
     R_ASSERT(token >= C_TOKEN_NORMAL && token < C_TOKEN_MAX, "token out of range");
