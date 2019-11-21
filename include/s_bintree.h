@@ -16,8 +16,8 @@ typedef void* BINTREE;
 typedef ENUM_RETURN (*BINTREE_DATA_ALLOC_PROC)(void** pp_data_container, void *p_data_new);
 typedef ENUM_RETURN (*BINTREE_DATA_FREE_PROC)(void** pp_data_container);
 typedef ENUM_RETURN (*BINTREE_DATA_PRINT_PROC)(void *p_data);
-typedef ENUM_BINTREE_DATA_COMPARE_RESULT (*BINTREE_DATA_COMPARE_PROC)(void *p_data_origin, void *p_data_new);
-typedef ENUM_RETURN (*BINTREE_DATA_UPDATE_PROC)(void *p_data_origin, void *p_data_new);
+typedef ENUM_BINTREE_DATA_COMPARE_RESULT (*BINTREE_DATA_COMPARE_PROC)(void *p_data_container, void *p_data_new);
+typedef ENUM_RETURN (*BINTREE_DATA_UPDATE_PROC)(void *p_data_container, void *p_data_new);
 
 
 __BEGIN_C_DECLS
@@ -29,6 +29,8 @@ ENUM_RETURN bintree_create(BINTREE *p_bintree,
     BINTREE_DATA_PRINT_PROC data_print_handler);
 ENUM_RETURN bintree_delete(BINTREE *p_bintree);
 ENUM_RETURN bintree_insert_data(BINTREE *p_bintree, void *p_data_new);
+ENUM_RETURN bintree_find_data(BINTREE *p_bintree, void *p_data_new, ENUM_BOOLEAN *p_result);
+
 ENUM_RETURN bintree_print(BINTREE *p_bintree);
 
 ENUM_RETURN bintree_add_data_alloc_handler(BINTREE *p_bintree, BINTREE_DATA_ALLOC_PROC handler);

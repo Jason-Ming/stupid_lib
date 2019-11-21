@@ -18,9 +18,9 @@ typedef struct TAG_STRU_IDENTIFIER
 
 PRIVATE BINTREE g_identifiers;
 
-PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_print(void *p_data)
+PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_print(void *p_data_container)
 {
-    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data;
+    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_container;
     printf("%20s, %6d\n", p_identifier->string, p_identifier->count);
     return RETURN_SUCCESS;
 }
@@ -57,12 +57,12 @@ PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_free(void** pp_data_containe
     return RETURN_SUCCESS;
 }
 
-PRIVATE ENUM_BINTREE_DATA_COMPARE_RESULT s_cproc_identifier_bintree_data_compare(void *p_data_origin, void *p_data_new)
+PRIVATE ENUM_BINTREE_DATA_COMPARE_RESULT s_cproc_identifier_bintree_data_compare(void *p_data_container, void *p_data_new)
 {
-    S_R_ASSERT(p_data_origin != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_data_container != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_data_new != NULL, RETURN_FAILURE);
 
-    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_origin;
+    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_container;
 
     _S32 result = strcmp(p_identifier->string, p_data_new);
     if(result > 0)
@@ -80,13 +80,13 @@ PRIVATE ENUM_BINTREE_DATA_COMPARE_RESULT s_cproc_identifier_bintree_data_compare
 }
 
 
-PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_update(void *p_data_origin, void *p_data_new)
+PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_update(void *p_data_container, void *p_data_new)
 {
-    S_R_ASSERT(p_data_origin != NULL, RETURN_FAILURE);
+    S_R_ASSERT(p_data_container != NULL, RETURN_FAILURE);
     S_R_ASSERT(p_data_new != NULL, RETURN_FAILURE);
 
 
-    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_origin;
+    STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_container;
 
     p_identifier->count++;
     
