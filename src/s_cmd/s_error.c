@@ -27,22 +27,22 @@ typedef struct TAG_STRU_ERROR_INFO
 
 PRIVATE STRU_ERROR_INFO system_error_infos[] = 
 {
-    {ERROR_CODE_SUCCESS, "Run succeed", BOOLEAN_FALSE, ERROR_TIP_NULL},
-    {ERROR_CODE_OPTION_PROC_FAIL, "option process failed", BOOLEAN_FALSE, ERROR_TIP_NULL},
-    {ERROR_CODE_SUBCMD_PROC_FAIL, "Run failed", BOOLEAN_FALSE, ERROR_TIP_NULL},
-    {ERROR_CODE_MISSING_SUBCMD, "Missing sub command", BOOLEAN_FALSE, ERROR_TIP_SUBCMD},
-    {ERROR_CODE_UNKONWN_SUBCMD, "Unrecognized sub command '%s'", BOOLEAN_TRUE, ERROR_TIP_SUBCMD},
-    {ERROR_CODE_REPETITIVE_SUBCMD, "Repetitive sub command '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
-    {ERROR_CODE_NO_INPUT_FILES, "'%s' requires input file", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_UNEXPECTED_INPUT_FILES, "Unexpected input files to '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
-    {ERROR_CODE_UNKONWN_OPTION, "Unrecognized option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_MISSING_OPTION, "Missing command line option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_MISSING_ARGS, "option '%s' requires an argument", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_MULTIPLE_ARGS, "Multiple arguments to '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_INVALID_ARGS, "Invalid argument '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
-    {ERROR_CODE_FILE_NOT_EXIST, "No such file or directory '%s'", BOOLEAN_TRUE, ERROR_TIP_NULL},
-    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File '%s' can not be created", BOOLEAN_TRUE, ERROR_TIP_NULL},
-    {ERROR_CODE_REPETITIVE_OPTION, "Repetitive option '%s'", BOOLEAN_TRUE, ERROR_TIP_OPTION},
+    {ERROR_CODE_SUCCESS,                 "Run succeed",                      BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_OPTION_PROC_FAIL,        "option process failed",            BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_SUBCMD_PROC_FAIL,        "Run failed",                       BOOLEAN_FALSE, ERROR_TIP_NULL},
+    {ERROR_CODE_MISSING_SUBCMD,          "Missing sub command",              BOOLEAN_FALSE, ERROR_TIP_SUBCMD},
+    {ERROR_CODE_UNKONWN_SUBCMD,          "Unrecognized sub command '%s'",    BOOLEAN_TRUE,  ERROR_TIP_SUBCMD},
+    {ERROR_CODE_REPETITIVE_SUBCMD,       "Repetitive sub command '%s'",      BOOLEAN_TRUE,  ERROR_TIP_NULL},
+    {ERROR_CODE_NO_INPUT_FILES,          "'%s' requires input file",         BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_UNEXPECTED_INPUT_FILES,  "Unexpected input files to '%s'",   BOOLEAN_TRUE,  ERROR_TIP_NULL},
+    {ERROR_CODE_UNKONWN_OPTION,          "Unrecognized option '%s'",         BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_MISSING_OPTION,          "Missing command line option '%s'", BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_MISSING_ARGS,            "option '%s' requires an argument", BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_MULTIPLE_ARGS,           "Multiple arguments to '%s'",       BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_INVALID_ARGS,            "Invalid argument '%s'",            BOOLEAN_TRUE,  ERROR_TIP_OPTION},
+    {ERROR_CODE_FILE_NOT_EXIST,          "No such file or directory '%s'",   BOOLEAN_TRUE,  ERROR_TIP_NULL},
+    {ERROR_CODE_FILE_CAN_NOT_BE_CREATED, "File '%s' can not be created",     BOOLEAN_TRUE,  ERROR_TIP_NULL},
+    {ERROR_CODE_REPETITIVE_OPTION,       "Repetitive option '%s'",           BOOLEAN_TRUE,  ERROR_TIP_OPTION},
 };
 
 #define MAX_NUM_OF_ERROR_INFO (ERROR_CODE_MAX + USER_DEFINE_ERROR_CODE_MAX)
