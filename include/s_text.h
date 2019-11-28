@@ -95,7 +95,7 @@ __BEGIN_C_DECLS
 /* set separaors, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
    the words are separeted by '\n', ' ', '\t', '\v' and '\f', this operation can influnce these functions: 
    s_count_word_f, s_count_word_s, s_get_word_f, s_get_word_s */
-void s_set_separators(_S8 *separators);
+void s_set_separators(const _S8 *separators);
 
 /* count word in file, word are separated by charactors in 'separators', if 'separators' is NULL or empty,
    the words are separeted by '\n', ' ', '\t', '\v' and '\f' */

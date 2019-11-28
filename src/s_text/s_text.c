@@ -21,7 +21,7 @@
 PRIVATE ENUM_BOOLEAN word_separators[MAX_CHAR] = {BOOLEAN_FALSE};
 PRIVATE ENUM_BOOLEAN whether_word_separators_have_been_set = BOOLEAN_FALSE;
 
-void s_set_separators(_S8 *separators)
+void s_set_separators(const _S8 *separators)
 {
     whether_word_separators_have_been_set = BOOLEAN_TRUE;
     for(_S32 i = 0; i < MAX_CHAR; i++)
@@ -36,6 +36,7 @@ void s_set_separators(_S8 *separators)
         word_separators[' '] = BOOLEAN_TRUE;
         word_separators['\v'] = BOOLEAN_TRUE;
         word_separators['\f'] = BOOLEAN_TRUE;
+        word_separators['\r'] = BOOLEAN_TRUE;
 
         return;
     }
@@ -53,7 +54,7 @@ PRIVATE ENUM_BOOLEAN is_separator(_S32 c)
     
     return (whether_word_separators_have_been_set?
         word_separators[c]:
-        (' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c));
+        (' ' == c || '\n' == c || '\t' == c || '\v' == c || '\f' == c || '\r' == c));
 }
 
 ENUM_RETURN s_count_word_f(FILE *pfr, size_t *word_num)
