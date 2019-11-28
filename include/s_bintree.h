@@ -15,7 +15,7 @@ typedef void* BINTREE;
 
 typedef ENUM_RETURN (*BINTREE_DATA_ALLOC_PROC)(void** pp_data_container, void *p_data_new);
 typedef ENUM_RETURN (*BINTREE_DATA_FREE_PROC)(void** pp_data_container);
-typedef ENUM_RETURN (*BINTREE_DATA_PRINT_PROC)(void *p_data);
+typedef ENUM_RETURN (*BINTREE_DATA_PRINT_PROC)(void *p_data_container);
 typedef ENUM_BINTREE_DATA_COMPARE_RESULT (*BINTREE_DATA_COMPARE_PROC)(void *p_data_container, void *p_data_new);
 typedef ENUM_RETURN (*BINTREE_DATA_UPDATE_PROC)(void *p_data_container, void *p_data_new);
 

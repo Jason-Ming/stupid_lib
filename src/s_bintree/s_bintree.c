@@ -32,9 +32,9 @@ typedef struct TAG_STRU_BINTREE
 PRIVATE ENUM_RETURN bintree_free_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NODE **pp_node)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
-    S_R_FALSE(pp_node != NULL, RETURN_SUCCESS);
-    S_R_FALSE(*pp_node != NULL, RETURN_SUCCESS);
+    //S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
+   // S_R_FALSE(pp_node != NULL, RETURN_SUCCESS);
+    //S_R_FALSE(*pp_node != NULL, RETURN_SUCCESS);
 
     if((*pp_node)->p_left != NULL)
     {
@@ -60,8 +60,8 @@ PRIVATE ENUM_RETURN bintree_free_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NODE
 PRIVATE ENUM_RETURN bintree_print_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NODE *p_node)
 {
     ENUM_RETURN ret_val = RETURN_SUCCESS;
-    S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
-    S_R_FALSE(p_node != NULL, RETURN_SUCCESS);
+    //S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
+    //S_R_FALSE(p_node != NULL, RETURN_SUCCESS);
 
     if(p_node->p_left != NULL)
     {
@@ -86,9 +86,9 @@ PRIVATE ENUM_RETURN bintree_find_node(STRU_BINTREE *p_bintree,
     STRU_BINTREE_NODE ***ppp_dest_node, 
     void *p_data_new)
 {
-    S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
-    S_R_ASSERT(ppp_dest_node != NULL, RETURN_FAILURE);
-    S_R_ASSERT(p_data_new != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(ppp_dest_node != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(p_data_new != NULL, RETURN_FAILURE);
     
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     ENUM_BINTREE_DATA_COMPARE_RESULT compare_result = ENUM_BINTREE_DATA_COMPARE_EQUAL;
@@ -96,7 +96,7 @@ PRIVATE ENUM_RETURN bintree_find_node(STRU_BINTREE *p_bintree,
     *ppp_dest_node = pp_current_node;
     S_R_FALSE(*pp_current_node != NULL, RETURN_SUCCESS);
 
-    S_R_ASSERT((*pp_current_node)->p_data_container != NULL, RETURN_FAILURE);
+    //S_R_ASSERT((*pp_current_node)->p_data_container != NULL, RETURN_FAILURE);
     compare_result = p_bintree->data_compare_handler((*pp_current_node)->p_data_container, p_data_new);
 
     switch(compare_result)
@@ -129,9 +129,9 @@ PRIVATE ENUM_RETURN bintree_find_node(STRU_BINTREE *p_bintree,
 
 PRIVATE ENUM_RETURN bintree_insert_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NODE **pp_node, void *p_data_new)
 {
-    S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
-    S_R_ASSERT(pp_node != NULL, RETURN_FAILURE);
-    S_R_ASSERT(*pp_node == NULL, RETURN_FAILURE);
+    //S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(pp_node != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(*pp_node == NULL, RETURN_FAILURE);
     
     ENUM_RETURN ret_val = RETURN_SUCCESS;
     STRU_BINTREE_NODE *p_node = (STRU_BINTREE_NODE*)malloc(sizeof(STRU_BINTREE_NODE));
@@ -151,8 +151,8 @@ PRIVATE ENUM_RETURN bintree_insert_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NO
 
 PRIVATE ENUM_RETURN bintree_update_node(STRU_BINTREE *p_bintree, STRU_BINTREE_NODE *p_current_node, void *p_data_new)
 {
-    S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
-    S_R_ASSERT(p_current_node != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(p_bintree != NULL, RETURN_FAILURE);
+    //S_R_ASSERT(p_current_node != NULL, RETURN_FAILURE);
 
     ENUM_RETURN ret_val = RETURN_SUCCESS;
 
@@ -192,7 +192,7 @@ ENUM_RETURN bintree_create(BINTREE *p_bintree,
 
     *p_bintree = p_bintree_temp;
 
-    S_LOG("bintree_create: %p", p_bintree_temp);
+    DEBUG_PRINT("bintree_create: %p", p_bintree_temp);
     
     return RETURN_SUCCESS;
 }
@@ -207,13 +207,13 @@ ENUM_RETURN bintree_print(BINTREE *p_bintree)
     
     if(p_bintree_temp->p_root != NULL)
     {
-        printf("bin tree:\n");
+        DEBUG_PRINT("printing bintree...\n\n");
         ret_val = bintree_print_node(p_bintree_temp, p_bintree_temp->p_root);
         S_R_ASSERT(ret_val == RETURN_SUCCESS, RETURN_FAILURE);
     }
     else
     {
-        printf("bin tree is empty.\n");
+        DEBUG_PRINT("bin tree is empty.\n");
     }
 
     return RETURN_SUCCESS;

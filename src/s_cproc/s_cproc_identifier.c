@@ -20,6 +20,7 @@ PRIVATE BINTREE g_identifiers;
 
 PRIVATE ENUM_RETURN s_cproc_identifier_bintree_data_print(void *p_data_container)
 {
+    S_R_ASSERT(p_data_container != NULL, RETURN_FAILURE);
     STRU_IDENTIFIER *p_identifier = (STRU_IDENTIFIER*)p_data_container;
     printf("%20s, %6d\n", p_identifier->string, p_identifier->count);
     return RETURN_SUCCESS;
